@@ -3,7 +3,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 
 # Load the saved PPO model
-model = PPO.load("/home/javi/tfm/models/ppo_robot")
+model = PPO.load("/home/javi/tfm/models/best_model")
 
 # Create the SimpleRobotEnv environment with rendering enabled
 env = gym.make('SimpleRobotEnv-v0', render_mode='human')
@@ -18,10 +18,11 @@ obs = env.reset()
 
 # Execute the policy for a longer duration
 episode_length = 5000  # Adjusted episode length for better visualization
-
+r = 0
 for _ in range(episode_length):
     action, _states = model.predict(obs)
-    obs, reward, done, info = env.step(action)
+    obs, step_reward, done, info = env.step(action)
+    #r += step_reward
 
     # Render the environment after each action
     env.envs[0].render()  # Use the underlying environment to render, bypassing DummyVecEnv
