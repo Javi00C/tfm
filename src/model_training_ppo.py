@@ -29,7 +29,7 @@ print(f"Numpy Version: {version('numpy')}")
 print(f"Stable Baselines3 Version: {version('stable_baselines3')}")
 print(f"Scipy Version: {version('scipy')}")
 
-TIMESTEPS = 100000
+TIMESTEPS = 600000
 #env_str = "CarRacing-v2"
 #env_str = "SimpleRobotEnv-v0" #Straight line edge
 env_str = "SimpleRobotEnv-v1" #Sine wave edge
