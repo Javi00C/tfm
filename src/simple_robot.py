@@ -28,7 +28,6 @@ class SimpleRobotEnv(gym.Env):
         self.done = False
         self.size = 512
         self.reward = 0
-        self.index = 1
         self.avgd = 0
         # Define robot's initial position
         x0 = random.randint(240, 260)
@@ -87,7 +86,6 @@ class SimpleRobotEnv(gym.Env):
         # Update the observation window
         self.state = self._get_observation()
         reward = self._calculate_reward()
-        self.index += 1
         
         # Return observation, reward, done, and optional info dictionary
         return self.state, reward, self.done, False, {}
@@ -110,9 +108,10 @@ class SimpleRobotEnv(gym.Env):
         # Calculate the distance from the robot to the white line (edge)
         car_x, _ = self.robot_pos
         return abs(car_x-WINDOW_SIZE//2)  # The distance is simply the x-coordinate difference from the edge at x=0
-    
-    def _calculate_average_dist(self):
-        self.avgd = ((self.index - 1) * self.avgd + self._calculate_distance_to_edge()) / self.index
+
+    #Average distance reward -> poor performance
+    #def _calculate_average_dist(self):
+    #    self.avgd = ((self.index - 1) * self.avgd + self._calculate_distance_to_edge()) / self.index
     
     def _calculate_reward(self):
         # Apply constant negative reward per step to encourage efficient behavior
