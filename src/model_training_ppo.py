@@ -29,7 +29,7 @@ print(f"Numpy Version: {version('numpy')}")
 print(f"Stable Baselines3 Version: {version('stable_baselines3')}")
 print(f"Scipy Version: {version('scipy')}")
 
-TIMESTEPS = 300000
+TIMESTEPS = 600000
 #env_str = "CarRacing-v2"
 env_str = "SimpleRobotEnv-v0"
 log_dir = "/home/javi/tfm/models"
@@ -67,7 +67,8 @@ eval_callback = EvalCallback(env_val,
 
 # Initialize PPO
 # buffer_size is not required for PPO as it is an on-policy method
-model = PPO('CnnPolicy', env, verbose=1)
+model = PPO('CnnPolicy', env, verbose=1, ent_coef=0.01)
+
 
 # Train the model
 model.learn(total_timesteps=TIMESTEPS, progress_bar=True, callback=eval_callback)

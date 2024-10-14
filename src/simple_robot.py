@@ -6,7 +6,7 @@ from typing import Optional
 import random
 
 #Parameters
-MAX_REWARD = 100
+MAX_REWARD = 1000
 WINDOW_SIZE = 512
 MAX_DIST = 50
 OBS_WINDOW = 128
@@ -80,14 +80,14 @@ class SimpleRobotEnv(gym.Env):
         self.robot_pos[0] = np.clip(self.robot_pos[0] + velocity_x, 0, self.size - 1)
         self.robot_pos[1] = np.clip(self.robot_pos[1] + velocity_y, 0, self.size - 1)
         
+        # Update environment state and check if episode is done
+        self.current_step += 1
+        self.done = self._check_done()  # Define a termination condition
+       
         # Update the observation window
         self.state = self._get_observation()
         reward = self._calculate_reward()
         self.index += 1
-        
-        # Update environment state and check if episode is done
-        self.current_step += 1
-        self.done = self._check_done()  # Define a termination condition
         
         # Return observation, reward, done, and optional info dictionary
         return self.state, reward, self.done, False, {}
@@ -123,21 +123,21 @@ class SimpleRobotEnv(gym.Env):
             self.visited_tiles = set()
 
         # Determine the current tile and whether it's on the edge (Positions could be divided to created larger tiles -> less memory)
-        current_tile = (int(self.robot_pos[0]), int(self.robot_pos[1]))
-        if self._check_on_edge():  # Check if on the edge (white line)
-            if current_tile not in self.visited_tiles:
-                self.visited_tiles.add(current_tile)
-                reward_for_tile = NUM_EDGE_TILES / max(1, len(self.visited_tiles))
-            else:
-                reward_for_tile = 0
-        else:
-            reward_for_tile = 0
-            
-        if self._check_done():
+        if self.done:
             terminated_penalty = -100
+            reward_for_tile = 0
         else:
             terminated_penalty = 0
-        
+            current_tile = (int(self.robot_pos[0]), int(self.robot_pos[1]))
+            if self._check_on_edge():  # Check if on the edge (white line)
+                if current_tile not in self.visited_tiles:
+                    self.visited_tiles.add(current_tile)
+                    reward_for_tile = MAX_REWARD / max(1, len(self.visited_tiles))
+                else:
+                    reward_for_tile = 0
+            else:
+                reward_for_tile = 0
+            
         # Calculate total reward per step
         total_reward = step_penalty + reward_for_tile + terminated_penalty
         return total_reward
