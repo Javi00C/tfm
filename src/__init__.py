@@ -2,3 +2,4 @@ from gymnasium.envs.box2d.bipedal_walker import BipedalWalker, BipedalWalkerHard
 from gymnasium.envs.box2d.car_racing import CarRacing
 from gymnasium.envs.box2d.lunar_lander import LunarLander, LunarLanderContinuous
 from gymnasium.envs.box2d.simple_robot import SimpleRobotEnv
+from gymnasium.envs.box2d.simple_robot_sine import SimpleRobotEnvSine

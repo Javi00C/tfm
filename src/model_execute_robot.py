@@ -5,8 +5,12 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 # Load the saved PPO model
 model = PPO.load("/home/javi/tfm/models/best_model")
 
+#env_str = "CarRacing-v2"
+#env_str = "SimpleRobotEnv-v0" #Straight line edge
+env_str = "SimpleRobotEnv-v1" #Sine wave edge
+
 # Create the SimpleRobotEnv environment with rendering enabled
-env = gym.make('SimpleRobotEnv-v0', render_mode='human')
+env = gym.make(env_str, render_mode='human')
 
 # Wrap the environment to stack frames, ensuring observation shape matches what the model expects
 env = DummyVecEnv([lambda: env])  # DummyVecEnv to make the environment compatible with Stable Baselines3

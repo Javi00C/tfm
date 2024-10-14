@@ -31,7 +31,9 @@ print(f"Scipy Version: {version('scipy')}")
 
 TIMESTEPS = 100000
 #env_str = "CarRacing-v2"
-env_str = "SimpleRobotEnv-v0"
+#env_str = "SimpleRobotEnv-v0" #Straight line edge
+env_str = "SimpleRobotEnv-v1" #Sine wave edge
+
 log_dir = "/home/javi/tfm/models"
 
 backend = torch.backends.quantized.engine

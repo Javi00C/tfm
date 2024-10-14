@@ -12,11 +12,11 @@ MAX_DIST = 50
 OBS_WINDOW = 128
 NUM_EDGE_TILES = WINDOW_SIZE*2
 
-class SimpleRobotEnv(gym.Env):
+class SimpleRobotEnvSine(gym.Env):
     metadata = {'render_modes': ['human']}
 
     def __init__(self, render_mode: Optional[str] = None):
-        super(SimpleRobotEnv, self).__init__()
+        super(SimpleRobotEnvSine, self).__init__()
         
         # Define action and observation space
         self.action_space = spaces.Box(low=-5.0, high=5.0, shape=(2,), dtype=np.float32)  # 2D velocity control: x and y velocities
@@ -154,7 +154,7 @@ class SimpleRobotEnv(gym.Env):
             # Draw the robot as a red dot in the full state image
             temp_image = self.full_state.copy()
             cv2.circle(temp_image, (int(self.robot_pos[0]), int(self.robot_pos[1])), 5, (0, 0, 255), -1)
-            cv2.imshow('SimpleRobotEnv', temp_image)
+            cv2.imshow('SimpleRobotEnvSine', temp_image)
             cv2.waitKey(100)  # Display the frame for a short period to create animation
 
     def close(self):
