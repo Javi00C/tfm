@@ -28,7 +28,7 @@ class SimpleRobotEnvSine(gym.Env):
         self.done = False
         self.size = 512
         self.reward = 0
-        self.avgd = 0
+        #self.avgd = 0
         # Define robot's initial position
         x0 = random.randint(240, 260)
         y0 = random.randint(0, 511)
