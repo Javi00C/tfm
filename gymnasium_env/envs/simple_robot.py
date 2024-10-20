@@ -44,9 +44,6 @@ class SimpleRobotEnv(gym.Env):
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         # Reset visited tiles for new episode
         self.visited_tiles = set()
-        #self.edge_tiles = set()
-        #for i in range(0,WINDOW_SIZE-1):
-        #    self.edge_tiles.add((WINDOW_SIZE//2,i))
 
         # Set the seed if provided (to maintain reproducibility)
         if seed is not None:
@@ -109,10 +106,6 @@ class SimpleRobotEnv(gym.Env):
         # Calculate the distance from the robot to the white line (edge)
         car_x, _ = self.robot_pos
         return abs(car_x-WINDOW_SIZE//2)  # The distance is simply the x-coordinate difference from the edge at x=0
-
-    #Average distance reward -> poor performance
-    #def _calculate_average_dist(self):
-    #    self.avgd = ((self.index - 1) * self.avgd + self._calculate_distance_to_edge()) / self.index
     
     def _calculate_reward(self):
         # Apply constant negative reward per step to encourage efficient behavior
