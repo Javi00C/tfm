@@ -20,6 +20,7 @@ class RopeSimulation:
         self.segments = segments
         self.length = length
         self.points = self._initialize_rope()
+        self.initial_points = np.copy(self.points)  # Store the initial positions of the rope
 
     def _initialize_rope(self):
         points = []
@@ -149,6 +150,20 @@ class SimpleRobotEnv(gym.Env):
 
     def _calculate_reward(self):
         reward = -0.1
+
+        # Calculate the average distance of all points to their original positions (horizontal alignment)
+        total_distance = 0
+        for i in range(len(self.rope_simulation.points)):
+            original_position = self.rope_simulation.initial_points[i]
+            current_position = self.rope_simulation.points[i]
+            distance = np.linalg.norm(np.array(current_position) - np.array(original_position))
+            total_distance += distance
+        avg_distance_to_original = total_distance / len(self.rope_simulation.points)
+
+        # Reward should decrease as the average distance to the original positions increases
+        alignment_penalty = avg_distance_to_original / (WINDOW_SIZE / 2)  # Normalize between 0 and 1
+        reward -= alignment_penalty * 10  # Penalize based on alignment
+
         return reward
 
     def render(self, mode='human'):
