@@ -9,8 +9,8 @@ import pygame
 MAX_REWARD = 1000
 WINDOW_SIZE = 512
 OBS_WINDOW = 128
-ROPE_SEGMENTS = 20  # Number of points in the rope
-ROPE_LENGTH = 400  # Approximate length of the rope in pixels
+ROPE_SEGMENTS = 60  # Number of points in the rope
+ROPE_LENGTH = WINDOW_SIZE  # Length of the rope to span the entire window height
 GRAVITY = 0.1  # Gravity force applied to rope points
 ROPE_SPRING_STIFFNESS = 0.1  # Stiffness of the rope's spring connections
 MAX_SEGMENT_LENGTH = ROPE_LENGTH // ROPE_SEGMENTS * 1.5  # Maximum allowable distance between rope points
@@ -25,13 +25,13 @@ class RopeSimulation:
         points = []
         spacing = self.length // self.segments
         for i in range(self.segments):
-            y_position = WINDOW_SIZE // 2
-            points.append([WINDOW_SIZE // 4 + spacing * i, y_position])  # Evenly spaced, last point is static at the bottom
+            y_position = i * spacing  # Rope goes from one side of the window to the other 
+            points.append([WINDOW_SIZE // 2, y_position])  # Distribute horizontally across the window
         return points
 
     def apply_gravity(self):
-        for i in range(len(self.points) - 1):  # Skip applying gravity to the last point
-            self.points[i][1] += GRAVITY
+        for i in range(1, len(self.points) - 1):  # Skip applying gravity to the first and last point
+            self.points[i][0] += GRAVITY # Gravity on the vertical axis 
 
     def apply_spring_forces(self):
         for i in range(1, len(self.points)):
@@ -55,11 +55,43 @@ class RopeSimulation:
                 else:
                     self.points[i - 1] += correction_vector
 
+        # Keep the first and last points of the rope fixed
+        self.points[0] = [WINDOW_SIZE//2, 0]  # Fixed at the top left corner of the window
+        self.points[-1] = [WINDOW_SIZE//2, self.length-1]  # Fixed at the bottom right corner of the window
+
+    def get_rope_image(self):
+        # Start with a black background
+        img = np.zeros((WINDOW_SIZE, WINDOW_SIZE, 3), dtype=np.uint8)
+
+        # Build polygon for the area over the rope
+        over_rope_pts = []
+
+        # Add the top-left and top-right corners
+        over_rope_pts.append([WINDOW_SIZE - 1, 0])  # Top-right corner
+        over_rope_pts.append([WINDOW_SIZE - 1, WINDOW_SIZE - 1])  # Top-left corner
+        
+
+        # Append the rope points from bottom to top
+        for pt in reversed(self.points):
+            over_rope_pts.append([int(pt[0]), int(pt[1])])
+
+        # Convert points to a NumPy array
+        over_rope_pts = np.array([over_rope_pts], dtype=np.int32)
+
+        # Fill the polygon with white color
+        cv2.fillPoly(img, over_rope_pts, (255, 255, 255))
+
+        return img
+
+
+"""
     def get_rope_image(self):
         img = np.zeros((WINDOW_SIZE, WINDOW_SIZE, 3), dtype=np.uint8)
         for i in range(1, len(self.points)):
             cv2.line(img, tuple(map(int, self.points[i - 1])), tuple(map(int, self.points[i])), (255, 255, 255), 2)
         return img
+
+"""
 
 class SimpleRobotEnv(gym.Env):
     metadata = {'render_modes': ['human']}
