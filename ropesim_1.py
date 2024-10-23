@@ -4,6 +4,7 @@ from gymnasium import spaces
 import cv2
 import random
 import pygame
+from typing import Optional
 
 # Parameters
 MAX_REWARD = 1000
@@ -14,6 +15,7 @@ ROPE_LENGTH = WINDOW_SIZE  # Length of the rope to span the entire window height
 GRAVITY = 0.1  # Gravity force applied to rope points
 ROPE_SPRING_STIFFNESS = 0.1  # Stiffness of the rope's spring connections
 MAX_SEGMENT_LENGTH = ROPE_LENGTH // ROPE_SEGMENTS * 1.5  # Maximum allowable distance between rope points
+MAX_DIST = 50  # Maximum allowable distance from the edge for the robot
 
 class RopeSimulation:
     def __init__(self, segments, length):
@@ -84,16 +86,6 @@ class RopeSimulation:
 
         return img
 
-
-"""
-    def get_rope_image(self):
-        img = np.zeros((WINDOW_SIZE, WINDOW_SIZE, 3), dtype=np.uint8)
-        for i in range(1, len(self.points)):
-            cv2.line(img, tuple(map(int, self.points[i - 1])), tuple(map(int, self.points[i])), (255, 255, 255), 2)
-        return img
-
-"""
-
 class SimpleRobotEnv(gym.Env):
     metadata = {'render_modes': ['human']}
 
@@ -107,12 +99,14 @@ class SimpleRobotEnv(gym.Env):
         self.robot_pos = [WINDOW_SIZE // 2, WINDOW_SIZE // 2]  # Center start
         self.done = False
         self.current_step = 0
+        self.visited_tiles = set()  # Track visited tiles for reward purposes
 
-    def reset(self):
+    def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         self.rope_simulation = RopeSimulation(ROPE_SEGMENTS, ROPE_LENGTH)
         self.robot_pos = [WINDOW_SIZE // 2, WINDOW_SIZE // 2]
         self.done = False
         self.current_step = 0
+        self.visited_tiles = set()  # Reset visited tiles
         return self._get_observation(), {}
 
     def step(self, action):
@@ -125,7 +119,7 @@ class SimpleRobotEnv(gym.Env):
         self._robot_interact_with_rope()
 
         self.current_step += 1
-        self.done = self.current_step >= 1000
+        self.done = self.current_step >= 1000 or self._check_done()
         return self._get_observation(), self._calculate_reward(), self.done, False, {}
 
     def _robot_interact_with_rope(self):
@@ -149,7 +143,16 @@ class SimpleRobotEnv(gym.Env):
         return resized_obs
 
     def _calculate_reward(self):
-        reward = -0.1
+        # Apply constant negative reward per step to encourage efficient behavior
+        step_penalty = -0.1
+
+        # Reward for moving over unvisited tiles
+        current_tile = (int(self.robot_pos[0]), int(self.robot_pos[1]))
+        reward_for_tile = 0
+        if not self.done:
+            if current_tile not in self.visited_tiles:
+                self.visited_tiles.add(current_tile)
+                reward_for_tile = MAX_REWARD / max(1, len(self.visited_tiles))
 
         # Calculate the average distance of all points to their original positions (horizontal alignment)
         total_distance = 0
@@ -162,62 +165,17 @@ class SimpleRobotEnv(gym.Env):
 
         # Reward should decrease as the average distance to the original positions increases
         alignment_penalty = avg_distance_to_original / (WINDOW_SIZE / 2)  # Normalize between 0 and 1
-        reward -= alignment_penalty * 10  # Penalize based on alignment
+        alignment_penalty *= 10  # Penalize based on alignment
 
-        return reward
+        # Calculate total reward per step
+        total_reward = step_penalty + reward_for_tile - alignment_penalty
+        return total_reward
 
-    def render(self, mode='human'):
-        if mode == 'human':
-            img = self.rope_simulation.get_rope_image()
-            cv2.circle(img, tuple(map(int, self.robot_pos)), 5, (0, 0, 255), -1)
-            cv2.imshow('Rope Simulation', img)
-            cv2.waitKey(100)
+    def _check_done(self):
+        # End the episode if the maximum number of steps is reached or the robot is too far from the edge
+        return self.current_step >= 1000 or self._calculate_distance_to_edge() > MAX_DIST
 
-    def close(self):
-        cv2.destroyAllWindows()
-
-# Pygame Integration for Manual Control
-def run_with_manual_control():
-    env = SimpleRobotEnv()
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
-    clock = pygame.time.Clock()
-    
-    obs, _ = env.reset()
-    running = True
-    
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        
-        # Manual Control Logic
-        keys = pygame.key.get_pressed()
-        action = [0, 0]
-        if keys[pygame.K_LEFT]:
-            action[1] = -5
-        if keys[pygame.K_RIGHT]:
-            action[1] = 5
-        if keys[pygame.K_UP]:
-            action[0] = -5
-        if keys[pygame.K_DOWN]:
-            action[0] = 5
-
-        obs, reward, done, _, _ = env.step(action)
-        if done:
-            obs, _ = env.reset()
-
-        # Update the Pygame screen
-        img = env.rope_simulation.get_rope_image()
-        cv2.circle(img, tuple(map(int, env.robot_pos)), 5, (0, 0, 255), -1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        pygame.surfarray.blit_array(screen, img)
-        pygame.display.flip()
-        clock.tick(30)
-
-    pygame.quit()
-    env.close()
-
-# Example usage
-if __name__ == '__main__':
-    run_with_manual_control()
+    def _calculate_distance_to_edge(self):
+        # Calculate the distance from the robot to the white line (edge)
+        car_x, _ = self.robot_pos
+        return abs(car_x - WINDOW_SIZE // 2)  #
