@@ -1,4 +1,5 @@
 import gymnasium
+import gymnasium_env
 from gymnasium.wrappers import RecordVideo
 
 import stable_baselines3
@@ -29,17 +30,17 @@ print(f"Numpy Version: {version('numpy')}")
 print(f"Stable Baselines3 Version: {version('stable_baselines3')}")
 print(f"Scipy Version: {version('scipy')}")
 
-TIMESTEPS = 600000
+TIMESTEPS = 600
 #env_str = "CarRacing-v2"
-#env_str = "SimpleRobotEnv-v0" #Straight line edge
-env_str = "SimpleRobotEnv-v1" #Sine wave edge
+#env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
+env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
-log_dir = "/home/javi/tfm/models"
+log_dir = "models"
 
 backend = torch.backends.quantized.engine
 print(f"Currently using backend: {backend}")
 
-env = gymnasium.make(env_str)
+env = gymnasium.make(env_str, render_mode="human")
 print("Observation Space Size: ", env.observation_space.shape)
 print("Action Space Size: ", env.action_space.shape)
 env.close()
@@ -47,14 +48,15 @@ env.close()
 
 
 # Create Training CarRacing environment
-env = make_vec_env(env_str, n_envs=1)
+env = make_vec_env(env_str, n_envs=1, env_kwargs={"render_mode": "human"})
 # Parameterize n_stack to allow flexible configuration
 n_stack = 4  # Set default value for n_stack, can be adjusted for experimentation
 env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 
+
 # Create Evaluation CarRacing environment
-env_val = make_vec_env(env_str, n_envs=1)
+env_val = make_vec_env(env_str, n_envs=1, env_kwargs={"render_mode": "human"})
 env_val = VecFrameStack(env_val, n_stack=n_stack)
 env_val = VecTransposeImage(env_val)
 
@@ -85,7 +87,7 @@ env.close()
 env_val.close()
 
 # Create Evaluation CarRacing environment
-env = make_vec_env(env_str, n_envs=1, seed=0)
+env = make_vec_env(env_str, n_envs=1, seed=0, env_kwargs={"render_mode": "human"})
 env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 

@@ -41,7 +41,7 @@ def create_focused_observation_wrapper(env, window_size):
             self.window_size = window_size  # (height, width)
             # Define a new observation space that matches the cropped window size
             self.observation_space = gymnasium.spaces.Box(
-                low=0, high=255, shape=(window_size[0], window_size[1], 3), dtype=np.uint8
+                low=0, high=255, shape=(window_size[0], window_size[1], 3), dtype=numpy.uint8
             )
 
         def observation(self, observation):
