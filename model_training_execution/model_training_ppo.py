@@ -32,8 +32,8 @@ print(f"Scipy Version: {version('scipy')}")
 
 TIMESTEPS = 600
 #env_str = "CarRacing-v2"
-#env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
-env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
+env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
+#env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
 log_dir = "models"
 
