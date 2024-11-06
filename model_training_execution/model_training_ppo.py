@@ -30,7 +30,7 @@ print(f"Numpy Version: {version('numpy')}")
 print(f"Stable Baselines3 Version: {version('stable_baselines3')}")
 print(f"Scipy Version: {version('scipy')}")
 
-TIMESTEPS = 600
+TIMESTEPS = 50000
 #env_str = "CarRacing-v2"
 env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
 #env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
@@ -92,7 +92,7 @@ env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 
 # Load the best model
-best_model_path = os.path.join(log_dir, "best_model.zip")
+best_model_path = os.path.join(log_dir, "best_model")
 best_model = PPO.load(best_model_path, env=env)
 
 mean_reward, std_reward = evaluate_policy(best_model, env, n_eval_episodes=20)
