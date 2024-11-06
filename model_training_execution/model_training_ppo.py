@@ -30,12 +30,17 @@ print(f"Numpy Version: {version('numpy')}")
 print(f"Stable Baselines3 Version: {version('stable_baselines3')}")
 print(f"Scipy Version: {version('scipy')}")
 
+#Create directories to hold models and logs
+model_dir = "models"
+log_dir = "logs"
+os.makedirs(model_dir, exist_ok=True)
+os.makedirs(log_dir, exist_ok=True)
+
 TIMESTEPS = 50000
 #env_str = "CarRacing-v2"
 env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
 #env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
-log_dir = "models"
 
 backend = torch.backends.quantized.engine
 print(f"Currently using backend: {backend}")
@@ -63,7 +68,7 @@ env_val = VecTransposeImage(env_val)
 # Create Evaluation Callback
 # eval_freq - increased to reduce potential learning instability due to frequent evaluations
 eval_callback = EvalCallback(env_val,
-                             best_model_save_path=log_dir,
+                             best_model_save_path=model_dir,
                              log_path=log_dir,
                              eval_freq=50000,
                              render=False,
@@ -78,7 +83,7 @@ model = PPO('CnnPolicy', env, verbose=1, ent_coef=0.01)
 model.learn(total_timesteps=TIMESTEPS, progress_bar=True, callback=eval_callback)
 
 # Save the model
-model.save(os.path.join(log_dir, "ppo_robot"))
+model.save(os.path.join(model_dir, "ppo_robot"))
 
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=20)
 print(f"Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
@@ -87,19 +92,19 @@ env.close()
 env_val.close()
 
 # Create Evaluation CarRacing environment
-env = make_vec_env(env_str, n_envs=1, seed=0, env_kwargs={"render_mode": "human"})
+env = make_vec_env(env_str, n_envs=1, seed=0, env_kwargs={"render_mode": "rgb_array"})
 env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 
 # Load the best model
-best_model_path = os.path.join(log_dir, "best_model")
+best_model_path = os.path.join(model_dir, "best_model")
 best_model = PPO.load(best_model_path, env=env)
 
 mean_reward, std_reward = evaluate_policy(best_model, env, n_eval_episodes=20)
 print(f"Best Model - Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
 
 # Record video of the best model playing CarRacing
-env = VecVideoRecorder(env, "/home/tfm/videos/",
+env = VecVideoRecorder(env, "videos/",
                        video_length=5000,  # Reduced video length to prevent large file sizes
                        record_video_trigger=lambda x: x == 0,
                        name_prefix="best_model_car_racing_ppo")
