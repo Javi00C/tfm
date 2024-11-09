@@ -19,6 +19,11 @@ pip install gymnasium==0.29.0
 ```bash
 https://github.com/google-deepmind/mujoco/releases
 ```
+
+```bash
+conda install -c conda-forge patchelf
+```
+
 ## Getting into the environment
 
 ```bash
