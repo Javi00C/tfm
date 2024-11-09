@@ -11,11 +11,14 @@ conda create -n gymenv python=3.10.12 swig gymnasium gymnasium[box2d] stable-bas
 
 
 ```
-##Stable baselines needs a version of Gymnasium < 0.30
+## Stable baselines needs a version of Gymnasium < 0.30
 ```bash
 pip install gymnasium==0.29.0
 ```
-
+## Install Mujoco (just download and extract)
+```bash
+https://github.com/google-deepmind/mujoco/releases
+```
 ## Getting into the environment
 
 ```bash
