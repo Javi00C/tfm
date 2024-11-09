@@ -17,9 +17,16 @@ pip install gymnasium==0.29.0
 ```
 ## Install Mujoco (just download and extract)
 ```bash
-https://github.com/google-deepmind/mujoco/releases
+mkdir -p ~/.mujoco
+cd ~/.mujoco
+wget https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
+tar -xf mujoco210-linux-x86_64.tar.gz
 ```
-
+## Install mujoco_py
+```bash
+pip install mujoco_py --no-cache-dir
+```
+## Patchelf
 ```bash
 conda install -c conda-forge patchelf
 ```
