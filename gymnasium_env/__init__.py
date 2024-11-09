@@ -10,3 +10,9 @@ register(
     id="gymnasium_env/SimpleRobotEnv-v1",
     entry_point="gymnasium_env.envs:SimpleRobotEnvSine",
 )
+
+register(
+    id="gymnasium_env/SimpleMujocoEnv-v0",
+    entry_point="gymnasium_env.envs:SimpleMujocoEnv",
+)
+
