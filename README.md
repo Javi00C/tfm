@@ -30,6 +30,14 @@ pip install mujoco_py --no-cache-dir
 ```bash
 conda install -c conda-forge patchelf
 ```
+## .bashrc Modification
+```bash
+# Mujoco (adjusted for proper path ordering)
+export MUJOCO_PY_MUJOCO_PATH=/home/javi/.mujoco/mujoco210
+export CPATH="/home/javi/.mujoco/mujoco210/include:$CPATH"
+export LD_LIBRARY_PATH="/home/javi/.mujoco/mujoco210/bin:/usr/lib/nvidia:$LD_LIBRARY_PATH"
+export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
+```
 
 ## Getting into the environment
 
