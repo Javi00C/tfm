@@ -7,7 +7,7 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 ## Create Conda Environment with dependencies
 
 ```bash
-conda create -n gymenv python=3.10.12 swig gymnasium gymnasium[box2d] pytz scipy sympy gymnasium[mujoco]
+conda create -n gym python=3.10.12 swig gymnasium gymnasium[box2d] pytz scipy sympy gymnasium[mujoco]
 
 conda activate gymenv
 pip install stable-baselines3[extra]
