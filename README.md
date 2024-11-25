@@ -45,7 +45,7 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 ## Getting into the environment
 
 ```bash
-conda activate gymenv
+conda activate gym
 ```
 
 # Execution
