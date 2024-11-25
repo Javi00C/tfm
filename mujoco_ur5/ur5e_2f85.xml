@@ -249,7 +249,7 @@
                                 diaginertia="4.73958e-07 3.64583e-07 1.23958e-07"/>
                                 <geom class="2f85_visual" mesh="pad"/>
                               <body name="left_silicone_pad">
-                                <site name="force_sensor" type="box" pos="0 0 0" size=".02 .0067 .04" rgba=".9 .1 .9 1"/> <!--SENSOR (SITE) ADDED, clipping with model size=".02 .0066 .04" --> 
+                                <site name="force_sensor" type="box" pos="0 0 0.02" size=".02 .0067 .02" rgba=".9 .1 .9 1"/> <!--SENSOR (SITE) ADDED, clipping with model size=".02 .0066 .04" --> 
                                 <geom class="2f85_visual" mesh="silicone_pad" material="2f85_black"/>
                             </body>
                           </body>
