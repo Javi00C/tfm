@@ -7,7 +7,10 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 ## Create Conda Environment with dependencies
 
 ```bash
-conda create -n gymenv python=3.10.12 swig gymnasium gymnasium[box2d] stable-baselines3[extra] pytz scipy sympy gymnasium[mujoco]
+conda create -n gym python=3.10.12 swig gymnasium gymnasium[box2d] pytz scipy sympy gymnasium[mujoco]
+
+conda activate gymenv
+pip install stable-baselines3[extra]
 
 
 ```
@@ -42,7 +45,7 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 ## Getting into the environment
 
 ```bash
-conda activate gymenv
+conda activate gym
 ```
 
 # Execution
