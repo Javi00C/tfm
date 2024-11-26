@@ -28,7 +28,7 @@ def display_data(data):
     print(f"Position_rope: {data.qpos[13:30]}")
     #print(f"Velocity: {data.qvel}")
     #print(f"Control Inputs: {data.ctrl}")
-    #print(f"Sensor Data: {data.sensordata}")
+    print(f"Sensor Data: {data.sensordata}")
     obs = np.concatenate((np.array(data.qpos),
                         np.array(data.qvel),
                         np.array(data.sensordata)), axis=0)

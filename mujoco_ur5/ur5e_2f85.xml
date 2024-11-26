@@ -248,9 +248,15 @@
                                 <inertial mass="0.0035" pos="0 -0.0025 0.0185" quat="1 0 0 1"
                                 diaginertia="4.73958e-07 3.64583e-07 1.23958e-07"/>
                                 <geom class="2f85_visual" mesh="pad"/>
-                              <body name="left_silicone_pad">
-                                <site name="force_sensor" type="box" pos="0 0 0.02" size=".02 .0067 .02" rgba=".9 .1 .9 1"/> <!--SENSOR (SITE) ADDED, clipping with model size=".02 .0066 .04" --> 
-                                <geom class="2f85_visual" mesh="silicone_pad" material="2f85_black"/>
+                              <body name="left_silicone_pad">                                                    
+                                  <geom class="2f85_visual" mesh="silicone_pad" material="2f85_black"/>
+                                  <!-- Add a dummy child body for the force sensor -->
+                                  <body name="dummy_child_left_pad">
+                                    <!-- Add a small invisible geometry to ensure the body is defined -->
+                                    <geom name="dummy_geom_left_pad" type="box" pos="0 -0.00345 0.02" size="0.01 0.004 0.015" rgba="1 1 1 1"/>
+                                    <!-- Define the site for the force sensor -->
+                                    <site name="force_sensor" pos="0 0 0" type="box" size="0.02 0.02 0.02" rgba="0.9 0.1 0.9 1"/>
+                                  </body>
                             </body>
                           </body>
                         </body>
