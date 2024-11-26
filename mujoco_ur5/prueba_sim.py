@@ -33,6 +33,11 @@ def display_data(data):
                         np.array(data.qvel),
                         np.array(data.sensordata)), axis=0)
     #print(f"CONCATENATED: {obs}")
+    print(f"Model nq (number of positions): {model.nq}")
+    print(f"Model nv (number of velocities): {model.nv}")
+    print(f"Initial qpos shape: {data.qpos.shape}")
+    print(f"Initial qvel shape: {data.qvel.shape}")
+
     print("-" * 40)
 
 # Initialize a viewer for visualization

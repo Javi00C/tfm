@@ -1,11 +1,14 @@
 import numpy as np
 import gymnasium as gym
+import gymnasium_env
 from gymnasium import spaces
+import cv2
 from typing import Optional
-import mujoco
+import random
 
 from gymnasium import utils
 from gymnasium.envs.mujoco import MujocoEnv
+from gymnasium.spaces import Box
 import os
 
 DIST_WEIGTH = 100000
@@ -21,99 +24,68 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ],
         "render_fps": 100,
     }
+
+
     def __init__(self, episode_len=500, **kwargs):
         utils.EzPickle.__init__(self, **kwargs)
-        # Define the action space
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
-
-
-        # Observation space
-        self.num_robot_joints = 6
-        self.gripper_joints = 7
-        self.sensor_reading_len = 3
-        obs_dim = (self.num_robot_joints + self.gripper_joints) * 2 + self.sensor_reading_len
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
-
-        # Load your MJCF model with env and choose frames count between actions
+        # change shape of observation to your observation space size
+        observation_space = Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float64)
+        # load your MJCF model with env and choose frames count between actions
         MujocoEnv.__init__(
             self,
             os.path.abspath(mujocosim_path),
             5,
-            observation_space=self.observation_space,
+            observation_space=observation_space,
             **kwargs
         )
-
         self.step_number = 0
         self.episode_len = episode_len
         self.done = False
         self.reward = 0
 
-        # Initialize qpos and qvel with correct sizes
-        self.init_qpos = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 0.0] + [0.0] * (self.model.nq - 7)
-        self.init_qvel = [0.0] * self.model.nv  # Corrected to match self.model.nv
+        self.init_qpos = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        self.init_qvel = [0, 0, 0, 0, 0, 0, 
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         self.step_number = 0
 
-        qpos = np.array(self.init_qpos, dtype=np.float32)
-        qvel = np.array(self.init_qvel, dtype=np.float32)
+        # for example, noise is added to positions and velocities
+        qpos = np.array(self.init_qpos)
+        # + self.np_random.uniform(
+        #     size=self.model.nq, low=-0.01, high=0.01
+        # )
+        qvel = np.array(self.init_qvel) 
+        # + self.np_random.uniform(
+        #     size=self.model.nv, low=-0.01, high=0.01
+        # )
         self.set_state(qpos, qvel)
         self.done = False
         self.current_step = 0
         self.obs = self._get_observation()
-        return self.obs, {}
+        return self.obs
 
-    def step(self, action):
-        # Scale the normalized action to the desired velocity range
-        v_max = 0.5  # Include max gripper velocity !!
-        scaled_action = action * v_max  # Now scaled_action.shape = (4,)
-        
-        # Compute the Jacobian at the current configuration
-        site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, 'attachment_site')
-        jacp = np.zeros((3, self.model.nv))
-        jacr = np.zeros((3, self.model.nv))
-        mujoco.mj_jacSite(self.model, self.data, jacp, jacr, site_id)
-        
-        # Include all robot joints including the gripper
-        jacp_robot = jacp[:, :self.num_robot_joints]  # Shape: (3, 7)
-        
-        # Extract the TCP velocities from the scaled action
-        tcp_velocity = scaled_action[:3]  # Shape: (3,)
-        
-        # Compute joint velocities for the arm and gripper
-        q_dot = np.linalg.pinv(jacp_robot) @ tcp_velocity  # q_dot shape: (7,)
-        
-        # Set the gripper joint velocity
-        q_dot[-1] = scaled_action[3]  # Assign gripper velocity
-        
-        # Apply the joint velocities as control inputs
-        ctrl = np.zeros(self.model.nu)
-        ctrl[:self.num_robot_joints] = q_dot
-        # Do simulation
-        self.do_simulation(ctrl, self.frame_skip)
+    def step(self, a):
+        reward = 1.0
+        self.do_simulation(a, self.frame_skip)
         self.current_step += 1
-        
+
         self.obs = self._get_observation()
         self.done = self._check_done()
-        truncated = self.current_step >= self.episode_len
-        reward = self._calculate_reward()
+        truncated = self.current_step > self.episode_len
         return self.obs, reward, self.done, truncated, {}
-
-
-    def _get_observation(self):
-        # Adjust the indices to include all robot joints and gripper joints
-        num_robot_joints = 6  # Adjust as necessary
-        num_gripper_joints = 7  # Replace with the actual number of gripper joints
-        total_joints = num_robot_joints + num_gripper_joints
-        obs = np.concatenate((
-            np.array(self.data.qpos[:total_joints], dtype=np.float32),
-            np.array(self.data.qvel[:total_joints], dtype=np.float32),
-            np.array(self.data.sensordata, dtype=np.float32)
-        ), axis=0)
-        return obs
-
     
-    # Computes the distance from each COM of each capsule to the desired final pose of each COM
+    def _get_observation(self):
+        # Observation includes the joint positions and vels of robot + gripper and sensor
+        obs = np.concatenate((np.array(self.data.qpos[0:13]), #All joints ur5 + gripper
+                              np.array(self.data.qvel[0:13]),
+                              np.array(self.data.sensordata)), axis=0)
+        return obs
+    
+    #Computes the distance from each COM of each capsule to the 
+    # desired final pose of each COM
     def _compute_dist_rope_COM(self, x0, L, z0):
         # Reshape rope_pos to extract positions of the 4 capsules
         self.rope_pos = self.rope_pos.reshape(-1, 4)  # Each capsule has 4 values, assuming COM is in first 3
@@ -135,23 +107,28 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         # Apply constant negative reward per step to encourage efficient behavior
         step_penalty = -0.1
 
-        # Reward based on how close the rope is to being horizontal
+        #Reward based on how close the rope is to being horizontal
         self.rope_pos = self.data.qpos[13:30]
-        com_dists = self._compute_dist_rope_COM(0.5, 0.185, 0.8)
-        # Rope initial pos= 0.5 0 0.8
-        # Rope horizontal -> centers of mass of capsules in 3D line 0.5 n*x 0.8
+        com_dists = self._compute_dist_rope_COM(0.5,0.185,0.8)
+        #rope initial pos= 0.5 0 0.8
+        #rope horizontal -> centers of mass of capsules in 3d line 0.5 n*x 0.8
+        # 0.5 0.0925 0.8, 0.5 0.2775
+        # link_n_end_pos = (x0, L/2+L*n, z0) (first is link n=0)
 
-        # IMPORTANT: Capsule positions are expressed in quaternions
+        #IMPORTANT capsule positions are expressed in quaternions
 
-        # Determine the current tile and whether it's on the edge
+        # Determine the current tile and whether it's on the edge (Positions could be divided to created larger tiles -> less memory)
         if self.done:
             terminated_penalty = -100
             reward = 0
         else:
             terminated_penalty = 0
             # Compute the reward
+            # Reward is inversely proportional to the distances; closer means higher reward
+            # Sum of inverses of distances for each capsule (avoid division by zero with a small epsilon)
+            # Min distance to COM = 0.01
             epsilon = 1e-6
-            reward = DIST_WEIGTH * (np.sum(1 / (com_dists + epsilon)))                
+            reward = DIST_WEIGTH*(np.sum(1 / (com_dists + epsilon)))                
             if reward > MAX_REWARD:
                 reward = MAX_REWARD
         # Calculate total reward per step
@@ -172,8 +149,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         MIN_FORCE_THRESHOLD = 0.1  # Minimum force threshold to consider the rope grasped
 
         # Get the TCP position from the site in the XML (attachment_site)
-        site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, 'attachment_site')
-        tcp_position = self.data.site_xpos[site_id]
+        tcp_position = self.data.site_xpos[self.model.site_name2id("attachment_site")]
 
         # Compute the final desired position of the rope's COM
         rope_com_desired = np.array([0.5, 0.185, 0.8])  # Adjust based on your target position
@@ -190,5 +166,4 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         rope_not_grasped = gripper_force < MIN_FORCE_THRESHOLD
 
         # Episode is done if either condition is true
-        return self.current_step >= self.episode_len or too_far or rope_not_grasped
-
+        return self.current_step >= self.max_steps or too_far or rope_not_grasped
