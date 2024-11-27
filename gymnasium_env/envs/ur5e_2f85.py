@@ -10,6 +10,10 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
+ACTION_SCALER = np.array([0.5, 0.5, 0.5, 255])  # Max velocities for x, y, z, and gripper actuation
+
+#MAX_ACTION = np.array([6.2831, 6.2831, 3.1415, 6.2831, 6.2831, 6.2831, 255])
+
 mujocosim_path = "scene_ur5_2f85.xml"
 
 class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
@@ -22,16 +26,13 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         "render_fps": 100,
     }
     def __init__(self, episode_len=500, **kwargs):
+        
         utils.EzPickle.__init__(self, **kwargs)
-        # Define the action space
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
-
 
         # Observation space
         self.num_robot_joints = 6
-        self.gripper_joints = 7
-        self.sensor_reading_len = 3
-        obs_dim = (self.num_robot_joints + self.gripper_joints) * 2 + self.sensor_reading_len
+        self.num_sensor_readings = 3
+        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings # multiplication by 2 because of qvel of robot
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Load your MJCF model with env and choose frames count between actions
@@ -43,14 +44,20 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
             **kwargs
         )
 
+        # Define the action space (3d TCP velocities and gripper actuator velocity) ACTION SPACE IS DEFINED AFTER THE INIT BECAUSE IF NOT IT IS CHANGED BY IT
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
+
         self.step_number = 0
         self.episode_len = episode_len
         self.done = False
         self.reward = 0
 
-        # Initialize qpos and qvel with correct sizes
-        self.init_qpos = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 0.0] + [0.0] * (self.model.nq - 7)
-        self.init_qvel = [0.0] * self.model.nv  # Corrected to match self.model.nv
+        # Initialize qpos and qvel
+        robot_ini_pos = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45]
+        gripper_ini_pos = [0.51020483, -0.15356462,  0.39897643, -0.17712295,  0.51018538, -0.25556113, 0.31270676,  0.04160611]
+        roope_ini_pos = [0.0] * (self.model.nq - 14)
+        self.init_qpos = robot_ini_pos + gripper_ini_pos + roope_ini_pos
+        self.init_qvel = [0.0] * self.model.nv  # All velocities are initialized to zero
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         self.step_number = 0
@@ -65,49 +72,61 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
 
     def step(self, action):
         # Scale the normalized action to the desired velocity range
-        v_max = 0.5  # Include max gripper velocity !!
-        scaled_action = action * v_max  # Now scaled_action.shape = (4,)
-        
+        scaled_action = action * ACTION_SCALER  # scaled_action.shape = (4,)
+
+        # Extract the TCP velocities from the scaled action
+        tcp_velocity = scaled_action[:3]  # Shape: (3,)
+
         # Compute the Jacobian at the current configuration
         site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, 'attachment_site')
         jacp = np.zeros((3, self.model.nv))
         jacr = np.zeros((3, self.model.nv))
         mujoco.mj_jacSite(self.model, self.data, jacp, jacr, site_id)
-        
-        # Include all robot joints including the gripper
-        jacp_robot = jacp[:, :self.num_robot_joints]  # Shape: (3, 7)
-        
-        # Extract the TCP velocities from the scaled action
-        tcp_velocity = scaled_action[:3]  # Shape: (3,)
-        
-        # Compute joint velocities for the arm and gripper
-        q_dot = np.linalg.pinv(jacp_robot) @ tcp_velocity  # q_dot shape: (7,)
-        
-        # Set the gripper joint velocity
-        q_dot[-1] = scaled_action[3]  # Assign gripper velocity
-        
-        # Apply the joint velocities as control inputs
+
+        # Jacobian concerning only the six robot joints
+        jacp_robot = jacp[:, :self.num_robot_joints]  # Shape: (3,6)
+
+        # Compute joint velocities for the arm
+        q_dot = np.linalg.pinv(jacp_robot) @ tcp_velocity  # q_dot shape: (6,)
+
+        # Compute the time step
+        dt = self.model.opt.timestep * self.frame_skip
+
+        # Get current joint positions
+        current_qpos = self.data.qpos[:self.num_robot_joints]
+
+        # Compute desired joint positions by integrating velocities
+        qpos_desired = current_qpos + q_dot * dt
+
+        # Apply the desired joint positions as control inputs
         ctrl = np.zeros(self.model.nu)
-        ctrl[:self.num_robot_joints] = q_dot
+        ctrl[:self.num_robot_joints] = qpos_desired  # Set desired positions for robot joints
+
+        # Set the gripper joint control
+        gripper_control = abs(scaled_action[3])  # The fourth element of the action vector THE ABSOLUTE VALUE HAS BEEN ADDED SINCE THE RANGE IS [0 255]
+        # Assuming the gripper actuator is a position actuator
+        ctrl[self.num_robot_joints] = gripper_control  # ctrl[6] = gripper_control
+
         # Do simulation
         self.do_simulation(ctrl, self.frame_skip)
         self.current_step += 1
-        
+
         self.obs = self._get_observation()
+        observation = self.obs
         self.done = self._check_done()
+        terminated = self.done
         truncated = self.current_step >= self.episode_len
+
         reward = self._calculate_reward()
-        return self.obs, reward, self.done, truncated, {}
+        return observation, reward, terminated, truncated, {}
+
+
 
 
     def _get_observation(self):
-        # Adjust the indices to include all robot joints and gripper joints
-        num_robot_joints = 6  # Adjust as necessary
-        num_gripper_joints = 7  # Replace with the actual number of gripper joints
-        total_joints = num_robot_joints + num_gripper_joints
         obs = np.concatenate((
-            np.array(self.data.qpos[:total_joints], dtype=np.float32),
-            np.array(self.data.qvel[:total_joints], dtype=np.float32),
+            np.array(self.data.qpos[:self.num_robot_joints], dtype=np.float32),
+            np.array(self.data.qvel[:self.num_robot_joints], dtype=np.float32),
             np.array(self.data.sensordata, dtype=np.float32)
         ), axis=0)
         return obs
@@ -116,7 +135,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
     # Computes the distance from each COM of each capsule to the desired final pose of each COM
     def _compute_dist_rope_COM(self, x0, L, z0):
         # Reshape rope_pos to extract positions of the 4 capsules
-        self.rope_pos = self.rope_pos.reshape(-1, 4)  # Each capsule has 4 values, assuming COM is in first 3
+        self.rope_pos = self.data.qpos[14:].reshape(-1, 4)  # Each capsule has 4 values, assuming COM is in first 3
         
         # Extract the actual COM positions (first 3 values for each capsule)
         actual_positions = self.rope_pos[:, :3]  # Shape: (4, 3)
@@ -189,6 +208,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         gripper_force = np.linalg.norm(self.data.sensordata[:3])  # Adjust sensor indices as necessary
         rope_not_grasped = gripper_force < MIN_FORCE_THRESHOLD
 
-        # Episode is done if either condition is true
-        return self.current_step >= self.episode_len or too_far or rope_not_grasped
+        # Episode is terminated if either condition is true
+        done = too_far or rope_not_grasped
+        return bool(done)  # Ensure 'done' is a boolean
 

@@ -23,9 +23,9 @@ data.ctrl[:] = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 163]  # Set control inpu
 # Function to display key mjData attributes
 def display_data(data):
     #print(f"Time: {data.time:.3f}")
-    print(f"Position_ur5: {data.qpos[0:6]}")
-    print(f"Position_gripper: {data.qpos[6:13]}")
-    print(f"Position_rope: {data.qpos[13:30]}")
+    print(f"Position_ur5: {data.qpos[0:6]}") # UR5 has 6 joints
+    print(f"Position_gripper: {data.qpos[6:14]}") # Gripper has 8 "joints" or 2 quaternions I dont know
+    print(f"Position_rope: {data.qpos[14:]}") # Rope has 16 values -> 4 quaternions
     #print(f"Velocity: {data.qvel}")
     #print(f"Control Inputs: {data.ctrl}")
     print(f"Sensor Data: {data.sensordata}")
