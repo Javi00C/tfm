@@ -10,7 +10,7 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([0.5, 0.5, 0.5, 255])  # Max velocities for x, y, z, and gripper actuation
+ACTION_SCALER = np.array([1, 1, 1, 255])  # Max velocities for x, y, z, and gripper actuation
 
 #MAX_ACTION = np.array([6.2831, 6.2831, 3.1415, 6.2831, 6.2831, 6.2831, 255])
 
@@ -121,8 +121,6 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         return observation, reward, terminated, truncated, {}
 
 
-
-
     def _get_observation(self):
         obs = np.concatenate((
             np.array(self.data.qpos[:self.num_robot_joints], dtype=np.float32),
@@ -169,7 +167,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         else:
             terminated_penalty = 0
             # Compute the reward
-            epsilon = 1e-6
+            epsilon = 1e-3
             reward = DIST_WEIGTH * (np.sum(1 / (com_dists + epsilon)))                
             if reward > MAX_REWARD:
                 reward = MAX_REWARD
@@ -187,8 +185,8 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         - done: bool, True if the episode should terminate, False otherwise.
         """
         # Constants
-        MAX_TCP_DIST = 0.6  # Maximum allowable distance from TCP to final rope position
-        MIN_FORCE_THRESHOLD = 0.1  # Minimum force threshold to consider the rope grasped
+        MAX_TCP_DIST = 10  # Maximum allowable distance from TCP to final rope position
+        MIN_FORCE_THRESHOLD = 0.001  # Minimum force threshold to consider the rope grasped
 
         # Get the TCP position from the site in the XML (attachment_site)
         site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, 'attachment_site')
