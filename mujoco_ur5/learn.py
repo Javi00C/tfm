@@ -27,7 +27,7 @@ log_dir = "logs"
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
 
-TIMESTEPS = 300000
+TIMESTEPS = 1000000
 env_str = "gymnasium_env/ur5e_2f85Env-v0"
 
 # Verify observation and action spaces

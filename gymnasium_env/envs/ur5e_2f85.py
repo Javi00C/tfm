@@ -10,7 +10,7 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([1, 1, 1, 255])  # Max velocities for x, y, z, and gripper actuation
+ACTION_SCALER = np.array([2, 2, 2, 255])  # Max velocities for x, y, z, and gripper actuation
 
 #MAX_ACTION = np.array([6.2831, 6.2831, 3.1415, 6.2831, 6.2831, 6.2831, 255])
 
@@ -39,7 +39,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         MujocoEnv.__init__(
             self,
             os.path.abspath(mujocosim_path),
-            5,
+            5, # 5 frames between actions (frame_skip)
             observation_space=self.observation_space,
             **kwargs
         )
@@ -153,7 +153,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         step_penalty = -0.1
 
         # Reward based on how close the rope is to being horizontal
-        self.rope_pos = self.data.qpos[13:30]
+        self.rope_pos = self.data.qpos[13:]
         com_dists = self._compute_dist_rope_COM(0.5, 0.185, 0.8)
         # Rope initial pos= 0.5 0 0.8
         # Rope horizontal -> centers of mass of capsules in 3D line 0.5 n*x 0.8
@@ -193,7 +193,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         tcp_position = self.data.site_xpos[site_id]
 
         # Compute the final desired position of the rope's COM
-        rope_com_desired = np.array([0.5, 0.185, 0.8])  # Adjust based on your target position
+        rope_com_desired = np.array([0.5, 0.185, 0.8]) 
 
         # Compute the distance from TCP to the rope's desired final position
         tcp_to_rope_dist = np.linalg.norm(tcp_position - rope_com_desired)
@@ -203,10 +203,10 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
 
         # Check if the rope is grasped
         # Assuming sensor data includes forces, and the rope is not grasped if force < MIN_FORCE_THRESHOLD
-        gripper_force = np.linalg.norm(self.data.sensordata[:3])  # Adjust sensor indices as necessary
+        gripper_force = np.linalg.norm(self.data.sensordata[:3]) 
         rope_not_grasped = gripper_force < MIN_FORCE_THRESHOLD
 
         # Episode is terminated if either condition is true
         done = too_far or rope_not_grasped
-        return bool(done)  # Ensure 'done' is a boolean
+        return bool(done) 
 
