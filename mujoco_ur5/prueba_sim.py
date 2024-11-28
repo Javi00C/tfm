@@ -10,6 +10,10 @@ model = mujoco.MjModel.from_xml_path(model_path)
 # Create a data object to hold simulation states
 data = mujoco.MjData(model)
 
+#for i in range(model.ngeom):
+#        print(i, model.geom(i).name, data.geom(i).xpos)
+#exit()
+
 # Initialize joints to keyframe values (from <keyframe> qpos)
 # Replace these values with the `qpos` values from your keyframe
 initial_qpos = [
@@ -32,6 +36,10 @@ def display_data(data):
     obs = np.concatenate((np.array(data.qpos),
                         np.array(data.qvel),
                         np.array(data.sensordata)), axis=0)
+    print(59, model.geom(59).name, data.geom(59).xpos)
+    print(60, model.geom(60).name, data.geom(60).xpos)
+    print(61, model.geom(61).name, data.geom(61).xpos)
+    print(62, model.geom(62).name, data.geom(62).xpos)
     #print(f"CONCATENATED: {obs}")
     print(f"Model nq (number of positions): {model.nq}")
     print(f"Model nv (number of velocities): {model.nv}")
