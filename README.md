@@ -10,13 +10,12 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 conda create -n gym python=3.10.12 swig gymnasium gymnasium[box2d] pytz scipy sympy gymnasium[mujoco]
 
 conda activate gymenv
-pip install stable-baselines3[extra]
 
-
+pip install stable-baselines3[extra]==2.4.0
 ```
-## Stable baselines needs a version of Gymnasium < 0.30
+## Install gymnasium
 ```bash
-pip install gymnasium==0.29.0
+pip install gymnasium==1.0.0
 ```
 ## Install Mujoco (just download and extract)
 ```bash
