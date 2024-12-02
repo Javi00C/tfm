@@ -22,8 +22,9 @@ print(f"Numpy Version: {np.__version__}")
 # print(f"Stable Baselines3 Version: {stable_baselines3.__version__}")
 
 # Define the number of environments
-num_envs = 32  # Adjust based on your system's capacity
-
+NUM_ENVS = 32  # Adjust based on your system's capacity
+TIMESTEPS = 4000000
+DEVICE_USED = 'cpu'
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
     return gymnasium.make("gymnasium_env/ur5e_2f85Env-v0")
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     os.makedirs(model_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
 
-    TIMESTEPS = 4000000
+
     env_str = "gymnasium_env/ur5e_2f85Env-v0"
 
     # Verify observation and action spaces
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     sample_env.close()
 
     # Create vectorized training environment
-    env = SubprocVecEnv([make_env for _ in range(num_envs)])
+    env = SubprocVecEnv([make_env for _ in range(NUM_ENVS)])
 
     # Create vectorized evaluation environment with a single environment
     eval_env = SubprocVecEnv([make_env for _ in range(1)])
@@ -58,7 +59,7 @@ if __name__ == '__main__':
                                  n_eval_episodes=5)
 
     # Initialize PPO model
-    model = PPO('MlpPolicy', env, verbose=1, device='cpu')
+    model = PPO('MlpPolicy', env, verbose=1, device=DEVICE_USED)
 
     # Train the model
     model.learn(total_timesteps=TIMESTEPS, progress_bar=True, callback=eval_callback)

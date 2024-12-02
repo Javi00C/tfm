@@ -10,7 +10,8 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([6, 6, 6, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
+ACTION_SCALER = np.array([7, 7, 7, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
+EPISODE_LEN = 6000
 mujocosim_path = "scene_ur5_2f85.xml"
 
 class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
@@ -22,7 +23,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ],
         "render_fps": 100,
     }
-    def __init__(self, episode_len=6000, **kwargs):
+    def __init__(self, episode_len=EPISODE_LEN, **kwargs):
         
         utils.EzPickle.__init__(self, **kwargs)
 
