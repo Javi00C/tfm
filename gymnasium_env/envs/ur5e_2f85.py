@@ -10,9 +10,7 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([2, 2, 2, 255])  # Max velocities for x, y, z, and gripper actuation
-
-#MAX_ACTION = np.array([6.2831, 6.2831, 3.1415, 6.2831, 6.2831, 6.2831, 255])
+ACTION_SCALER = np.array([6, 6, 6, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
 
 mujocosim_path = "scene_ur5_2f85.xml"
 
@@ -25,7 +23,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ],
         "render_fps": 100,
     }
-    def __init__(self, episode_len=500, **kwargs):
+    def __init__(self, episode_len=6000, **kwargs):
         
         utils.EzPickle.__init__(self, **kwargs)
 
@@ -44,7 +42,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
             **kwargs
         )
 
-        # Define the action space (3d TCP velocities and gripper actuator velocity) ACTION SPACE IS DEFINED AFTER THE INIT BECAUSE IF NOT IT IS CHANGED BY IT
+        # Define the action space (3d TCP velocities and gripper actuator velocity)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
 
         self.step_number = 0
@@ -70,9 +68,19 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         self.obs = self._get_observation()
         return self.obs, {}
 
+    # Scales action range [-1,1] to [0 255]
+    def _scale_gripp_action(self,x):
+        a = 127.5
+        b = a
+        y = a*x+b
+        return y
+
     def step(self, action):
         # Scale the normalized action to the desired velocity range
         scaled_action = action * ACTION_SCALER  # scaled_action.shape = (4,)
+
+        #Gripper action scaling
+        scaled_action[3] = self._scale_gripp_action(scaled_action[3])
 
         # Extract the TCP velocities from the scaled action
         tcp_velocity = scaled_action[:3]  # Shape: (3,)
@@ -103,7 +111,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ctrl[:self.num_robot_joints] = qpos_desired  # Set desired positions for robot joints
 
         # Set the gripper joint control
-        gripper_control = abs(scaled_action[3])  # The fourth element of the action vector THE ABSOLUTE VALUE HAS BEEN ADDED SINCE THE RANGE IS [0 255]
+        gripper_control = scaled_action[3]  
         # Assuming the gripper actuator is a position actuator
         ctrl[self.num_robot_joints] = gripper_control  # ctrl[6] = gripper_control
 
@@ -129,64 +137,59 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ), axis=0)
         return obs
 
-    
-    # Computes the distance from each COM of each capsule to the desired final pose of each COM
-    def _compute_dist_rope_COM(self, x0, L, z0):
-        # Reshape rope_pos to extract positions of the 4 capsules
-        self.rope_pos = self.data.qpos[14:].reshape(-1, 4)  # Each capsule has 4 values, assuming COM is in first 3
-        
-        # Extract the actual COM positions (first 3 values for each capsule)
-        actual_positions = self.rope_pos[:, :3]  # Shape: (4, 3)
 
-        # Calculate the expected positions for the capsules
-        expected_positions = np.array([
-            [x0, L / 2 + L * n, z0] for n in range(4)
-        ])  # Shape: (4, 3)
-
-        # Compute Euclidean distances
-        distances = np.linalg.norm(actual_positions - expected_positions, axis=1)  # Shape: (4,)
-
-        return distances
-        
     def _calculate_reward(self):
         # Apply constant negative reward per step to encourage efficient behavior
         step_penalty = -0.1
 
         # Reward based on how close the rope is to being horizontal
-        self.rope_pos = self.data.qpos[13:]
-        com_dists = self._compute_dist_rope_COM(0.5, 0.185, 0.8)
-        # Rope initial pos= 0.5 0 0.8
-        # Rope horizontal -> centers of mass of capsules in 3D line 0.5 n*x 0.8
-
-        # IMPORTANT: Capsule positions are expressed in quaternions
+        capsule_len = 0.185
+        num_capsules = 4
+        sph_rad = 0.02
+        y_expected = num_capsules*capsule_len - 2*num_capsules*sph_rad
+        expected_pos = [0.5, y_expected, 0.8]
+        curr_pos = self.data.geom(62).xpos
+        dist = np.linalg.norm(curr_pos - expected_pos)
 
         # Determine the current tile and whether it's on the edge
         if self.done:
-            terminated_penalty = -100
+            terminated_penalty = -1000
             reward = 0
         else:
             terminated_penalty = 0
             # Compute the reward
             epsilon = 1e-3
-            reward = DIST_WEIGTH * (np.sum(1 / (com_dists + epsilon)))                
-            if reward > MAX_REWARD:
-                reward = MAX_REWARD
+            reward = 1 / (dist + epsilon)
         # Calculate total reward per step
         total_reward = step_penalty + reward + terminated_penalty
         return total_reward
 
-    def _check_done(self):
+    def _check_instability(self):
         """
-        Checks whether the episode is done based on:
-        1. The distance of the robot's TCP (attachment site) from the desired final position of the rope.
-        2. Whether the rope is grasped (force sensor reading indicates no grasp).
+        Checks for NaN or Inf values in the simulation data to detect instability.
 
         Returns:
-        - done: bool, True if the episode should terminate, False otherwise.
+        - unstable: bool, True if instability is detected, False otherwise.
         """
-        # Constants
-        MAX_TCP_DIST = 10  # Maximum allowable distance from TCP to final rope position
-        MIN_FORCE_THRESHOLD = 0.001  # Minimum force threshold to consider the rope grasped
+        # Check joint positions, velocities, and accelerations
+        qpos_nan = np.isnan(self.data.qpos).any()
+        qvel_nan = np.isnan(self.data.qvel).any()
+        qacc_nan = np.isnan(self.data.qacc).any()
+
+        qpos_inf = np.isinf(self.data.qpos).any()
+        qvel_inf = np.isinf(self.data.qvel).any()
+        qacc_inf = np.isinf(self.data.qacc).any()
+
+        # Combine checks
+        unstable = qpos_nan or qvel_nan or qacc_nan or qpos_inf or qvel_inf or qacc_inf
+
+        if unstable:
+            print("Simulation is unstable (terminated = true)")
+        return unstable
+
+
+    def _check_done(self):
+        MAX_TCP_DIST = 100  # Maximum allowable distance from TCP to final rope position
 
         # Get the TCP position from the site in the XML (attachment_site)
         site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, 'attachment_site')
@@ -201,12 +204,9 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         # Check if TCP is too far
         too_far = tcp_to_rope_dist > MAX_TCP_DIST
 
-        # Check if the rope is grasped
-        # Assuming sensor data includes forces, and the rope is not grasped if force < MIN_FORCE_THRESHOLD
-        gripper_force = np.linalg.norm(self.data.sensordata[:3]) 
-        rope_not_grasped = gripper_force < MIN_FORCE_THRESHOLD
+        # Check for instability after simulation
+        unstable = self._check_instability()
 
-        # Episode is terminated if either condition is true
-        done = too_far or rope_not_grasped
+        done = too_far or unstable
         return bool(done) 
 

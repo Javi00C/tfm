@@ -9,7 +9,7 @@ print("Gymnasium version:", gym.__version__)
 print("Mujoco version:", mujoco.__version__)
 
 # Load the saved PPO model
-model = PPO.load("/home/javi/tfm/src/mujoco_ur5/models/ppo_robot.zip")
+model = PPO.load("/home/javi/tfm/src/mujoco_ur5/models/ppo_robot")
 
 env_str = "gymnasium_env/ur5e_2f85Env-v0"
 
@@ -23,7 +23,7 @@ env = DummyVecEnv([lambda: env])
 obs = env.reset()
 
 # Execute the policy for a longer duration
-episode_length = 5000  # Adjust as needed
+episode_length = 1000  # Adjust as needed
 for _ in range(episode_length):
     action, _states = model.predict(obs)
     obs, reward, done, info = env.step(action)

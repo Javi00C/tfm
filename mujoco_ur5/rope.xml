@@ -4,7 +4,7 @@
     <default>
         <default class="rope">
             <geom type="capsule" size="0.02 0.0725" density="1700" friction="0.5" />
-            <joint damping="2" stiffness="0.08" armature="0.01" />
+            <joint damping="3" stiffness="1" armature="0.01" />
         </default>
     </default>
     
