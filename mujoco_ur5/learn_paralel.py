@@ -58,7 +58,7 @@ if __name__ == '__main__':
                                  n_eval_episodes=5)
 
     # Initialize PPO model
-    model = PPO('MlpPolicy', env, verbose=1, device='cuda')
+    model = PPO('MlpPolicy', env, verbose=1, device='cpu')
 
     # Train the model
     model.learn(total_timesteps=TIMESTEPS, progress_bar=True, callback=eval_callback)
