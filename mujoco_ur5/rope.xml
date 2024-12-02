@@ -1,38 +1,50 @@
 <mujoco model="rope">
 
-    <!-- Default settings for the model (size of capsule = 0.185)-->
-    <default>
-        <default class="rope">
-            <geom type="capsule" size="0.02 0.0725" density="1700" friction="0.5" />
-            <joint damping="3" stiffness="1" armature="0.01" />
-        </default>
-    </default>
-    
-    <!-- World body -->
-    <worldbody>
-        <!-- Fixed base of the DLO chain (no joint, so it remains in place) -->
-        <body name="segment_0" pos="0.5 0 0.8">
-            <geom name="geom_0" type="capsule" size="0.02 0.0725" rgba="0.8 0.2 0.2 1"/>
-            <joint name="joint_0" type="ball" pos="0 0 0.0725" />
-            <!-- This first segment is fixed in space without a joint -->
+	<!-- Default settings for the model (size of capsule = 0.185)-->
+	<default>
+		<default class="rope">
+			<geom type="capsule" size="0.02 0.035125" density="1700" friction="0.5" />
+			<joint damping="0.1" stiffness="0.2" armature="0.01" />
+		</default>
+	</default>
 
-            <!-- Chain structure for the wire with ball joints -->
-            <body name="segment_1" pos="0 0 -0.165">
-                <geom name="geom_1" type="capsule" size="0.02 0.0725" rgba="0.8 0.2 0.2 1" />
-                <joint name="joint_1" type="ball" pos="0 0 0.0725" />
-
-                <body name="segment_2" pos="0 0 -0.165">
-                    <geom name="geom_2" type="capsule" size="0.02 0.0725" rgba="0.8 0.2 0.2 1" />
-                    <joint name="joint_2" type="ball" pos="0 0 0.0725" />
-
-                    <body name="segment_3" pos="0 0 -0.165">
-                        <geom name="geom_3" type="capsule" size="0.02 0.0725" rgba="0.8 0.2 0.2 1" />
-                        <joint name="joint_3" type="ball" pos="0 0 0.0725" />
-
-                    </body>
-                </body>
-            </body>
-        </body>
-    </worldbody>
+	<!-- World body -->
+	<worldbody>
+		<!-- Fixed base of the DLO chain (no joint, so it remains in place) -->
+		<body name="segment_0" pos="0.5 0 0.8" childclass="rope">
+			<geom name="geom_0" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1"/>
+			<joint name="joint_0" type="ball" pos="0 0 0.035125" />
+			<!-- This first segment is fixed in space without a joint -->
+			<!-- Chain structure for the wire with ball joints -->
+			<body name="segment_1" pos="0 0 -0.0825">
+				<geom name="geom_1" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+				<joint name="joint_1" type="ball" pos="0 0 0.035125" />
+				<body name="segment_2" pos="0 0 -0.0825">
+					<geom name="geom_2" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+					<joint name="joint_2" type="ball" pos="0 0 0.035125" />
+					<body name="segment_3" pos="0 0 -0.0825">
+						<geom name="geom_3" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+						<joint name="joint_3" type="ball" pos="0 0 0.035125" />
+						<body name="segment_4" pos="0 0 -0.0825">
+							<geom name="geom_4" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+							<joint name="joint_4" type="ball" pos="0 0 0.035125" />
+							<body name="segment_5" pos="0 0 -0.0825">
+								<geom name="geom_5" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+								<joint name="joint_5" type="ball" pos="0 0 0.035125" />
+								<body name="segment_6" pos="0 0 -0.0825">
+									<geom name="geom_6" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+									<joint name="joint_6" type="ball" pos="0 0 0.035125" />
+									<body name="segment_7" pos="0 0 -0.0825">
+										<geom name="geom_7" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
+										<joint name="joint_7" type="ball" pos="0 0 0.035125" />
+									</body>
+								</body>
+							</body>
+						</body>
+					</body>
+				</body>
+			</body>
+		</body>
+	</worldbody>
 
 </mujoco>

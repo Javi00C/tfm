@@ -10,7 +10,7 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([6, 6, 6, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
+ACTION_SCALER = np.array([7, 7, 7, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
 
 mujocosim_path = "scene_ur5_2f85.xml"
 
@@ -148,7 +148,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         sph_rad = 0.02
         y_expected = num_capsules*capsule_len - 2*num_capsules*sph_rad
         expected_pos = [0.5, y_expected, 0.8]
-        curr_pos = self.data.geom(62).xpos
+        curr_pos = self.data.geom(66).xpos
         dist = np.linalg.norm(curr_pos - expected_pos)
 
         # Determine the current tile and whether it's on the edge

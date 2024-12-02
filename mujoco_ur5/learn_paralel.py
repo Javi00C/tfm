@@ -22,7 +22,7 @@ print(f"Numpy Version: {np.__version__}")
 # print(f"Stable Baselines3 Version: {stable_baselines3.__version__}")
 
 # Define the number of environments
-num_envs = 64  # Adjust based on your system's capacity
+num_envs = 32  # Adjust based on your system's capacity
 
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     os.makedirs(model_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
 
-    TIMESTEPS = 3000000
+    TIMESTEPS = 4000000
     env_str = "gymnasium_env/ur5e_2f85Env-v0"
 
     # Verify observation and action spaces

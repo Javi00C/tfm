@@ -10,19 +10,22 @@ model = mujoco.MjModel.from_xml_path(model_path)
 # Create a data object to hold simulation states
 data = mujoco.MjData(model)
 
-#for i in range(model.ngeom):
-#        print(i, model.geom(i).name, data.geom(i).xpos)
-#exit()
+for i in range(model.ngeom):
+        print(i, model.geom(i).name, data.geom(i).xpos)
+exit()
 
 # Initialize joints to keyframe values (from <keyframe> qpos)
 # Replace these values with the `qpos` values from your keyframe
 initial_qpos = [
     -1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
 data.qpos[:len(initial_qpos)] = initial_qpos  # Set qpos
 data.qvel[:] = 0  # Set velocities to zero
-data.ctrl[:] = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 163]  # Set control inputs to zero (if applicable)
+data.ctrl[:] = [-1.82, -1.82, 1.57, -2.95, -1.57, 1.45, 0]  # Set control inputs to zero (if applicable)
 
 # Function to display key mjData attributes
 def display_data(data):

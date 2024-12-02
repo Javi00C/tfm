@@ -14,7 +14,7 @@
 <!--DOF: 6 from UR5, 16 from rope (4 capsules), 15 DOF robotiq_2f85 -->
 <keyframe>
     <!--<key name="home" qpos="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" ctrl="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0"/>-->
-    <key name="home" qpos="-1.82 -1.82 1.57 -2.95 -1.57 1.45 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" ctrl="-1.82 -1.82 1.57 -2.95 -1.57 1.45 0"/>
+	<!--<key name="home" qpos="-1.82 -1.82 1.57 -2.95 -1.57 1.45 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" ctrl="-1.82 -1.82 1.57 -2.95 -1.57 1.45 0"/>-->
     <!--Creo que las primeras 6 posiciones corresponden al ur5, las siguientes 7 al gripper y las ultimas 16 a la cuerda-->
 </keyframe>
 
