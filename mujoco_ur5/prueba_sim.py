@@ -10,11 +10,11 @@ model = mujoco.MjModel.from_xml_path(model_path)
 # Create a data object to hold simulation states
 data = mujoco.MjData(model)
 
-# for i in range(model.ngeom):
-#         print(i, model.geom(i).name, data.geom(i).xpos, model.geom(i).size)
-# #print(len(range(model.ngeom)))
-# print(int(len(data.qpos[14:])/4))
-# exit()
+for i in range(model.ngeom):
+        print(i, model.geom(i).name, data.geom(i).xpos, model.geom(i).size)
+#print(len(range(model.ngeom)))
+#print(int(len(data.qpos[14:])/4))
+exit()
 
 # Initialize joints to keyframe values (from <keyframe> qpos)
 # Replace these values with the `qpos` values from your keyframe
