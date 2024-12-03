@@ -137,19 +137,22 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         ), axis=0)
         return obs
 
-
+    # Reward based on how close the rope is to being horizontal
     def _calculate_reward(self):
-        # Apply constant negative reward per step to encourage efficient behavior
-        step_penalty = -0.1
-
-        # Reward based on how close the rope is to being horizontal
-        capsule_len = 0.185
-        num_capsules = 4
-        sph_rad = 0.02
+        #Rope attributes
+        last_rope_link_id = len(range(self.model.ngeom))-1
+        sph_rad = self.model.geom(last_rope_link_id).size[0]
+        cyl_semilen = self.model.geom(last_rope_link_id).size[1]
+        capsule_len = 2*(sph_rad + cyl_semilen)
+        num_capsules = int(len(self.data.qpos[14:])/4) #Num capsules is calculated dividing the number of coords by quaternion length
+        
         y_expected = num_capsules*capsule_len - 2*num_capsules*sph_rad
         expected_pos = [0.5, y_expected, 0.8]
-        curr_pos = self.data.geom(66).xpos
+        curr_pos = self.data.geom(last_rope_link_id).xpos
         dist = np.linalg.norm(curr_pos - expected_pos)
+
+        # Apply constant negative reward per step to encourage efficient behavior
+        step_penalty = -0.1
 
         # Determine the current tile and whether it's on the edge
         if self.done:

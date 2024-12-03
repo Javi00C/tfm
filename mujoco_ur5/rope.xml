@@ -1,9 +1,9 @@
 <mujoco model="rope">
 
-	<!-- Default settings for the model (size of capsule = 0.185)-->
+	<!-- Default settings for the model (size of capsule = 0.185) 0.035125, pos 0.0825-->
 	<default>
 		<default class="rope">
-			<geom type="capsule" size="0.02 0.035125" density="1700" friction="0.5" />
+			<geom type="capsule" size="0.02 0.0175625" density="1700" friction="0.5" />
 			<joint damping="0.1" stiffness="0.2" armature="0.01" />
 		</default>
 	</default>
@@ -12,31 +12,63 @@
 	<worldbody>
 		<!-- Fixed base of the DLO chain (no joint, so it remains in place) -->
 		<body name="segment_0" pos="0.5 0 0.8" childclass="rope">
-			<geom name="geom_0" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1"/>
-			<joint name="joint_0" type="ball" pos="0 0 0.035125" />
+			<geom name="geom_0" type="capsule" rgba="0.8 0.2 0.2 1"/>
+			<joint name="joint_0" type="ball" pos="0 0 0.0175625" />
 			<!-- This first segment is fixed in space without a joint -->
 			<!-- Chain structure for the wire with ball joints -->
-			<body name="segment_1" pos="0 0 -0.0825">
-				<geom name="geom_1" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-				<joint name="joint_1" type="ball" pos="0 0 0.035125" />
-				<body name="segment_2" pos="0 0 -0.0825">
-					<geom name="geom_2" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-					<joint name="joint_2" type="ball" pos="0 0 0.035125" />
-					<body name="segment_3" pos="0 0 -0.0825">
-						<geom name="geom_3" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-						<joint name="joint_3" type="ball" pos="0 0 0.035125" />
-						<body name="segment_4" pos="0 0 -0.0825">
-							<geom name="geom_4" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-							<joint name="joint_4" type="ball" pos="0 0 0.035125" />
-							<body name="segment_5" pos="0 0 -0.0825">
-								<geom name="geom_5" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-								<joint name="joint_5" type="ball" pos="0 0 0.035125" />
-								<body name="segment_6" pos="0 0 -0.0825">
-									<geom name="geom_6" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-									<joint name="joint_6" type="ball" pos="0 0 0.035125" />
-									<body name="segment_7" pos="0 0 -0.0825">
-										<geom name="geom_7" type="capsule" size="0.02 0.035125" rgba="0.8 0.2 0.2 1" />
-										<joint name="joint_7" type="ball" pos="0 0 0.035125" />
+			<body name="segment_1" pos="0 0 -0.04125">
+				<geom name="geom_1" type="capsule" rgba="0.8 0.2 0.2 1" />
+				<joint name="joint_1" type="ball" pos="0 0 0.0175625" />
+				<body name="segment_2" pos="0 0 -0.04125">
+					<geom name="geom_2" type="capsule" rgba="0.8 0.2 0.2 1" />
+					<joint name="joint_2" type="ball" pos="0 0 0.0175625" />
+					<body name="segment_3" pos="0 0 -0.04125">
+						<geom name="geom_3" type="capsule" rgba="0.8 0.2 0.2 1" />
+						<joint name="joint_3" type="ball" pos="0 0 0.0175625" />
+						<body name="segment_4" pos="0 0 -0.04125">
+							<geom name="geom_4" type="capsule" rgba="0.8 0.2 0.2 1" />
+							<joint name="joint_4" type="ball" pos="0 0 0.0175625" />
+							<body name="segment_5" pos="0 0 -0.04125">
+								<geom name="geom_5" type="capsule" rgba="0.8 0.2 0.2 1" />
+								<joint name="joint_5" type="ball" pos="0 0 0.0175625" />
+								<body name="segment_6" pos="0 0 -0.04125">
+									<geom name="geom_6" type="capsule" rgba="0.8 0.2 0.2 1" />
+									<joint name="joint_6" type="ball" pos="0 0 0.0175625" />
+									<body name="segment_7" pos="0 0 -0.04125">
+										<geom name="geom_7" type="capsule" rgba="0.8 0.2 0.2 1" />
+										<joint name="joint_7" type="ball" pos="0 0 0.0175625" />
+										<body name="segment_8" pos="0 0 -0.04125">
+											<geom name="geom_8" type="capsule" rgba="0.8 0.2 0.2 1" />
+											<joint name="joint_8" type="ball" pos="0 0 0.0175625" />
+											<body name="segment_9" pos="0 0 -0.04125">
+												<geom name="geom_9" type="capsule" rgba="0.8 0.2 0.2 1" />
+												<joint name="joint_9" type="ball" pos="0 0 0.0175625" />
+												<body name="segment_10" pos="0 0 -0.04125">
+													<geom name="geom_10" type="capsule" rgba="0.8 0.2 0.2 1" />
+													<joint name="joint_10" type="ball" pos="0 0 0.0175625" />
+													<body name="segment_11" pos="0 0 -0.04125">
+														<geom name="geom_11" type="capsule" rgba="0.8 0.2 0.2 1" />
+														<joint name="joint_11" type="ball" pos="0 0 0.0175625" />
+														<body name="segment_12" pos="0 0 -0.04125">
+															<geom name="geom_12" type="capsule" rgba="0.8 0.2 0.2 1" />
+															<joint name="joint_12" type="ball" pos="0 0 0.0175625" />
+															<body name="segment_13" pos="0 0 -0.04125">
+																<geom name="geom_13" type="capsule" rgba="0.8 0.2 0.2 1" />
+																<joint name="joint_13" type="ball" pos="0 0 0.0175625" />
+																<body name="segment_14" pos="0 0 -0.04125">
+																	<geom name="geom_14" type="capsule" rgba="0.8 0.2 0.2 1" />
+																	<joint name="joint_14" type="ball" pos="0 0 0.0175625" />
+																	<body name="segment_15" pos="0 0 -0.04125">
+																		<geom name="geom_15" type="capsule" rgba="0.8 0.2 0.2 1" />
+																		<joint name="joint_15" type="ball" pos="0 0 0.0175625" />
+																	</body>
+																</body>
+															</body>
+														</body>
+													</body>
+												</body>
+											</body>
+										</body>
 									</body>
 								</body>
 							</body>
