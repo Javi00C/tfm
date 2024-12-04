@@ -61,6 +61,7 @@ git clone https://github.com/L3S/TACTO-MuJoCo.git
 cd TACTO-MuJoCo
 
 Install Python Dependencies: Within the repository directory, run:
+I have commented the line that mentions numpy version 1.20.3 seems to create an error
 pip install -r requirements.txt
 
 Verify Your Setup: Run a demo script to ensure the installation was successful:
