@@ -47,9 +47,23 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 conda activate gym
 ```
 
-# Execution
+# DIGIT SENSOR (TACTO MUJOCO library installation) (MUJOCO VERSION MAY HAVE CHANGED REVISE)
 
 ```bash
-python3 obs_wrapper_ppo.py
+pip install dm-control==1.0.14
+
+pip install pyopengl==3.1.4
+
+sudo apt-get install libosmesa6-dev
+
+Clone the Repository: Pull the TACTO-MuJoCo repository into a directory of your choice:
+git clone https://github.com/L3S/TACTO-MuJoCo.git
+cd TACTO-MuJoCo
+
+Install Python Dependencies: Within the repository directory, run:
+pip install -r requirements.txt
+
+Verify Your Setup: Run a demo script to ensure the installation was successful:
+python demo_mujoco_digit.py
 ```
 
