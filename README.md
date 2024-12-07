@@ -47,7 +47,7 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 conda activate gym
 ```
 
-# DIGIT SENSOR (TACTO MUJOCO library installation) (MUJOCO VERSION MAY HAVE CHANGED REVISE)
+# DIGIT SENSOR (TACTO MUJOCO library installation)
 
 ```bash
 pip install dm-control==1.0.14
@@ -70,9 +70,9 @@ python demo_mujoco_digit.py
 # PROBLEM WITH TACTO MUJOCO library installation
 
 ```bash
-he problem is this: pyrender 0.1.45 requires PyOpenGL==3.1.0, dm-control 1.0.14 requires pyopengl>=3.1.4
+The problem is this: pyrender 0.1.45 requires PyOpenGL==3.1.0, dm-control 1.0.14 requires pyopengl>=3.1.4
 seems like both pyrender and dm-control are needed to run the demo_mujoco_digit.py
-seems like the pyrender version 0.1.45 is the highest version -> needs pyopengl 3.1.0
-seems like the lowest version of dm-control  0.0.28658793 is compatible with pyopengl 3.1.0 or at least lower than 3.1.4
-seems like if version of dm-control 0.0.28658793 is used then it looks for document names of a lower version of mujoco
+The pyrender version 0.1.45 is the highest version -> needs pyopengl 3.1.0
+The lowest version of dm-control  0.0.28658793 is compatible with pyopengl 3.1.0 or at least lower than 3.1.4
+seems like if version of dm-control 0.0.28658793 is used then it looks for document names of a lower version of mujoco (2.0.0) which is not available for download (https://github.com/google-deepmind/mujoco/releases)
 ```
