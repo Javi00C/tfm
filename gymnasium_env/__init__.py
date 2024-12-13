@@ -23,5 +23,10 @@ register(
     entry_point="gymnasium_env.envs:ur5e_2f85Env",
 )
 
-
+#PyBullet robot simulation
+#Mujoco ur5e and 2f85 gripper env
+register(
+    id="gymnasium_env/ur5e_2f85Env-v0",
+    entry_point="gymnasium_env.envs:ur5e_2f85Env",
+)
 

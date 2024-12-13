@@ -1,20 +1,23 @@
 import mujoco
+from mujoco import MjModel, MjData
 import mujoco.viewer as viewer
 import numpy as np
 import time
+#from mujoco.wrapper.mjbindings import mjlib, types
+
 
 # Load the MuJoCo model
 model_path = "scene_ur5_2f85.xml"  # Replace with your MuJoCo model file path
-model = mujoco.MjModel.from_xml_path(model_path)
+model = MjModel.from_xml_path(model_path)
 
 # Create a data object to hold simulation states
-data = mujoco.MjData(model)
+data = MjData(model)
 
-for i in range(model.ngeom):
-        print(i, model.geom(i).name, data.geom(i).xpos, model.geom(i).size)
-#print(len(range(model.ngeom)))
-#print(int(len(data.qpos[14:])/4))
-exit()
+# for i in range(model.ngeom):
+#         print(i, model.geom(i).name, data.geom(i).xpos, model.geom(i).size)
+# #print(len(range(model.ngeom)))
+# #print(int(len(data.qpos[14:])/4))
+# exit()
 
 # Initialize joints to keyframe values (from <keyframe> qpos)
 # Replace these values with the `qpos` values from your keyframe
