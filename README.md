@@ -110,6 +110,17 @@ pip install .
 pip install -r requirements/examples.txt
 ```
 ---
+## Step 5: Modify Tacto Folder
+```bash
+mv <path_to_repo>/examples_tacto_modif/ /<path_to_tacto_folder>/tacto/
+```
+---
+## Step 6: Run simulation
+The simulation file is called examples_tacto_modif/robot_rope_digit.py, the robot description class is examples_tacto_modif/pybullet_env_classes/robot_modif.py
+```bash
+python3 robot_rope_digit.py
+```
+---
 
 ## Troubleshooting
 
