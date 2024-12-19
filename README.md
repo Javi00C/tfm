@@ -1,51 +1,11 @@
-# 1.MUJOCO Env Installation
-
-## Miniconda
-
-Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "Miniconda official site")
-
-## Create Conda Environment with dependencies
-```bash
-conda create -n mujoco_env python=3.10.12 swig gymnasium=1.0.0 pytz scipy sympy gymnasium[mujoco]
-
-conda activate mujoco_env
-
-pip install stable-baselines3[extra]==2.4.0
-```
-## Mujoco_py
-```bash
-pip install mujoco_py --no-cache-dir
-```
-## Patchelf
-```bash
-conda install -c conda-forge patchelf
-```
-## Install Mujoco (just download and extract)
-```bash
-mkdir -p ~/.mujoco
-cd ~/.mujoco
-wget https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
-tar -xf mujoco210-linux-x86_64.tar.gz
-```
-## .bashrc file Modification
-```bash
-# Mujoco (adjusted for proper path ordering)
-export MUJOCO_PY_MUJOCO_PATH=/home/javi/.mujoco/mujoco210
-export CPATH="/home/javi/.mujoco/mujoco210/include:$CPATH"
-export LD_LIBRARY_PATH="/home/javi/.mujoco/mujoco210/bin:/usr/lib/nvidia:$LD_LIBRARY_PATH"
-export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
-```
-
-## Getting into the environment
-```bash
-conda activate mujoco_env
-```
-
-# 2.PYBULLET Env Installation
+# 1.PYBULLET Env Installation
 
 This guide explains how to install PyBullet from a `.tar.gz` source file and resolve any dependency issues encountered during the installation process.
 
 ---
+## Miniconda
+
+Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "Miniconda official site")
 
 ## Prerequisites
 
@@ -133,6 +93,48 @@ python3 robot_rope_digit.py
    ```
 ---
 
+# 2.MUJOCO Env Installation
+
+## Miniconda
+
+Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "Miniconda official site")
+
+## Create Conda Environment with dependencies
+```bash
+conda create -n mujoco_env python=3.10.12 swig gymnasium=1.0.0 pytz scipy sympy gymnasium[mujoco]
+
+conda activate mujoco_env
+
+pip install stable-baselines3[extra]==2.4.0
+```
+## Mujoco_py
+```bash
+pip install mujoco_py --no-cache-dir
+```
+## Patchelf
+```bash
+conda install -c conda-forge patchelf
+```
+## Install Mujoco (just download and extract)
+```bash
+mkdir -p ~/.mujoco
+cd ~/.mujoco
+wget https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
+tar -xf mujoco210-linux-x86_64.tar.gz
+```
+## .bashrc file Modification
+```bash
+# Mujoco (adjusted for proper path ordering)
+export MUJOCO_PY_MUJOCO_PATH=/home/javi/.mujoco/mujoco210
+export CPATH="/home/javi/.mujoco/mujoco210/include:$CPATH"
+export LD_LIBRARY_PATH="/home/javi/.mujoco/mujoco210/bin:/usr/lib/nvidia:$LD_LIBRARY_PATH"
+export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
+```
+
+## Getting into the environment
+```bash
+conda activate mujoco_env
+```
 
 # 3.DIGIT SENSOR (TACTO MUJOCO library installation)
 
