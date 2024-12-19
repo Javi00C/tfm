@@ -50,10 +50,6 @@ This guide explains how to install PyBullet from a `.tar.gz` source file and res
 ## Prerequisites
 
 1. **Python Environment**:
-   - Ensure Python 3.7 or later is installed.
-   - ```
-     
-
    - Use a virtual environment to avoid conflicts:
      ```bash
      conda create -n mujoco_env python=3.9.21
