@@ -80,7 +80,7 @@ https://github.com/bulletphysics/bullet3/releases
 Before installing PyBullet, resolve its dependencies. Install all required packages:
 
 ```bash
-pip install "pillow>=8.3.2" "scipy>=1.10" "decorator<5.0,>=4.0.2" "requests<3.0,>=2.8.1" "pytz>=2020.1" "packaging" "protobuf!=4.24.0,>=3.19.6" "six>1.9" "click" "pyyaml>=5.3.1" "prompt-toolkit<=3.0.36,>=2.0"
+pip install "pillow>=8.3.2" "scipy>=1.10" "decorator<5.0,>=4.0.2" "requests<3.0,>=2.8.1" "pytz>=2020.1" "packaging" "protobuf!=4.24.0,>=3.19.6" "six>1.9" "click" "pyyaml>=5.3.1" "prompt-toolkit<=3.0.36,>=2.0" "opencv-python" "pybulletX"
 ```
 
 If additional conflicts arise, resolve them as prompted by `pip`.
@@ -101,7 +101,14 @@ After resolving dependencies, install PyBullet:
    ```bash
    pip install .
    ```
-
+   
+## Step 3: Install Tacto
+```bash
+https://github.com/facebookresearch/tacto.git
+cd tacto
+pip install .
+pip install -r requirements/examples.txt
+```
 ---
 
 ## Troubleshooting
