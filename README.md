@@ -1,21 +1,24 @@
-# Installation
+# MUJOCO Env Installation
 
 ## Miniconda
 
 Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "Miniconda official site")
 
 ## Create Conda Environment with dependencies
-
 ```bash
-conda create -n gym python=3.10.12 swig gymnasium gymnasium[box2d] pytz scipy sympy gymnasium[mujoco]
+conda create -n mujoco_env python=3.10.12 swig gymnasium=1.0.0 pytz scipy sympy gymnasium[mujoco]
 
-conda activate gymenv
+conda activate mujoco_env
 
 pip install stable-baselines3[extra]==2.4.0
 ```
-## Install gymnasium
+## Mujoco_py
 ```bash
-pip install gymnasium==1.0.0
+pip install mujoco_py --no-cache-dir
+```
+## Patchelf
+```bash
+conda install -c conda-forge patchelf
 ```
 ## Install Mujoco (just download and extract)
 ```bash
@@ -24,15 +27,7 @@ cd ~/.mujoco
 wget https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
 tar -xf mujoco210-linux-x86_64.tar.gz
 ```
-## Install mujoco_py
-```bash
-pip install mujoco_py --no-cache-dir
-```
-## Patchelf
-```bash
-conda install -c conda-forge patchelf
-```
-## .bashrc Modification
+## .bashrc file Modification
 ```bash
 # Mujoco (adjusted for proper path ordering)
 export MUJOCO_PY_MUJOCO_PATH=/home/javi/.mujoco/mujoco210
@@ -42,10 +37,87 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 ```
 
 ## Getting into the environment
+```bash
+conda activate mujoco_env
+```
+
+# PYBULLET Env Installation
+
+This guide explains how to install PyBullet from a `.tar.gz` source file and resolve any dependency issues encountered during the installation process.
+
+---
+
+## Prerequisites
+
+1. **Python Environment**:
+   - Ensure Python 3.7 or later is installed.
+   - ```
+     
+
+   - Use a virtual environment to avoid conflicts:
+     ```bash
+     conda create -n mujoco_env python=3.9.21
+     ```
+
+2. **Required Tools**:
+   - Ensure `pip` is updated:
+     ```bash
+     pip install --upgrade pip
+     ```
+
+---
+
+## Step 1: Extract the Source Code
+
+1. Download the PyBullet `.tar.gz` file.
+2. Extract it using the following command:
+   ```bash
+   tar -xvzf pybullet-3.2.6.tar.gz
+   cd pybullet-3.2.6
+   ```
+
+---
+
+## Step 2: Install Dependencies
+
+Before installing PyBullet, resolve its dependencies. Install all required packages:
 
 ```bash
-conda activate gym
+pip install "pillow>=8.3.2" "scipy>=1.10" "decorator<5.0,>=4.0.2" "requests<3.0,>=2.8.1" "pytz>=2020.1" "packaging" "protobuf!=4.24.0,>=3.19.6" "six>1.9" "click" "pyyaml>=5.3.1" "prompt-toolkit<=3.0.36,>=2.0"
 ```
+
+If additional conflicts arise, resolve them as prompted by `pip`.
+
+---
+
+## Step 3: Install PyBullet
+
+After resolving dependencies, install PyBullet:
+
+1. Using `setup.py`:
+   ```bash
+   cd bullet3-3.25
+   python setup.py install
+   ```
+
+2. Alternatively, using `pip`:
+   ```bash
+   pip install .
+   ```
+
+---
+
+## Troubleshooting
+
+1. **Dependency Issues**:
+   If you encounter errors about missing or conflicting dependencies, manually resolve them by installing the specified versions.
+
+2. **Check for Dependency Conflicts**:
+   ```bash
+   pip check
+   ```
+---
+
 
 # DIGIT SENSOR (TACTO MUJOCO library installation)
 
