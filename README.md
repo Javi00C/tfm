@@ -123,7 +123,7 @@ pip install -r requirements/examples.txt
 ---
 
 
-# DIGIT SENSOR (TACTO MUJOCO library installation)
+# 3.DIGIT SENSOR (TACTO MUJOCO library installation)
 
 ```bash
 pip install dm-control==1.0.14
@@ -143,7 +143,7 @@ pip install -r requirements.txt
 Verify Your Setup: Run a demo script to ensure the installation was successful:
 python demo_mujoco_digit.py
 ```
-# PROBLEM WITH TACTO MUJOCO library installation
+## PROBLEM WITH TACTO MUJOCO library installation
 
 ```bash
 The problem is this: pyrender 0.1.45 requires PyOpenGL==3.1.0, dm-control 1.0.14 requires pyopengl>=3.1.4
