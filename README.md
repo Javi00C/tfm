@@ -66,7 +66,8 @@ This guide explains how to install PyBullet from a `.tar.gz` source file and res
 ## Step 1: Extract the Source Code
 
 1. Download the PyBullet `.tar.gz` file.
-2. Extract it using the following command:
+https://github.com/bulletphysics/bullet3/releases
+3. Extract it using the following command:
    ```bash
    tar -xvzf pybullet-3.2.6.tar.gz
    cd pybullet-3.2.6
