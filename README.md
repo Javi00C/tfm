@@ -52,7 +52,7 @@ This guide explains how to install PyBullet from a `.tar.gz` source file and res
 1. **Python Environment**:
    - Use a virtual environment to avoid conflicts:
      ```bash
-     conda create -n mujoco_env python=3.9.21
+     conda create -n pybullet_env python=3.9.21
      ```
 
 2. **Required Tools**:
