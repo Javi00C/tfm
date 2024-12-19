@@ -102,7 +102,7 @@ After resolving dependencies, install PyBullet:
    pip install .
    ```
    
-## Step 3: Install Tacto
+## Step 4: Install Tacto
 ```bash
 https://github.com/facebookresearch/tacto.git
 cd tacto
