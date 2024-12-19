@@ -21,9 +21,9 @@ class UR5e2f85BulletEnv(gym.Env):
 
         self.gui = gui
         self.episode_len = episode_len
-        self.num_robot_joints = 6
-        self.num_sensor_readings = 3  # for example, the EE pos
-        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings
+        #self.num_robot_joints = 6
+        #self.num_sensor_readings = 3  # for example, the EE pos
+        #obs_dim = 2*self.num_robot_joints + self.num_sensor_readings
         
         # Observation space: (joint_positions, joint_velocities, ee_pos)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
@@ -80,8 +80,8 @@ class UR5e2f85BulletEnv(gym.Env):
             self.sim._step_simulation()
             time.sleep(1/240.0 if self.gui else 0.0)
 
-        obs_dict = self.sim.get_observation()
-        obs = self._dict_to_obs(obs_dict)
+        obs = self._get_observation()
+
 
         reward = self._calculate_reward(obs_dict)
         done = self._check_done()
@@ -90,7 +90,8 @@ class UR5e2f85BulletEnv(gym.Env):
 
         return obs, reward, terminated, truncated, {}
 
-    def _dict_to_obs(self, obs_dict):
+    def _get_observation(self):
+        obs_dict = self.sim.get_observation()
         # obs_dict contains 'positions', 'velocities', 'ee_pos'
         positions = np.array(obs_dict["positions"], dtype=np.float32)
         velocities = np.array(obs_dict["velocities"], dtype=np.float32)
