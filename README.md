@@ -1,4 +1,4 @@
-# MUJOCO Env Installation
+# 1.MUJOCO Env Installation
 
 ## Miniconda
 
@@ -41,7 +41,7 @@ export PATH="/home/javi/.mujoco/mujoco210/bin:$PATH"
 conda activate mujoco_env
 ```
 
-# PYBULLET Env Installation
+# 2.PYBULLET Env Installation
 
 This guide explains how to install PyBullet from a `.tar.gz` source file and resolve any dependency issues encountered during the installation process.
 
