@@ -76,7 +76,7 @@ if __name__ == '__main__':
     eval_env.close()
 
     # Load and evaluate the best model
-    best_model_path = os.path.join(model_dir, "best_model_pyB")
+    best_model_path = os.path.join(model_dir, "best_model")
     best_model = PPO.load(best_model_path)
 
     # Create a new evaluation environment

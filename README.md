@@ -18,6 +18,7 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 2. **Required Tools**:
    - Ensure `pip` is updated:
      ```bash
+     conda activate pybullet_env
      pip install --upgrade pip
      ```
 
@@ -25,12 +26,11 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 
 ## Step 1: Extract the Source Code
 
-1. Download the PyBullet `.tar.gz` file.
-https://github.com/bulletphysics/bullet3/releases
-3. Extract it using the following command:
+1. Download the PyBullet `.tar.gz` file. and extract it using the following command:
    ```bash
-   tar -xvzf pybullet-3.2.6.tar.gz
-   cd pybullet-3.2.6
+   wget https://github.com/bulletphysics/bullet3/archive/refs/tags/3.25.tar.gz -o bullet3-3.25.tar.gz
+   tar -xvzf bullet3-3.25.tar.gz
+   cd bullet3-3.25
    ```
 
 ---
@@ -64,7 +64,7 @@ After resolving dependencies, install PyBullet:
    
 ## Step 4: Install Tacto
 ```bash
-https://github.com/facebookresearch/tacto.git
+git clone https://github.com/facebookresearch/tacto.git
 cd tacto
 pip install .
 pip install -r requirements/examples.txt

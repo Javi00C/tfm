@@ -13,7 +13,7 @@ from attrdict import AttrDict
 import gymnasium as gym
 from gymnasium import spaces
 
-ROBOT_URDF_PATH = "/home/javi/tfm/src/gymnasium_env/envs/pybullet_ur5_gripper/robots/urdf/ur5e_with_gripper.urdf"
+ROBOT_URDF_PATH = os.path.join(os.environ['HOME'], "tfm/gymnasium_env/envs/pybullet_ur5_gripper/robots/urdf/ur5e_with_gripper.urdf")
 
 class UR5Sim:
     def __init__(self,
