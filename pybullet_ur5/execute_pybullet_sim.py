@@ -3,11 +3,6 @@ import gymnasium_env
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-import mujoco
-
-print("Gymnasium version:", gym.__version__)
-print("Mujoco version:", mujoco.__version__)
-
 # Load the saved PPO model
 model = PPO.load("models_pybullet/ppo_robot_pyB")
 
