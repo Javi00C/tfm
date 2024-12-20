@@ -169,20 +169,7 @@ class UR5Sim:
         pybullet.stepSimulation()
         self.stepCounter += 1
         time.sleep(1./240.)
+
     def close(self):
         pybullet.disconnect()
 
-# if __name__ == "__main__":
-#     # Example usage of the simulation:
-#     sim = UR5Sim(useIK=True, renders=True, maxSteps=500)
-
-#     # Run a simple loop: move the end-effector around and try to open/close gripper
-#     for i in range(6000):
-#         # Try moving along the x-axis slowly and keep the gripper open
-#         end_effector_velocity = np.array([0, 0, 0])
-#         gripper_cmd = -1.0  # open
-#         sim.step(end_effector_velocity, gripper_cmd)
-#         time.sleep(1./240.)
-
-#     print("Simulation ended.")
-#     pybullet.disconnect()
