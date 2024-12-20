@@ -4,7 +4,7 @@ from gymnasium import spaces
 from typing import Optional
 import time
 
-from gymnasium_env.envs.pybullet_ur5_gripper.robot_gripper_sim import UR5Sim
+from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 DIST_WEIGHT = 100000
 MAX_REWARD = 1000
@@ -45,7 +45,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     def step(self, action):
         # action is a 3D vector (vx, vy, vz)
         # Apply a scaling factor to translate [-1,1] action space to a suitable velocity range:
-        velocity_scale = 0.06
+        velocity_scale = 0.01
         end_effector_velocity = action * velocity_scale
 
         # Fix gripper open
