@@ -70,15 +70,23 @@ pip install .
 pip install -r requirements/examples.txt
 ```
 ---
-## Step 5: Modify Tacto Folder
+## Step 5: Modify Tacto Folder (NOT USING CURRENT ROBOT CONTROL CODE)
 ```bash
 mv <path_to_repo>/examples_tacto_modif/ /<path_to_tacto_folder>/tacto/
 ```
 ---
-## Step 6: Run simulation
+## Step 6: Run simulation (NOT USING CURRENT ROBOT CONTROL CODE)
 The simulation file is called examples_tacto_modif/robot_rope_digit.py, the robot description class is examples_tacto_modif/pybullet_env_classes/robot_modif.py
 ```bash
 python3 robot_rope_digit.py
+```
+---
+
+## Step 7: New robot control code 
+The learn file is called <path_to_repo>pybullet_ur5/learn_paralel_pybullet.py, to execute the simulation controlled by agent <path_to_repo>pybullet_ur5/execute_pybullet_sim.py
+```bash
+pip install torch torchvision torchaudio
+pip install stable-baselines3[extra]
 ```
 ---
 
