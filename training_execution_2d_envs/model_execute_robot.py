@@ -4,11 +4,12 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 
 # Load the saved PPO model
-model = PPO.load("/home/javi/tfm/models/best_model")
+model = PPO.load("/home/javi/tfm/best_model_simple_sims/best_model_sine")
+#model = PPO.load("/home/javi/tfm/src/training_execution_2d_envs/models/best_model")
 
 #env_str = "CarRacing-v2"
 #env_str = "SimpleRobotEnv-v0" #Straight line edge
-env_str = "SimpleRobotEnv-v0" #Sine wave edge
+env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
 # Create the SimpleRobotEnv environment with rendering enabled
 env = gym.make(env_str, render_mode='human')

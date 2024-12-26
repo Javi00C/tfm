@@ -36,10 +36,11 @@ log_dir = "logs"
 os.makedirs(model_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
 
-TIMESTEPS = 50000
+TIMESTEPS = 200000
+DEVICE_USED = 'cpu'
 #env_str = "CarRacing-v2"
-env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
-#env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
+#env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
+env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
 
 backend = torch.backends.quantized.engine
@@ -76,7 +77,7 @@ eval_callback = EvalCallback(env_val,
 
 # Initialize PPO
 # buffer_size is not required for PPO as it is an on-policy method
-model = PPO('CnnPolicy', env, verbose=1, ent_coef=0.01)
+model = PPO('CnnPolicy', env, verbose=1, ent_coef=0.01, device=DEVICE_USED)
 
 
 # Train the model

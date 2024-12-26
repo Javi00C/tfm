@@ -3,7 +3,7 @@
 	<!-- Default settings for the model (size of capsule = 0.185) 0.035125, pos 0.0825-->
 	<default>
 		<default class="rope">
-			<geom type="capsule" size="0.02 0.0175625" density="1700" friction="0.5" />
+			<geom type="capsule" size="0.02 0.0175625" density="1140" friction="0.5" /> <!--density of Nylon-->
 			<joint damping="0.1" stiffness="0.2" armature="0.01" />
 		</default>
 	</default>
