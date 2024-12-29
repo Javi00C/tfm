@@ -18,7 +18,7 @@ from attrdict import AttrDict
 import gymnasium as gym
 from gymnasium import spaces
 
-ROBOT_URDF_PATH = "/robots/urdf/ur5e_with_gripper.urdf"
+ROBOT_URDF_PATH = "/robots/urdf/ur5e_with_gripper_digit.urdf"
 
 class UR5Sim:
     def __init__(self,
@@ -141,7 +141,8 @@ class UR5Sim:
         # ---------------------------
         self.digits = None
         self.digit_body = None
-        self._load_digit_sensor()
+        #self._load_digit_sensor()
+        self._initialize_tacto_sensor_in_urdf()
 
         # Optional: Print joints for debugging
         for i in range(pybullet.getNumJoints(self.ur5)):
@@ -158,7 +159,34 @@ class UR5Sim:
         plane_id = pybullet.loadURDF("plane.urdf", [0, 0, 0])
 
 
-        #self._load_sphere()
+        self._load_sphere()
+
+    def _initialize_tacto_sensor_in_urdf(self):
+        # 1) Initialize TACTO with your config
+        bg = cv2.imread("conf/bg_digit_240_320.jpg")  # If you have a background image
+        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg)
+
+        # 2) Identify the link index in your newly updated robot URDF
+        #    Suppose you named the sensor link "digit_link" in your URDF <link name="digit_link">
+        digit_link_name = "sensor_gripper_joint"  # or whatever you used
+        digit_link_index = None
+
+        # If you stored your link info in self.joints, find it:
+        for joint_info in self.joints.values():
+            if joint_info.name == digit_link_name:
+                digit_link_index = joint_info.id
+                break
+
+        if digit_link_index is None:
+            raise ValueError(f"Could not find link named {digit_link_name} in the robot's URDF")
+
+        # 3) Let TACTO treat that link as the camera link
+        #    The first argument is the “bodyUniqueId” for the robot,
+        #    second argument is a list of link indices that have digit sensors.
+        self.digits.add_camera(self.ur5, [digit_link_index])
+
+        print("DIGIT sensor is integrated into the robot URDF and recognized by TACTO!")
+
 
     def _load_digit_sensor(self):
         # 1) Load background for DIGIT
@@ -180,18 +208,34 @@ class UR5Sim:
         print(f"Attaching DIGIT to link ID: {attach_link_id}")
 
         # Example using JOINT_POINT2POINT with an offset:
+        parent_pos, parent_orn = pybullet.getLinkState(self.ur5, attach_link_id)[:2]
+        child_pos, child_orn = pybullet.getBasePositionAndOrientation(self.digit_body.id)
+        print(f"Parent pos: {parent_pos}")
+        print(f"Child pos: {child_pos}")
         pybullet.createConstraint(
             parentBodyUniqueId=self.ur5,
             parentLinkIndex=attach_link_id,
             childBodyUniqueId=self.digit_body.id,
             childLinkIndex=-1,
-            jointType=pybullet.JOINT_POINT2POINT,
+            jointType=pybullet.JOINT_FIXED,
             jointAxis=[0, 0, 0],
-            parentFramePosition=[0.01, -0.02, 0.0],
-            parentFrameOrientation=[0, 0, 0, 1],
-            childFramePosition=[0.0, 0.0, 0.0],
-            childFrameOrientation=[0, 0, 0, 1]
+            parentFramePosition=[0,0,-0.1],
+            parentFrameOrientation=parent_orn,
+            childFramePosition=[0,0,0],
+            childFrameOrientation=[0,0,0,1]
         )
+        # pybullet.createConstraint(
+        #     parentBodyUniqueId=self.ur5,
+        #     parentLinkIndex=attach_link_id,
+        #     childBodyUniqueId=self.digit_body.id,
+        #     childLinkIndex=-1,
+        #     jointType=pybullet.JOINT_POINT2POINT,
+        #     jointAxis=[0, 0, 0],
+        #     parentFramePosition=[0, 0, 0],
+        #     parentFrameOrientation=parent_orn,#[0, 0, 0, 1]
+        #     childFramePosition=[0, 0, 0],
+        #     childFrameOrientation=child_orn + (0, 0, 0, 0)#[0, 0, 0, 1]
+        # )
 
         # 6) Disable collisions between the robot and DIGIT
         robot_num_joints = pybullet.getNumJoints(self.ur5)
@@ -206,16 +250,6 @@ class UR5Sim:
         print("DIGIT sensor attached and collisions disabled.")
 
     def _load_sphere(self):
-        """
-        Load the small sphere from the Hydra config and register it with Tacto.
-        The config typically has:
-            object:
-              urdf_path: "objects/sphere_small.urdf"
-              base_position: [...]
-              global_scaling: ...
-        """
-        # 1) Create the sphere via px.Body
-        #    This picks up base_position, global_scaling, etc. from cfg.object
         self.sphere = px.Body(**self.cfg.object)
         print(f"Sphere body ID: {self.sphere.id}")
 
