@@ -12,6 +12,6 @@ if __name__ == "__main__":
         end_effector_velocity = np.array([0.001, 0.0, 0.0, 0.00, 0.00, 0.00])
         gripper_cmd = 1.0  # open
         sim.step(end_effector_velocity, gripper_cmd)
-
+        print(f"Sensor reading{np.shape(sim.get_sensor_reading())}")
     print("Simulation ended.")
     sim.close()

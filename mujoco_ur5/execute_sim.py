@@ -9,7 +9,7 @@ print("Gymnasium version:", gym.__version__)
 print("Mujoco version:", mujoco.__version__)
 
 # Load the saved PPO model
-model = PPO.load("models/ppo_robot")
+model = PPO.load("models/best_model")
 
 env_str = "gymnasium_env/ur5e_2f85Env-v0"
 

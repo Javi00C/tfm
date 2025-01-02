@@ -24,10 +24,16 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.render_mode = render_mode
 
         # Observation: joint positions only (6D)
-        self.observation_space = spaces.Box(low=-2 * np.pi, high=2 * np.pi, shape=(6,), dtype=np.float32)
+        #self.observation_space = spaces.Box(low=-2 * np.pi, high=2 * np.pi, shape=(6,), dtype=np.float32)
+        # Observation space
+        self.num_robot_joints = 6
+        self.num_sensor_readings = 160*120
+        self.rope_link_pose = 3
+        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose# multiplication by 2 because of qvel of robot
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Action: 3D end-effector velocity in world coordinates
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(3,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
 
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
@@ -45,11 +51,14 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     def step(self, action):
         # action is a 3D vector (vx, vy, vz)
         # Apply a scaling factor to translate [-1,1] action space to a suitable velocity range:
-        velocity_scale = 0.01
-        end_effector_velocity = action * velocity_scale
+        velocity_action = action[:3]
+        gripper_action = action[3]
+
+        velocity_scale = 0.3 #Maximum velocity that is stable in the simulation
+        end_effector_velocity = velocity_action * velocity_scale
 
         # Fix gripper open
-        self.sim.step(end_effector_velocity, gripper_cmd=-1.0)
+        self.sim.step(end_effector_velocity, gripper_action)
 
         obs = self._get_obs()
 
@@ -69,6 +78,12 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         step_penalty = -10
 
         # Determine the current tile and whether it's on the edge
+
+        max_rew = 1000
+        max_dist = 1.5
+        a = -max_rew/max_dist
+        b = max_rew
+
         if self.done:
             terminated_penalty = -1000
             reward = 0
@@ -76,7 +91,8 @@ class ur5e_2f85_pybulletEnv(gym.Env):
             terminated_penalty = 0
             ee_pos, _ = self.sim.get_current_pose()
             dist = np.linalg.norm(ee_pos - self.target)
-            reward = MAX_REWARD / (0.001 + dist)  # Reward function
+            #reward = MAX_REWARD / (0.001 + dist)  # Reward function
+            reward = a*dist+b
 
         total_reward = step_penalty + reward + terminated_penalty
         return total_reward
@@ -91,8 +107,18 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def _get_obs(self):
         # Joint angles as observation
-        joints = self.sim.get_joint_angles()
-        return np.array(joints, dtype=np.float32)
+        joint_positions = self.sim.get_joint_angles()
+        joint_velocities = self.sim.get_joint_velocities()
+        sensor_reading = self.sim.get_sensor_reading()
+
+        obs = np.concatenate((
+            np.array(joint_positions, dtype=np.float32),
+            np.array(joint_velocities, dtype=np.float32),
+            np.array(sensor_reading, dtype=np.float32)
+            #np.array(rope_curr_pos, dtype=np.float32)
+        ), axis=0)
+
+        return obs
 
     def render(self):
         # If render_mode == "human", PyBullet GUI is already open.

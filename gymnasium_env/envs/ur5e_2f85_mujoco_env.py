@@ -10,7 +10,7 @@ import os
 
 DIST_WEIGTH = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([7, 7, 7, 1])  # Max velocities for x, y, z (gripper scalilng is done in step function)
+ACTION_SCALER = np.array([7, 7, 7, 2])  # Max velocities for x, y, z (gripper scalilng is done in step function)
 EPISODE_LEN = 6000
 mujocosim_path = "scene_ur5_2f85.xml"
 
@@ -30,7 +30,8 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         # Observation space
         self.num_robot_joints = 6
         self.num_sensor_readings = 3
-        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings # multiplication by 2 because of qvel of robot
+        self.rope_link_pose = 3
+        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose# multiplication by 2 because of qvel of robot
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Load your MJCF model with env and choose frames count between actions
@@ -130,10 +131,14 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
 
 
     def _get_observation(self):
+        #Current position of last link fo rope
+        last_rope_link_id = len(range(self.model.ngeom))-1
+        rope_curr_pos = self.data.geom(last_rope_link_id).xpos
         obs = np.concatenate((
             np.array(self.data.qpos[:self.num_robot_joints], dtype=np.float32),
             np.array(self.data.qvel[:self.num_robot_joints], dtype=np.float32),
-            np.array(self.data.sensordata, dtype=np.float32)
+            np.array(self.data.sensordata, dtype=np.float32),
+            np.array(rope_curr_pos, dtype=np.float32)
         ), axis=0)
         return obs
 
@@ -154,6 +159,12 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         step_penalty = -0.1
 
         # Determine the current tile and whether it's on the edge
+
+        max_rew = 1000
+        max_dist = 1.5
+        a = -max_rew/max_dist
+        b = max_rew
+
         if self.done:
             terminated_penalty = -1000
             reward = 0
@@ -161,7 +172,8 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
             terminated_penalty = 0
             # Compute the reward
             epsilon = 1e-3
-            reward = 1 / (dist + epsilon)
+            #reward = 1 / (dist + epsilon)
+            reward = a*dist+b
         # Calculate total reward per step
         total_reward = step_penalty + reward + terminated_penalty
         return total_reward

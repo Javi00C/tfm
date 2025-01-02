@@ -130,15 +130,12 @@ class UR5Sim:
         self.end_effector_index = 7
         self.ur5_or = [0.0, math.pi/2, 0.0]
         self.stepCounter = 0
-
-        # ---------------------------
+        self.ur5_joint_ids = [1,2,3,4,5,6]
         # 4) Reset Robot to Default Pose
-        # ---------------------------
         self.reset()
 
-        # ---------------------------
         # 5) Load the DIGIT sensor
-        # ---------------------------
+
         self.digits = None
         self.digit_body = None
         #self._load_digit_sensor()
@@ -151,18 +148,10 @@ class UR5Sim:
                   "Name:", joint_info[1].decode(),
                   "Type:", joint_info[2])
 
-        # ---------------------------
-        # 6) Load the sphere from config
-        # ---------------------------
         #Loads a plane to act as floor
         # pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
         # plane_id = pybullet.loadURDF("plane.urdf", [0, 0, 0])
 
-
-        #self._load_rope()
-        #self._load_sphere()
-        #self._load_rope_urdf()
-        #self._load_rope_mujoco()
         self._load_rope()
 
     def _initialize_tacto_sensor_in_urdf(self):
@@ -474,6 +463,40 @@ class UR5Sim:
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]
         return (np.array(position), orientation)
+
+    def get_joint_angles(self):
+        joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
+        joint_positions = [state[0] for state in joint_states]
+        return joint_positions
+    
+    def get_joint_velocities(self):
+        joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
+        joint_velocities = [state[1] for state in joint_states]
+        return joint_velocities
+    def get_sensor_reading(self): # DIGIT SENSOR READING IS SIZE (160,120) px
+        # 1) Render images from the TACTO sensor
+        color_imgs, depth_imgs = self.digits.render()
+        
+        # 2) Assume a single DIGIT sensor or pick sensor index 0
+        depth_img = depth_imgs[0]
+        
+        # 3) Convert depth to 'pressure' map
+        #    The constant offset (0.022) is an example from the original TACTO DIGIT renderer,
+        #    but you can calibrate or adjust to taste.
+        pressure_img = 0.022 - depth_img
+        
+        # 4) Scale and convert to 8-bit
+        min_val, max_val = pressure_img.min(), pressure_img.max()
+        if max_val > min_val:
+            pressure_img = (pressure_img - min_val) / (max_val - min_val)
+        else:
+            pressure_img[:] = 0  # Degenerate case if there's no variation
+        
+        # Now pressure_img lies in [0, 1]. Scale it to [0, 255].
+        #pressure_img = (pressure_img * 255.0).astype(np.uint8)
+        
+        # 5) Return or save this grayscale image
+        return pressure_img
 
     def reset(self):
         self.stepCounter = 0

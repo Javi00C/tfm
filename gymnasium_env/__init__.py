@@ -1,31 +1,31 @@
 from gymnasium.envs.registration import register
 
-#Frist 2d simulations
-register(
-   id="gymnasium_env/SimpleRobotEnv-v0",
-   entry_point="gymnasium_env.envs:SimpleRobotEnv",
-)
-
-register(
-   id="gymnasium_env/SimpleRobotEnv-v1",
-   entry_point="gymnasium_env.envs:SimpleRobotEnvSine",
-)
-
-# #Mujoco ball control example env
+# #Frist 2d simulations
 # register(
-#    id="gymnasium_env/SimpleMujocoEnv-v0",
-#    entry_point="gymnasium_env.envs:SimpleMujocoEnv",
+#    id="gymnasium_env/SimpleRobotEnv-v0",
+#    entry_point="gymnasium_env.envs:SimpleRobotEnv",
 # )
 
-# #Mujoco ur5e and 2f85 gripper env
 # register(
-#    id="gymnasium_env/ur5e_2f85Env-v0",
-#    entry_point="gymnasium_env.envs:ur5e_2f85Env",
+#    id="gymnasium_env/SimpleRobotEnv-v1",
+#    entry_point="gymnasium_env.envs:SimpleRobotEnvSine",
 # )
 
-# #PyBullet robot simulation
-# register(
-#     id="gymnasium_env/ur5e_2f85_pybulletEnv-v0",
-#     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv",
-#)
+#Mujoco ball control example env
+register(
+   id="gymnasium_env/SimpleMujocoEnv-v0",
+   entry_point="gymnasium_env.envs:SimpleMujocoEnv",
+)
+
+#Mujoco ur5e and 2f85 gripper env
+register(
+   id="gymnasium_env/ur5e_2f85Env-v0",
+   entry_point="gymnasium_env.envs:ur5e_2f85Env",
+)
+
+#PyBullet robot simulation
+register(
+    id="gymnasium_env/ur5e_2f85_pybulletEnv-v0",
+    entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv",
+)
 

@@ -23,7 +23,7 @@ print(f"Numpy Version: {np.__version__}")
 
 # Define the number of environments
 NUM_ENVS = 32  # Adjust based on your system's capacity
-TIMESTEPS = 1000000
+TIMESTEPS = 4000000
 DEVICE_USED = 'cpu'
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
@@ -84,17 +84,6 @@ if __name__ == '__main__':
     mean_reward, std_reward = evaluate_policy(best_model, eval_env, n_eval_episodes=5)
     print(f"Best Model - Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
     eval_env.close()
-
-    # Record video of the best model
-    # video_env = gymnasium.make(env_str, render_mode="rgb_array")
-    # video_env = gymnasium.wrappers.RecordVideo(video_env, video_folder='videos', episode_trigger=lambda e: True)
-    # obs, info = video_env.reset()
-    # done = False
-    # while not done:
-    #     action, _states = best_model.predict(obs)
-    #     obs, reward, terminated, truncated, info = video_env.step(action)
-    #     done = terminated or truncated
-    # video_env.close()
 
     # Plot evaluation results
     data = np.load(os.path.join(log_dir, "evaluations.npz"))
