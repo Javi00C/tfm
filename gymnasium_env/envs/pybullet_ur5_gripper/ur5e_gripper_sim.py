@@ -39,7 +39,7 @@ class UR5Sim:
         else:
             pybullet.connect(pybullet.DIRECT)
         pybullet.setTimeStep(1./240.)
-        pybullet.setGravity(0,0,-10)
+        pybullet.setGravity(0,0,-9.81)
         pybullet.setRealTimeSimulation(False)
         pybullet.resetDebugVisualizerCamera(cameraDistance=1.5,
                                             cameraYaw=60,
@@ -155,11 +155,15 @@ class UR5Sim:
         # 6) Load the sphere from config
         # ---------------------------
         #Loads a plane to act as floor
-        pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
-        plane_id = pybullet.loadURDF("plane.urdf", [0, 0, 0])
+        # pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # plane_id = pybullet.loadURDF("plane.urdf", [0, 0, 0])
 
 
-        self._load_sphere()
+        #self._load_rope()
+        #self._load_sphere()
+        #self._load_rope_urdf()
+        #self._load_rope_mujoco()
+        self._load_rope()
 
     def _initialize_tacto_sensor_in_urdf(self):
         # 1) Initialize TACTO with your config
@@ -224,18 +228,6 @@ class UR5Sim:
             childFramePosition=[0,0,0],
             childFrameOrientation=[0,0,0,1]
         )
-        # pybullet.createConstraint(
-        #     parentBodyUniqueId=self.ur5,
-        #     parentLinkIndex=attach_link_id,
-        #     childBodyUniqueId=self.digit_body.id,
-        #     childLinkIndex=-1,
-        #     jointType=pybullet.JOINT_POINT2POINT,
-        #     jointAxis=[0, 0, 0],
-        #     parentFramePosition=[0, 0, 0],
-        #     parentFrameOrientation=parent_orn,#[0, 0, 0, 1]
-        #     childFramePosition=[0, 0, 0],
-        #     childFrameOrientation=child_orn + (0, 0, 0, 0)#[0, 0, 0, 1]
-        # )
 
         # 6) Disable collisions between the robot and DIGIT
         robot_num_joints = pybullet.getNumJoints(self.ur5)
@@ -249,9 +241,163 @@ class UR5Sim:
                                                 enableCollision=0)
         print("DIGIT sensor attached and collisions disabled.")
 
+    def _load_rope_mujoco(self):
+        mjcf_path = os.path.join(os.getcwd(), "objects/rope.xml")
+        body_ids = pybullet.loadMJCF(mjcf_path)  
+        print(f"Body:{body_ids}")
+        #Remove joints
+        for rope_id in body_ids:
+            num_joints = pybullet.getNumJoints(rope_id)
+            print(f"Num_joints rope:{num_joints}")
+            print(f"Body id:{rope_id}")
+            for joint_index in range(num_joints):
+                # Get the joint info
+                joint_info = pybullet.getJointInfo(rope_id, joint_index)
+                print(f"Removing joint: {joint_info[1]} at index {joint_index}")
+                # You can programmatically "remove" joints by disabling them
+                pybullet.resetJointState(rope_id, joint_index, targetValue=0)
+
+        segment_length = 0.0575625  # Total length of a segment
+        half_length = segment_length / 2
+        
+        for i in range(len(body_ids) - 1):
+            parent_id = body_ids[i]
+            child_id = body_ids[i + 1]
+            
+            # Create a spherical joint between parent and child
+            pybullet.createConstraint(
+                parentBodyUniqueId=parent_id,
+                parentLinkIndex=-1,  # Base of the parent
+                childBodyUniqueId=child_id,
+                childLinkIndex=-1,  # Base of the child
+                jointType=pybullet.JOINT_SPHERICAL,
+                jointAxis=[0, 0, 0],
+                parentFramePosition=[0, 0, -half_length],  # Bottom of the parent
+                childFramePosition=[0, 0, half_length]     # Top of the child
+            )
+
+
+        #for rid in body_ids:
+        #    self.digits.add_object("objects/rope_dummy.urdf", rid, globalScaling=1.0)    
+
+    def _load_rope_urdf(self):
+        self.rope = px.Body(**self.cfg.rope)
+        print(f"Rope body ID: {self.rope.id}")
+        print(f"Rope attributes: {dir(self.rope)}")
+        
+        # if hasattr(self.rope, 'geometry'):
+        #     print(f"Rope geometry: {self.rope.geometry}")
+        # else:
+        #     print("Rope has no geometry")
+        
+        print(f"Rope configuration: {self.cfg.rope}")
+
+        # 2) Add sphere to the Tacto sensor to detect collisions
+        if self.digits is not None:
+            self.digits.add_body(self.rope)
+        else:
+            print("Digits is NONE")
+
+        for joint_index in range(pybullet.getNumJoints(self.rope.id)):
+            pybullet.changeDynamics(self.rope.id, joint_index, jointDamping=0)
+            pybullet.changeDynamics(self.rope.id, joint_index, lateralFriction=0.1)
+
+            pybullet.setJointMotorControl2(
+                bodyUniqueId=self.rope.id,
+                jointIndex=joint_index,
+                controlMode=pybullet.VELOCITY_CONTROL,
+                force=0
+            )
+        # I COULD TRY TO CREATE THE URDF LINKS AND THEN CREATE THE JOINTS IN PYBULLET BUT WHAT HAPPENS WHEN
+        #THE LINKS SPAWN IN THE SIMULATION??
+        # pybullet.createConstraint(
+        #     parentBodyUniqueId=rope_id,
+        #     parentLinkIndex=segment_1_index,
+        #     childBodyUniqueId=rope_id,
+        #     childLinkIndex=segment_2_index,
+        #     jointType=pybullet.JOINT_SPHERICAL,
+        #     jointAxis=[0, 0, 0],
+        #     parentFramePosition=[0, 0, -0.06],
+        #     childFramePosition=[0, 0, 0]
+        # )
+
+
+    def _load_rope(self):
+        self.num_segments = 30
+        self.segment_length = 0.06
+        self.segment_radius = 0.02
+        self.mass = 0.1
+        self.friction = 0.5
+        self.start_position = [0.635, 0.135, 1]
+        self.rope_segments = []
+        self.constraints = []
+
+        for i in range(self.num_segments):
+            segment_position = [
+                self.start_position[0],
+                self.start_position[1],
+                self.start_position[2] - i * self.segment_length
+            ]
+
+            segment_id = pybullet.createCollisionShape(pybullet.GEOM_CAPSULE, 
+                                                radius=self.segment_radius, 
+                                                height=self.segment_length)
+            visual_id = pybullet.createVisualShape(pybullet.GEOM_CAPSULE, 
+                                            radius=self.segment_radius, 
+                                            length=self.segment_length,
+                                            rgbaColor=[0,1,0,1])
+            body_id = pybullet.createMultiBody(baseMass=self.mass, 
+                                        baseCollisionShapeIndex=segment_id,
+                                        baseVisualShapeIndex=visual_id, 
+                                        basePosition=segment_position)
+
+            pybullet.changeDynamics(body_id, -1, lateralFriction=self.friction)
+            self.rope_segments.append(body_id)
+            #ADD TO TACTO SENSOR
+            #self.digits.add_body(body_id)
+            self.digits.add_object("objects/rope_dummy.urdf", body_id, globalScaling=1.0)    
+
+            if i > 0:
+                pybullet.setCollisionFilterPair(self.rope_segments[i - 1], self.rope_segments[i], -1, -1, enableCollision=0)
+                c = pybullet.createConstraint(
+                    parentBodyUniqueId=self.rope_segments[i - 1],
+                    parentLinkIndex=-1,
+                    childBodyUniqueId=self.rope_segments[i],
+                    childLinkIndex=-1,
+                    jointType=pybullet.JOINT_POINT2POINT,
+                    jointAxis=[0,0,0],
+                    parentFramePosition=[0,0,-self.segment_length/2],
+                    childFramePosition=[0,0,self.segment_length/2],
+                )
+                self.constraints.append(c)
+
+        # Create anchor
+        anchor_shape = pybullet.createCollisionShape(pybullet.GEOM_SPHERE, radius=0.001)
+        anchor_body = pybullet.createMultiBody(baseMass=0, 
+                                        baseCollisionShapeIndex=anchor_shape, 
+                                        basePosition=self.start_position)
+        pybullet.createConstraint(
+            parentBodyUniqueId=anchor_body,
+            parentLinkIndex=-1,
+            childBodyUniqueId=self.rope_segments[0],
+            childLinkIndex=-1,
+            jointType=pybullet.JOINT_FIXED,
+            jointAxis=[0,0,0],
+            parentFramePosition=[0,0,0],
+            childFramePosition=[0,0,0]
+        )
+
+            
+
+
     def _load_sphere(self):
         self.sphere = px.Body(**self.cfg.object)
         print(f"Sphere body ID: {self.sphere.id}")
+
+        if hasattr(self.sphere, 'geometry'):
+            print(f"Sphere geometry: {self.sphere.geometry}")
+        else:
+            print("Sphere has no geometry")
 
         # 2) Add sphere to the Tacto sensor to detect collisions
         if self.digits is not None:
@@ -331,7 +477,7 @@ class UR5Sim:
 
     def reset(self):
         self.stepCounter = 0
-        joint_angles = (0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
+        joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
         self.control_gripper(-0.4)
         for i in range(100):

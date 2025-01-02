@@ -1,0 +1,109 @@
+<mujoco model="rope_capsule_mjcf">
+    <!-- 1) Define your custom mesh in <asset> -->
+    <asset>
+        <mesh name="segment_capsule" file="segment_capsule.stl" scale="1 1 1"/>
+    </asset>
+
+    <!-- 2) Provide defaults for friction, density, etc. -->
+    <default>
+        <default class="rope">
+            <!-- Must specify type="mesh" for each geom in PyBullet’s partial MJCF -->
+            <geom type="mesh" mesh="segment_capsule" density="1140" friction="0.5" 
+                  rgba="0.8 0.2 0.2 1"/>
+            <joint damping="0.1" stiffness="0.2" armature="0.01"/>
+        </default>
+    </default>
+
+    <worldbody>
+        <!-- segment_0 is the top (fixed base). 
+             'childclass="rope"' applies the above <default class="rope">. 
+        -->
+        <body name="segment_0" pos="0.5 0 0.8" childclass="rope">
+            <!-- Provide type="mesh" as well here -->
+            <geom name="geom_0" type="mesh" mesh="segment_capsule" />
+            
+            <!-- 
+                Replace type="ball" with ball + axis to avoid the 
+                'joint without axis' warning. 
+                Example axis="0 1 0" or whatever axis you want for each ball.
+            -->
+            <joint name="joint_0" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+            <!-- Next segment, offset by pos="0 0 -0.04125" so it extends downward -->
+            <body name="segment_1" pos="0 0 -0.04125">
+                <geom name="geom_1" type="mesh" mesh="segment_capsule"/>
+                <joint name="joint_1" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                <body name="segment_2" pos="0 0 -0.04125">
+                    <geom name="geom_2" type="mesh" mesh="segment_capsule"/>
+                    <joint name="joint_2" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                    <body name="segment_3" pos="0 0 -0.04125">
+                        <geom name="geom_3" type="mesh" mesh="segment_capsule"/>
+                        <joint name="joint_3" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                        <body name="segment_4" pos="0 0 -0.04125">
+                            <geom name="geom_4" type="mesh" mesh="segment_capsule"/>
+                            <joint name="joint_4" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                            <body name="segment_5" pos="0 0 -0.04125">
+                                <geom name="geom_5" type="mesh" mesh="segment_capsule"/>
+                                <joint name="joint_5" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                <body name="segment_6" pos="0 0 -0.04125">
+                                    <geom name="geom_6" type="mesh" mesh="segment_capsule"/>
+                                    <joint name="joint_6" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                    <body name="segment_7" pos="0 0 -0.04125">
+                                        <geom name="geom_7" type="mesh" mesh="segment_capsule"/>
+                                        <joint name="joint_7" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                        <body name="segment_8" pos="0 0 -0.04125">
+                                            <geom name="geom_8" type="mesh" mesh="segment_capsule"/>
+                                            <joint name="joint_8" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                            <body name="segment_9" pos="0 0 -0.04125">
+                                                <geom name="geom_9" type="mesh" mesh="segment_capsule"/>
+                                                <joint name="joint_9" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                <body name="segment_10" pos="0 0 -0.04125">
+                                                    <geom name="geom_10" type="mesh" mesh="segment_capsule"/>
+                                                    <joint name="joint_10" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                    <body name="segment_11" pos="0 0 -0.04125">
+                                                        <geom name="geom_11" type="mesh" mesh="segment_capsule"/>
+                                                        <joint name="joint_11" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                        <body name="segment_12" pos="0 0 -0.04125">
+                                                            <geom name="geom_12" type="mesh" mesh="segment_capsule"/>
+                                                            <joint name="joint_12" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                            <body name="segment_13" pos="0 0 -0.04125">
+                                                                <geom name="geom_13" type="mesh" mesh="segment_capsule"/>
+                                                                <joint name="joint_13" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                                <body name="segment_14" pos="0 0 -0.04125">
+                                                                    <geom name="geom_14" type="mesh" mesh="segment_capsule"/>
+                                                                    <joint name="joint_14" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+
+                                                                    <body name="segment_15" pos="0 0 -0.04125">
+                                                                        <geom name="geom_15" type="mesh" mesh="segment_capsule"/>
+                                                                        <joint name="joint_15" type="ball" pos="0 0 0.0175625" axis="1 1 1"/>
+                                                                    </body>
+                                                                </body>
+                                                            </body>
+                                                        </body>
+                                                    </body>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

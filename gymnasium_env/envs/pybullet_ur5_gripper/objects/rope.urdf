@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="rope_spherical_joints">
+
+  <!-- 
+    A tiny anchor link with no mass to fix the top of the rope in space.
+    We rely on loadURDF(basePosition=[0.635, 0.135, 1]) to place it globally.
+  -->
+  <link name="anchor_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.001"/>
+      </geometry>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!-- 
+    Fix anchor_link to segment_1 so the top of the rope is anchored. 
+    No offset => segment_1 top is at anchor_link origin, 
+    which PyBullet places at (0.635, 0.135, 1).
+  -->
+  <joint name="anchor_to_segment_1" type="fixed">
+    <parent link="anchor_link"/>
+    <child link="segment_1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==============================
+       DEFINE THE 10 SEGMENTS
+       Each references segment_capsule.stl,
+       length=0.06, radius=0.02, 
+       shifted by -0.03 in z so top is at z=0.
+  ============================== -->
+
+  <!-- segment_1 -->
+  <link name="segment_1">
+    <visual>
+      <origin xyz="0 0 -0.03" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="Green">
+        <color rgba="0 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.03" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- segment_2 -->
+  <link name="segment_2">
+    <visual>
+      <origin xyz="0 0 -0.03"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="Green">
+        <color rgba="0 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.03"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- segment_3 -->
+  <link name="segment_3">
+    <visual>
+      <origin xyz="0 0 -0.03"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="Green">
+        <color rgba="0 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.03"/>
+      <geometry>
+        <mesh filename="segment_capsule.stl" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- 
+    For each union: "segment_i" -> 3 revolute joints -> "segment_(i+1)"
+    We'll define "dummy" links with zero geometry & zero mass
+    so that we can chain x, y, z axes in a row.
+  -->
+
+  <!-- =============================
+       UNION from segment_1 to segment_2: 
+         1) revolve X   -> link_1_2_rx
+         2) revolve Y   -> link_1_2_ry
+         3) revolve Z   -> segment_2
+  ============================== -->
+
+  <!-- A dummy link with zero mass & no geometry -->
+  <link name="link_1_2_rx">
+    <inertial>
+      <mass value="0.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0"
+               iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!-- revolve X joint -->
+  <joint name="joint_1_2_rx" type="continuous">
+    <parent link="segment_1"/>
+    <child link="link_1_2_rx"/>
+    <!-- We place these 0.06 below segment_1's origin, at the bottom -->
+    <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <!-- Very wide limits emulate free rotation -->
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="50"/>
+  </joint>
+
+  <link name="link_1_2_ry">
+    <inertial>
+      <mass value="0.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0"
+               iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!-- revolve Y joint -->
+  <joint name="joint_1_2_ry" type="continuous">
+    <parent link="link_1_2_rx"/>
+    <child link="link_1_2_ry"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="10"/>
+  </joint>
+
+  <!-- revolve Z joint leads directly to segment_2 -->
+  <joint name="joint_1_2_rz" type="continuous">
+    <parent link="link_1_2_ry"/>
+    <child link="segment_2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="50"/>
+  </joint>
+
+
+  <!-- =============================
+       UNION from segment_2 to segment_3
+       (3 revolve joints about X, Y, Z)
+  ============================== -->
+
+  <link name="link_2_3_rx">
+    <inertial>
+      <mass value="0.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0"
+               iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_2_3_rx" type="continuous">
+    <parent link="segment_2"/>
+    <child link="link_2_3_rx"/>
+    <!-- bottom of segment_2 is at z=-0.06 from segment_2's origin -->
+    <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="50"/>
+  </joint>
+
+  <link name="link_2_3_ry">
+    <inertial>
+      <mass value="0.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0" ixz="0"
+               iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_2_3_ry" type="continuous">
+    <parent link="link_2_3_rx"/>
+    <child link="link_2_3_ry"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="50"/>
+  </joint>
+
+  <joint name="joint_2_3_rz" type="continuous">
+    <parent link="link_2_3_ry"/>
+    <child link="segment_3"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="50"/>
+  </joint>
+
+
+  <!-- =============================
+       Repeat similarly for segments 3->4, 4->5, 
+       5->6, 6->7, 7->8, 8->9, 9->10
+       Each union has 3 revolve joints: rx, ry, rz
+       leading into the next segment
+  ============================== -->
+
+  <!-- For brevity, not rewriting all. 
+       In practice, replicate the pattern:
+         link_3_4_rx + joint_3_4_rx
+         link_3_4_ry + joint_3_4_ry
+         joint_3_4_rz => segment_4
+       and so forth up to segment_10.
+  -->
+
+  <!-- ... YOU WOULD INSERT:
+         link_3_4_rx, link_3_4_ry, joints_3_4_rx, etc. 
+         link_4_5_rx, ...
+         ...
+         link_9_10_rx, link_9_10_ry, joints_9_10_rx, etc.
+       EXACTLY THE SAME PATTERN. 
+  -->
+
+</robot>

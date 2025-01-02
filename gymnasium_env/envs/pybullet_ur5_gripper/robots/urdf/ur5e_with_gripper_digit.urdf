@@ -605,7 +605,7 @@
   <joint name="sensor_gripper_joint" type="fixed">
     <parent link="robotiq_85_right_finger_tip_link"/>
     <child link="digit_baselink"/>
-    <origin rpy="0.0 0.0 1.5708" xyz="0.2 0.0 0.0"/>
+    <origin rpy="1.5708 0.0 1.5708" xyz="0.01 -0.01 0.0"/><!--DIGIT sensor is embedded with gripper pad in this position-->
   </joint>
 
 </robot>

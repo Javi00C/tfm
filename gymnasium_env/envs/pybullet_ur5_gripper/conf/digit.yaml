@@ -30,3 +30,9 @@ pybullet_camera:
   cameraYaw: 90.
   cameraPitch: -45.
   cameraTargetPosition: [0, 0, 0]
+  
+rope:
+  urdf_path: "objects/rope.urdf"
+  base_position: [0.635, 0.135, 1]
+  global_scaling: 1
+

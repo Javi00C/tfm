@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="rope_dummy">
+  <link name="capsule_link">
+    <visual>
+      <geometry>
+        <mesh filename="segment_capsule.stl"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="segment_capsule.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+</robot>
