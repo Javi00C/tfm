@@ -33,7 +33,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Action: 3D end-effector velocity in world coordinates
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(7,), dtype=np.float32)
 
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
@@ -46,13 +46,14 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.sim.reset()
         self.current_step = 0
         self.done = False
-        return self._get_obs(), {}
+        obs = self._get_obs()
+        return obs, {}
 
     def step(self, action):
         # action is a 3D vector (vx, vy, vz)
         # Apply a scaling factor to translate [-1,1] action space to a suitable velocity range:
-        velocity_action = action[:3]
-        gripper_action = action[3]
+        velocity_action = action[:6]
+        gripper_action = action[6]
 
         velocity_scale = 0.3 #Maximum velocity that is stable in the simulation
         end_effector_velocity = velocity_action * velocity_scale
@@ -110,14 +111,25 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         joint_positions = self.sim.get_joint_angles()
         joint_velocities = self.sim.get_joint_velocities()
         sensor_reading = self.sim.get_sensor_reading()
-
+        sensor_reading = sensor_reading.ravel()
+        last_link_rope_pos = self.sim.get_last_rope_link_position()
         obs = np.concatenate((
             np.array(joint_positions, dtype=np.float32),
             np.array(joint_velocities, dtype=np.float32),
-            np.array(sensor_reading, dtype=np.float32)
-            #np.array(rope_curr_pos, dtype=np.float32)
+            np.array(sensor_reading, dtype=np.float32),
+            np.array(last_link_rope_pos, dtype=np.float32)
         ), axis=0)
 
+        # Debugging: Check observation shape
+        # expected_shape = self.observation_space.shape
+        # if obs.shape == expected_shape:
+        #     print("NO shape mismatch observation space")
+        # else: 
+        #     print(f"Observation shape mismatch: {obs.shape} vs {expected_shape}")
+        obs = obs.flatten()
+        obs = np.squeeze(obs)
+        #print(f"Obs shape:{obs.shape}")
+        #print(f"Shape after flatten: {obs.shape}")  # Should be (19215,)
         return obs
 
     def render(self):

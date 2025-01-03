@@ -22,12 +22,13 @@ print(f"Numpy Version: {np.__version__}")
 # print(f"Stable Baselines3 Version: {stable_baselines3.__version__}")
 
 # Define the number of environments
-NUM_ENVS = 32  # Adjust based on your system's capacity
-TIMESTEPS = 500000
+NUM_ENVS = 16  # Adjust based on your system's capacity
+TIMESTEPS = 10000
 DEVICE_USED = 'cpu'
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v1"
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
-    return gymnasium.make("gymnasium_env/ur5e_2f85_pybulletEnv-v0")
+    return gymnasium.make(env_str)
 
 if __name__ == '__main__':
     # Create directories to hold models and logs
@@ -37,7 +38,7 @@ if __name__ == '__main__':
     os.makedirs(log_dir, exist_ok=True)
 
 
-    env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
+    
 
     # Verify observation and action spaces
     sample_env = gymnasium.make(env_str)
@@ -84,17 +85,6 @@ if __name__ == '__main__':
     mean_reward, std_reward = evaluate_policy(best_model, eval_env, n_eval_episodes=5)
     print(f"Best Model - Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
     eval_env.close()
-
-    # Record video of the best model
-    # video_env = gymnasium.make(env_str, render_mode="rgb_array")
-    # video_env = gymnasium.wrappers.RecordVideo(video_env, video_folder='videos', episode_trigger=lambda e: True)
-    # obs, info = video_env.reset()
-    # done = False
-    # while not done:
-    #     action, _states = best_model.predict(obs)
-    #     obs, reward, terminated, truncated, info = video_env.step(action)
-    #     done = terminated or truncated
-    # video_env.close()
 
     # Plot evaluation results
     data = np.load(os.path.join(log_dir, "evaluations.npz"))

@@ -5,7 +5,6 @@ hydra:
 tacto:
   width: 120
   height: 160
-  visualize_gui: True
 
 digit:
   urdf_path: "meshes/digit.urdf"

@@ -18,7 +18,14 @@ from attrdict import AttrDict
 import gymnasium as gym
 from gymnasium import spaces
 
-ROBOT_URDF_PATH = "/robots/urdf/ur5e_with_gripper_digit.urdf"
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the absolute path to the URDF file
+ROBOT_URDF_PATH = os.path.join(script_dir, "robots", "urdf", "ur5e_with_gripper_digit.urdf")
+
+
+#ROBOT_URDF_PATH = "/robots/urdf/ur5e_with_gripper_digit.urdf"
 
 class UR5Sim:
     def __init__(self,
@@ -142,11 +149,11 @@ class UR5Sim:
         self._initialize_tacto_sensor_in_urdf()
 
         # Optional: Print joints for debugging
-        for i in range(pybullet.getNumJoints(self.ur5)):
-            joint_info = pybullet.getJointInfo(self.ur5, i)
-            print("Joint index:", i,
-                  "Name:", joint_info[1].decode(),
-                  "Type:", joint_info[2])
+        # for i in range(pybullet.getNumJoints(self.ur5)):
+        #     joint_info = pybullet.getJointInfo(self.ur5, i)
+        #     print("Joint index:", i,
+        #           "Name:", joint_info[1].decode(),
+        #           "Type:", joint_info[2])
 
         #Loads a plane to act as floor
         # pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -156,8 +163,12 @@ class UR5Sim:
 
     def _initialize_tacto_sensor_in_urdf(self):
         # 1) Initialize TACTO with your config
-        bg = cv2.imread("conf/bg_digit_240_320.jpg")  # If you have a background image
-        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg)
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Construct the absolute path to the URDF file
+        conf_dir = os.path.join(script_dir, "conf", "bg_digit_240_320.jpg")
+        bg = cv2.imread(conf_dir)  # If you have a background image
+        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg, visualize_gui=False)
 
         # 2) Identify the link index in your newly updated robot URDF
         #    Suppose you named the sensor link "digit_link" in your URDF <link name="digit_link">
@@ -178,7 +189,7 @@ class UR5Sim:
         #    second argument is a list of link indices that have digit sensors.
         self.digits.add_camera(self.ur5, [digit_link_index])
 
-        print("DIGIT sensor is integrated into the robot URDF and recognized by TACTO!")
+        #print("DIGIT sensor is integrated into the robot URDF and recognized by TACTO!")
 
 
     def _load_digit_sensor(self):
@@ -274,12 +285,8 @@ class UR5Sim:
         print(f"Rope body ID: {self.rope.id}")
         print(f"Rope attributes: {dir(self.rope)}")
         
-        # if hasattr(self.rope, 'geometry'):
-        #     print(f"Rope geometry: {self.rope.geometry}")
-        # else:
-        #     print("Rope has no geometry")
         
-        print(f"Rope configuration: {self.cfg.rope}")
+        #print(f"Rope configuration: {self.cfg.rope}")
 
         # 2) Add sphere to the Tacto sensor to detect collisions
         if self.digits is not None:
@@ -297,22 +304,10 @@ class UR5Sim:
                 controlMode=pybullet.VELOCITY_CONTROL,
                 force=0
             )
-        # I COULD TRY TO CREATE THE URDF LINKS AND THEN CREATE THE JOINTS IN PYBULLET BUT WHAT HAPPENS WHEN
-        #THE LINKS SPAWN IN THE SIMULATION??
-        # pybullet.createConstraint(
-        #     parentBodyUniqueId=rope_id,
-        #     parentLinkIndex=segment_1_index,
-        #     childBodyUniqueId=rope_id,
-        #     childLinkIndex=segment_2_index,
-        #     jointType=pybullet.JOINT_SPHERICAL,
-        #     jointAxis=[0, 0, 0],
-        #     parentFramePosition=[0, 0, -0.06],
-        #     childFramePosition=[0, 0, 0]
-        # )
 
 
     def _load_rope(self):
-        self.num_segments = 30
+        self.num_segments = 10
         self.segment_length = 0.06
         self.segment_radius = 0.02
         self.mass = 0.1
@@ -344,7 +339,10 @@ class UR5Sim:
             self.rope_segments.append(body_id)
             #ADD TO TACTO SENSOR
             #self.digits.add_body(body_id)
-            self.digits.add_object("objects/rope_dummy.urdf", body_id, globalScaling=1.0)    
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            # Construct the absolute path to the URDF file
+            dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
+            self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
 
             if i > 0:
                 pybullet.setCollisionFilterPair(self.rope_segments[i - 1], self.rope_segments[i], -1, -1, enableCollision=0)
@@ -376,7 +374,23 @@ class UR5Sim:
             childFramePosition=[0,0,0]
         )
 
-            
+    def get_last_rope_link_position(self):
+        """
+        Get the current 3D position of the last link of the rope.
+
+        Returns:
+            tuple: A tuple containing the position (x, y, z) of the last rope link.
+        """
+        # if not self.rope_segments or len(self.rope_segments) == 0:
+        #     raise ValueError("Rope segments are not loaded or initialized.")
+        
+        # Get the ID of the last rope segment
+        last_segment_id = self.rope_segments[-1]
+        
+        # Get the position of the last rope segment
+        position, _ = pybullet.getBasePositionAndOrientation(last_segment_id)
+        return np.array(position, dtype=np.float32)
+
 
 
     def _load_sphere(self):
@@ -473,6 +487,7 @@ class UR5Sim:
         joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
         joint_velocities = [state[1] for state in joint_states]
         return joint_velocities
+    
     def get_sensor_reading(self): # DIGIT SENSOR READING IS SIZE (160,120) px
         # 1) Render images from the TACTO sensor
         color_imgs, depth_imgs = self.digits.render()
