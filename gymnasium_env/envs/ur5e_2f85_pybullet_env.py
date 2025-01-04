@@ -16,20 +16,18 @@ MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.0, 0.3]), max_steps=500, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.5, 0.3]), max_steps=500, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
         self.max_steps = max_steps
         self.render_mode = render_mode
 
-        # Observation: joint positions only (6D)
-        #self.observation_space = spaces.Box(low=-2 * np.pi, high=2 * np.pi, shape=(6,), dtype=np.float32)
         # Observation space
         self.num_robot_joints = 6
         self.num_sensor_readings = 160*120
         self.rope_link_pose = 3
-        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose# multiplication by 2 because of qvel of robot
+        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Action: 3D end-effector velocity in world coordinates
@@ -130,6 +128,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         obs = np.squeeze(obs)
         #print(f"Obs shape:{obs.shape}")
         #print(f"Shape after flatten: {obs.shape}")  # Should be (19215,)
+        #print("Inside _get_obs():", obs.shape, self.observation_space.shape)
         return obs
 
     def render(self):
@@ -138,14 +137,3 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def close(self):
         self.sim.close()
-
-
-# #Example usage:
-# env = UR5e2f85BulletEnv(render_mode="human")
-# obs, info = env.reset()
-# for _ in range(10000):
-#     action = env.action_space.sample()
-#     obs, reward, done, truncated, info = env.step(action)
-#     if done or truncated:
-#         break
-# env.close()

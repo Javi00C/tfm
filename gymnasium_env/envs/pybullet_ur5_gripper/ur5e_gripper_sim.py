@@ -7,10 +7,19 @@ import math
 import pybullet
 import pybullet_data
 import pybulletX as px
+import matplotlib.pyplot as plt
 
 import tacto
 import hydra
 import cv2
+
+import pytouch
+from pytouch.handlers import ImageHandler
+from pytouch.sensors import DigitSensor
+from pytouch.tasks import ContactArea
+from pytouch.tasks import TouchDetect
+from PIL import Image
+
 from datetime import datetime
 from collections import namedtuple
 from attrdict import AttrDict
@@ -23,9 +32,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct the absolute path to the URDF file
 ROBOT_URDF_PATH = os.path.join(script_dir, "robots", "urdf", "ur5e_with_gripper_digit.urdf")
-
-
-#ROBOT_URDF_PATH = "/robots/urdf/ur5e_with_gripper_digit.urdf"
 
 class UR5Sim:
     def __init__(self,
@@ -138,15 +144,14 @@ class UR5Sim:
         self.ur5_or = [0.0, math.pi/2, 0.0]
         self.stepCounter = 0
         self.ur5_joint_ids = [1,2,3,4,5,6]
-        # 4) Reset Robot to Default Pose
-        self.reset()
-
-        # 5) Load the DIGIT sensor
-
+        
+        #Load DIGIT sensor
         self.digits = None
         self.digit_body = None
-        #self._load_digit_sensor()
         self._initialize_tacto_sensor_in_urdf()
+
+        # Reset Robot to Default Pose and Load Rope
+        self.reset()
 
         # Optional: Print joints for debugging
         # for i in range(pybullet.getNumJoints(self.ur5)):
@@ -155,11 +160,8 @@ class UR5Sim:
         #           "Name:", joint_info[1].decode(),
         #           "Type:", joint_info[2])
 
-        #Loads a plane to act as floor
-        # pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
-        # plane_id = pybullet.loadURDF("plane.urdf", [0, 0, 0])
 
-        self._load_rope()
+        
 
     def _initialize_tacto_sensor_in_urdf(self):
         # 1) Initialize TACTO with your config
@@ -375,14 +377,6 @@ class UR5Sim:
         )
 
     def get_last_rope_link_position(self):
-        """
-        Get the current 3D position of the last link of the rope.
-
-        Returns:
-            tuple: A tuple containing the position (x, y, z) of the last rope link.
-        """
-        # if not self.rope_segments or len(self.rope_segments) == 0:
-        #     raise ValueError("Rope segments are not loaded or initialized.")
         
         # Get the ID of the last rope segment
         last_segment_id = self.rope_segments[-1]
@@ -488,9 +482,40 @@ class UR5Sim:
         joint_velocities = [state[1] for state in joint_states]
         return joint_velocities
     
-    def get_sensor_reading(self): # DIGIT SENSOR READING IS SIZE (160,120) px
-        # 1) Render images from the TACTO sensor
+    def get_sensor_reading(self): 
+        
+        # Elipse calculation
         color_imgs, depth_imgs = self.digits.render()
+        sample_img = color_imgs[0]  
+        #ImageHandler.save("digit_base_image.png", color_imgs[0])
+                # Visualize the color image
+        # plt.imshow(color_imgs[0])
+        # plt.title("Sensor Output")
+        # plt.show()
+        # plt.close()  # Close the plot to free resources
+
+        #Upload base image
+        # script_dir = os.path.dirname(os.path.abspath(__file__))
+        # base_img_path = os.path.join(script_dir, "objects", "digit_base_image.png")
+        # base_img = ImageHandler(base_img_path).nparray
+        
+        # #Sensor touch inference 
+        # color_img_pil = Image.fromarray((color_imgs[0] * 255).astype(np.uint8))
+        # print(color_img_pil)
+        # pt = pytouch.PyTouch(DigitSensor, tasks=[TouchDetect])
+        # is_touching, certainty = pt.TouchDetect(color_img_pil)
+        # print(f"Sensor Touching:{is_touching}")
+
+        
+        # diff_img = sample_img - base_img
+        # print(f"Shape diff-img:{diff_img.shape}")
+
+        # #Elipse computation
+        #pt = pytouch.PyTouch(DigitSensor, tasks=[ContactArea])
+        # contact_area = ContactArea(base=base_img,contour_threshold=100,draw_poly=False)
+        # major, minor = contact_area(sample_img)
+        # print("Major Axis: {0}, minor axis: {1}".format(*major, *minor))
+
         
         # 2) Assume a single DIGIT sensor or pick sensor index 0
         depth_img = depth_imgs[0]
@@ -520,6 +545,17 @@ class UR5Sim:
         self.control_gripper(-0.4)
         for i in range(100):
             pybullet.stepSimulation()
+
+        # Reset rope: remove old segments and constraints
+        if hasattr(self, 'rope_segments'):
+            for seg_id in self.rope_segments:
+                pybullet.removeBody(seg_id)
+            self.rope_segments = []
+        if hasattr(self, 'constraints'):
+            self.constraints = []
+
+        # 3) Reload rope from scratch
+        self._load_rope()
 
     def step(self, end_effector_velocity, gripper_cmd=-1.0):
         active_joint_indices = []

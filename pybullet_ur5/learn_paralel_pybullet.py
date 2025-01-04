@@ -22,7 +22,7 @@ print(f"Numpy Version: {np.__version__}")
 # print(f"Stable Baselines3 Version: {stable_baselines3.__version__}")
 
 # Define the number of environments
-NUM_ENVS = 16  # Adjust based on your system's capacity
+NUM_ENVS = 4  # Adjust based on your system's capacity
 TIMESTEPS = 10000
 DEVICE_USED = 'cpu'
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v1"
