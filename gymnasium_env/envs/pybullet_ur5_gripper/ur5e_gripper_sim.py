@@ -314,7 +314,7 @@ class UR5Sim:
         self.segment_radius = 0.02
         self.mass = 0.1
         self.friction = 0.5
-        self.start_position = [0.635, 0.135, 1]
+        self.start_position = [0.61, 0.135, 1]
         self.rope_segments = []
         self.constraints = []
 
@@ -542,7 +542,7 @@ class UR5Sim:
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
-        self.control_gripper(-0.4)
+        
         for i in range(100):
             pybullet.stepSimulation()
 
@@ -556,6 +556,11 @@ class UR5Sim:
 
         # 3) Reload rope from scratch
         self._load_rope()
+        
+        #Close gripper
+        self.control_gripper(0.7)
+        for i in range(100):
+            pybullet.stepSimulation()
 
     def step(self, end_effector_velocity, gripper_cmd=-1.0):
         active_joint_indices = []
