@@ -1,3 +1,4 @@
+print(">>> LOADING UR5E_2F85_PYBULLETENV WITH OBS_DIM=19215 <<<")
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -8,15 +9,14 @@ from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 DIST_WEIGHT = 100000
 MAX_REWARD = 1000
-ACTION_SCALER = np.array([7, 7, 7, 1])  # Max velocities for x, y, z (gripper scaling is done in step function)
 EPISODE_LEN = 6000
 
-MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.5, 0.3]), max_steps=500, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.5, 0.5]), max_steps=500, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -68,6 +68,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         terminated = self.done
         truncated = self.current_step >= self.max_steps
 
+        #print(f"Last rope link position: {self.sim.get_last_rope_link_position()}")
         return obs, reward, terminated, truncated, {}
 
     def _calculate_reward(self):

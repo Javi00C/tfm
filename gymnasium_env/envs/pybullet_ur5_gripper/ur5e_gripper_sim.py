@@ -365,6 +365,7 @@ class UR5Sim:
         anchor_body = pybullet.createMultiBody(baseMass=0, 
                                         baseCollisionShapeIndex=anchor_shape, 
                                         basePosition=self.start_position)
+        pybullet.setCollisionFilterPair(anchor_body, self.rope_segments[0], -1, -1, enableCollision=0)
         pybullet.createConstraint(
             parentBodyUniqueId=anchor_body,
             parentLinkIndex=-1,

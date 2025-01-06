@@ -25,7 +25,7 @@ obs = env.reset()
 
 
 # Execute the policy for a longer duration
-episode_length = 1000  # Adjust as needed
+episode_length = 10000000  # Adjust as needed
 for _ in range(episode_length):
     #print(f"Shape of observation passed to model: {obs.shape}")
     action, _states = model.predict(obs)
@@ -33,8 +33,8 @@ for _ in range(episode_length):
 
     # Render the environment
     env.envs[0].render()
-
-    if done[0]:  # Since 'done' is an array in DummyVecEnv
-        obs = env.reset()
+        
+    #if done[0]:  # Since 'done' is an array in DummyVecEnv
+    #    obs = env.reset()
 
 env.close()
