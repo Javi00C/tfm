@@ -33,6 +33,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the absolute path to the URDF file
 ROBOT_URDF_PATH = os.path.join(script_dir, "robots", "urdf", "ur5e_with_gripper_digit.urdf")
 
+
 class UR5Sim:
     def __init__(self,
                  useIK=True,
@@ -314,7 +315,7 @@ class UR5Sim:
         self.segment_radius = 0.02
         self.mass = 0.1
         self.friction = 0.5
-        self.start_position = [0.61, 0.135, 1]
+        self.start_position = [0.60, 0.135, 1]
         self.rope_segments = []
         self.constraints = []
 

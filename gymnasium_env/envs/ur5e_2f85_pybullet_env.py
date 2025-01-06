@@ -1,4 +1,3 @@
-print(">>> LOADING UR5E_2F85_PYBULLETENV WITH OBS_DIM=19215 <<<")
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -7,10 +6,7 @@ import time
 
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
-DIST_WEIGHT = 100000
 MAX_REWARD = 1000
-EPISODE_LEN = 6000
-
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
 
 class ur5e_2f85_pybulletEnv(gym.Env):
@@ -21,7 +17,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         self.target = np.array(target, dtype=np.float32)
         self.max_steps = max_steps
-        self.render_mode = render_mode
+        self.render_mode = False # False for not visual renderization, True for visual renderization (GUI)
 
         # Observation space
         self.num_robot_joints = 6
@@ -34,7 +30,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(7,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
+        self.sim = UR5Sim(useIK=True, renders=self.render_mode, maxSteps=self.max_steps)
         self.current_step = 0
 
         self.done = False
@@ -79,13 +75,13 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         # Determine the current tile and whether it's on the edge
 
-        max_rew = 1000
+        max_rew = MAX_REWARD
         max_dist = 1.5
         a = -max_rew/max_dist
         b = max_rew
 
         if self.done:
-            terminated_penalty = -1000
+            terminated_penalty = -MAX_REWARD
             reward = 0
         else:
             terminated_penalty = 0
