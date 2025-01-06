@@ -6,8 +6,12 @@ pip install attrdict
 pip install tacto
 pip install torch
 pip install stable-baselines3[extra]
+pip install pybulletx
+pip install pytouch
 cd 
 git clone git@github.com:Javi00C/tfm.git
 cd tfm
 pip install -e .
+# Important for headless server (and make use of egl in the learning script)
+pip install PyOpenGL PyOpenGL-accelerate pyrender trimesh
 
