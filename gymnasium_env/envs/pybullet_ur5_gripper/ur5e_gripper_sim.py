@@ -473,7 +473,7 @@ class UR5Sim:
         )
         return joint_angles
 
-    def get_end_eff_pose(self):
+    def get_end_eff_pose(self): #whole pose including orientation (euler)
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]
         orientation_euler = pybullet.getEulerFromQuaternion(orientation)
@@ -482,6 +482,11 @@ class UR5Sim:
             np.array(orientation_euler),
             ),axis=0)
         return ee_pose
+    
+    def get_current_pose(self):
+        linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
+        position, orientation = linkstate[0], linkstate[1]
+        return position
     
     def get_end_eff_vel(self):
         return self.end_effector_vel    
