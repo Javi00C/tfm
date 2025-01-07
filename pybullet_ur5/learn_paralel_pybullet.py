@@ -32,7 +32,7 @@ DEVICE_USED = 'cuda'
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
-    return gymnasium.make(env_str)
+    return gymnasium.make(env_str, render_mode='training')
 
 if __name__ == '__main__':
     # Create directories to hold models and logs
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     
 
     # Verify observation and action spaces
-    sample_env = gymnasium.make(env_str)
+    sample_env = gymnasium.make(env_str, render_mode='training')
     print("Observation Space Shape: ", sample_env.observation_space.shape)
     print("Action Space Shape: ", sample_env.action_space.shape)
     sample_env.close()

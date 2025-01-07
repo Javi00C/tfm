@@ -310,9 +310,13 @@ class UR5Sim:
 
 
     def _load_rope(self):
+        # Parameters MUST BE CHANGED IN THE DUMMY URDF FOR TACTO
         self.num_segments = 10
-        self.segment_length = 0.06
+        self.total_length = 0.6   
+
+        # Segment properties based on the number of segments
         self.segment_radius = 0.02
+        self.segment_length = self.total_length / self.num_segments
         self.mass = 0.1
         self.friction = 0.5
         self.start_position = [0.60, 0.135, 1]
@@ -564,7 +568,7 @@ class UR5Sim:
         for i in range(100):
             pybullet.stepSimulation()
 
-    def step(self, end_effector_velocity, gripper_cmd=-1.0):
+    def step(self, end_effector_velocity, gripper_cmd):
         active_joint_indices = []
         for i in range(self.num_joints):
             info = pybullet.getJointInfo(self.ur5, i)

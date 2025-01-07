@@ -8,16 +8,18 @@ from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 MAX_REWARD = 1000
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
+MAX_DIST_REW = 1.5
+MAX_STEPS_SIM = 4000
 
 class ur5e_2f85_pybulletEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 100}
+    metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.5, 0.5]), max_steps=500, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.5, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
         self.max_steps = max_steps
-        self.render_mode = False # False for not visual renderization, True for visual renderization (GUI)
+        self.render_mode = render_mode
 
         # Observation space
         self.num_robot_joints = 6
@@ -30,7 +32,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(7,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=self.render_mode, maxSteps=self.max_steps)
+        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
         self.current_step = 0
 
         self.done = False
@@ -76,7 +78,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         # Determine the current tile and whether it's on the edge
 
         max_rew = MAX_REWARD
-        max_dist = 1.5
+        max_dist = MAX_DIST_REW
         a = -max_rew/max_dist
         b = max_rew
 
@@ -115,21 +117,11 @@ class ur5e_2f85_pybulletEnv(gym.Env):
             np.array(last_link_rope_pos, dtype=np.float32)
         ), axis=0)
 
-        # Debugging: Check observation shape
-        # expected_shape = self.observation_space.shape
-        # if obs.shape == expected_shape:
-        #     print("NO shape mismatch observation space")
-        # else: 
-        #     print(f"Observation shape mismatch: {obs.shape} vs {expected_shape}")
         obs = obs.flatten()
         obs = np.squeeze(obs)
-        #print(f"Obs shape:{obs.shape}")
-        #print(f"Shape after flatten: {obs.shape}")  # Should be (19215,)
-        #print("Inside _get_obs():", obs.shape, self.observation_space.shape)
         return obs
 
     def render(self):
-        # If render_mode == "human", PyBullet GUI is already open.
         pass
 
     def close(self):
