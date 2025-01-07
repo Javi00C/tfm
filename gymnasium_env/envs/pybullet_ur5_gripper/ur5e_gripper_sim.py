@@ -556,7 +556,7 @@ class UR5Sim:
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
-        self.end_effector_vel = [0,0,0,0,0,0]
+        self.end_effector_vel = np.zeros(6)
         for i in range(100):
             pybullet.stepSimulation()
 
