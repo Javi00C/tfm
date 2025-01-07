@@ -473,10 +473,17 @@ class UR5Sim:
         )
         return joint_angles
 
-    def get_current_pose(self):
+    def get_end_eff_pose(self):
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]
-        return (np.array(position), orientation)
+        ee_pose = np.concatenate((
+            np.array(position),
+            np.array(orientation),
+            ),axis=0)
+        return ee_pose
+    
+    def get_end_eff_vel(self):
+        return self.end_effector_vel    
 
     def get_joint_angles(self):
         joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
@@ -544,11 +551,12 @@ class UR5Sim:
         # 5) Return or save this grayscale image
         return pressure_img
 
+
     def reset(self):
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
-        
+        self.end_effector_vel = [0,0,0,0,0,0]
         for i in range(100):
             pybullet.stepSimulation()
 
@@ -569,6 +577,7 @@ class UR5Sim:
             pybullet.stepSimulation()
 
     def step(self, end_effector_velocity, gripper_cmd):
+        self.end_effector_vel = end_effector_velocity
         active_joint_indices = []
         for i in range(self.num_joints):
             info = pybullet.getJointInfo(self.ur5, i)

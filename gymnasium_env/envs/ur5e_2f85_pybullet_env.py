@@ -105,16 +105,24 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def _get_obs(self):
         # Joint angles as observation
-        joint_positions = self.sim.get_joint_angles()
-        joint_velocities = self.sim.get_joint_velocities()
+        #joint_positions = self.sim.get_joint_angles()
+        #joint_velocities = self.sim.get_joint_velocities()
+        
+        tcp_pos = self.sim.get_end_eff_pose()
+        tcp_vel = self.sim.get_end_eff_vel()
+
         sensor_reading = self.sim.get_sensor_reading()
         sensor_reading = sensor_reading.ravel()
+        
         last_link_rope_pos = self.sim.get_last_rope_link_position()
+
         obs = np.concatenate((
-            np.array(joint_positions, dtype=np.float32),
-            np.array(joint_velocities, dtype=np.float32),
-            np.array(sensor_reading, dtype=np.float32),
-            np.array(last_link_rope_pos, dtype=np.float32)
+            #np.array(joint_positions, dtype=np.float32),
+            #np.array(joint_velocities, dtype=np.float32),
+            np.array(tcp_pos, dtype=np.float32),
+            np.array(tcp_vel, dtype=np.float32),
+            np.array(last_link_rope_pos, dtype=np.float32),
+            np.array(sensor_reading, dtype=np.float32)
         ), axis=0)
 
         obs = obs.flatten()
