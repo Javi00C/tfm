@@ -87,7 +87,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
             reward = 0
         else:
             terminated_penalty = 0
-            ee_pos, _ = self.sim.get_current_pose()
+            ee_pos = self.sim.get_current_pose()
             dist = np.linalg.norm(ee_pos - self.target)
             #reward = MAX_REWARD / (0.001 + dist)  # Reward function
             reward = a*dist+b
@@ -97,7 +97,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
-        ee_pos, _ = self.sim.get_current_pose()
+        ee_pos = self.sim.get_current_pose()
         dist_to_target = np.linalg.norm(ee_pos - self.target)
         if dist_to_target > MAX_DISTANCE:
             return True
