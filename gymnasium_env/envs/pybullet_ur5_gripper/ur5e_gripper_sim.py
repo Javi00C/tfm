@@ -476,9 +476,10 @@ class UR5Sim:
     def get_end_eff_pose(self):
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]
+        orientation_euler = pybullet.getEulerFromQuaternion(orientation)
         ee_pose = np.concatenate((
             np.array(position),
-            np.array(orientation),
+            np.array(orientation_euler),
             ),axis=0)
         return ee_pose
     
