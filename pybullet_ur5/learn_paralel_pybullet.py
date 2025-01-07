@@ -27,8 +27,8 @@ print(f"Numpy Version: {np.__version__}")
 
 # Define the number of environments
 NUM_ENVS = 25  # Adjust based on system's capacity
-TIMESTEPS = 1000000
-DEVICE_USED = 'cuda'
+TIMESTEPS = 200000
+DEVICE_USED = 'cpu'
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
