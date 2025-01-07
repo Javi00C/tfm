@@ -8,7 +8,7 @@ from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 MAX_REWARD = 1000
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
-MAX_DIST_REW = 1.5
+MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
 
 class ur5e_2f85_pybulletEnv(gym.Env):
