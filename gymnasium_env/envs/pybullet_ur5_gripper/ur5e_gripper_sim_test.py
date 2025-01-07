@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # Move the arm a bit, keep the gripper open
     for i in range(1000000):
         end_effector_velocity = np.array([0.001, 0.0, 0.0, 0.00, 0.00, 0.00])
-        gripper_cmd = 1.0  # open
+        gripper_cmd = 0.7  # open
         sim.step(end_effector_velocity, gripper_cmd)
         #print(f"Sensor reading{np.shape(sim.get_sensor_reading())}")
         sim.get_sensor_reading()

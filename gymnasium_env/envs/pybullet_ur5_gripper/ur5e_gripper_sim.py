@@ -609,8 +609,9 @@ class UR5Sim:
                 force=joint_info.maxForce
             )
 
-        gripper_action = np.clip(gripper_cmd * 0.4, -0.4, 0.4)
-        self.control_gripper(gripper_action)
+        #gripper_action = np.clip(gripper_cmd * 0.4, -0.4, 0.4)
+        #self.control_gripper(gripper_action)
+        self.control_gripper(gripper_cmd)
 
         pybullet.stepSimulation()
         self.stepCounter += 1
