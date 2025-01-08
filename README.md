@@ -4,12 +4,14 @@ conda create -n pybullet_env python=3.9.21
 conda activate pybullet_env
 pip install --upgrade pip
 pip3 install pybullet --upgrade --user
+pip install numpy==1.23.0
 pip install attrdict
 pip install tacto
 pip install torch
 pip install stable-baselines3[extra]
 pip install pybulletx
 pip install pytouch
+pip install networkx==3.2.1
 cd 
 git clone git@github.com:Javi00C/tfm.git
 cd tfm
