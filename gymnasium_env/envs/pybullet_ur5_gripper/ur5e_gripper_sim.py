@@ -382,15 +382,6 @@ class UR5Sim:
             childFramePosition=[0,0,0]
         )
 
-    def get_last_rope_link_position(self):
-        
-        # Get the ID of the last rope segment
-        last_segment_id = self.rope_segments[-1]
-        
-        # Get the position of the last rope segment
-        position, _ = pybullet.getBasePositionAndOrientation(last_segment_id)
-        return np.array(position, dtype=np.float32)
-
 
 
     def _load_sphere(self):
@@ -500,6 +491,15 @@ class UR5Sim:
         joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
         joint_velocities = [state[1] for state in joint_states]
         return joint_velocities
+    
+    def get_last_rope_link_position(self):
+        
+        # Get the ID of the last rope segment
+        last_segment_id = self.rope_segments[-1]
+        
+        # Get the position of the last rope segment
+        position, _ = pybullet.getBasePositionAndOrientation(last_segment_id)
+        return np.array(position, dtype=np.float32)
     
     def get_sensor_reading(self): 
         

@@ -87,8 +87,8 @@ class ur5e_2f85_pybulletEnv(gym.Env):
             reward = 0
         else:
             terminated_penalty = 0
-            ee_pos = self.sim.get_current_pose()
-            dist = np.linalg.norm(ee_pos - self.target)
+            link_rope_pos = self.sim.get_last_rope_link_position()
+            dist = np.linalg.norm(link_rope_pos - self.target)
             #reward = MAX_REWARD / (0.001 + dist)  # Reward function
             reward = a*dist+b
 
@@ -97,8 +97,8 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
-        ee_pos = self.sim.get_current_pose()
-        dist_to_target = np.linalg.norm(ee_pos - self.target)
+        link_rope_pos = self.sim.get_last_rope_link_position()
+        dist_to_target = np.linalg.norm(link_rope_pos - self.target)
         if dist_to_target > MAX_DISTANCE:
             return True
         return False
@@ -119,11 +119,10 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         obs = np.concatenate((
             #np.array(joint_positions, dtype=np.float32),
             #np.array(joint_velocities, dtype=np.float32),
-            self.target,
             np.array(tcp_pos, dtype=np.float32),
-            np.array(tcp_vel, dtype=np.float32)
-            #np.array(last_link_rope_pos, dtype=np.float32),
-            #np.array(sensor_reading, dtype=np.float32)
+            np.array(tcp_vel, dtype=np.float32),
+            np.array(last_link_rope_pos, dtype=np.float32),
+            np.array(sensor_reading, dtype=np.float32)
         ), axis=0)
 
         obs = obs.flatten()
