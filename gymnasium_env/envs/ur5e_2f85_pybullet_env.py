@@ -68,34 +68,58 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         terminated = self.done
         truncated = self.current_step >= self.max_steps
 
-        print(f"robot tcp pos: {self.sim.get_current_pose()}")
+        #print(f"robot tcp pos: {self.sim.get_current_pose()}")
         return obs, reward, terminated, truncated, {}
 
-    def _calculate_reward(self):
-        # Compute reward: reward is high when close to the target, penalized with distance
+    # def _calculate_reward(self):
+    #     # Compute reward: reward is high when close to the target, penalized with distance
         
-        # Apply constant negative reward per step to encourage efficient behavior
-        step_penalty = -10
+    #     # Apply constant negative reward per step to encourage efficient behavior
+    #     step_penalty = -10
 
-        # Determine the current tile and whether it's on the edge
+    #     # Determine the current tile and whether it's on the edge
 
-        max_rew = MAX_REWARD
-        max_dist = MAX_DIST_REW
-        a = -max_rew/max_dist
-        b = max_rew
+    #     max_rew = MAX_REWARD
+    #     max_dist = MAX_DIST_REW
+    #     a = -max_rew/max_dist
+    #     b = max_rew
 
-        if self.done:
-            terminated_penalty = -MAX_REWARD
-            reward = 0
-        else:
-            terminated_penalty = 0
-            ee_pos = self.sim.get_current_pose()
-            dist = np.linalg.norm(ee_pos - self.target)
-            #reward = MAX_REWARD / (0.001 + dist)  # Reward function
-            reward = a*dist+b
+    #     if self.done:
+    #         terminated_penalty = -MAX_REWARD
+    #         reward = 0
+    #     else:
+    #         terminated_penalty = 0
+    #         ee_pos = self.sim.get_current_pose()
+    #         dist = np.linalg.norm(ee_pos - self.target)
+    #         #reward = MAX_REWARD / (0.001 + dist)  # Reward function
+    #         reward = a*dist+b
 
-        total_reward = step_penalty + reward + terminated_penalty
-        return total_reward
+    #     total_reward = step_penalty + reward + terminated_penalty
+    #     return total_reward
+
+    def _calculate_reward(self):
+        ee_pos = self.sim.get_current_pose()
+        dist = np.linalg.norm(ee_pos - self.target)
+
+        # 1) Basic shaping term (negative distance):
+        #    The agent gets less negative (i.e. higher) reward the closer it is.
+        #    You can scale this factor according to preference.
+        reward = -dist
+
+        # 2) Bonus for being "close enough":
+        #    If the end-effector is within some small threshold, award a constant bonus.
+        #    This encourages the robot to stay near the target region.
+        threshold = 0.05
+        if dist < threshold:
+            reward += 2.0  # Provide a small "hovering reward" each step
+
+        # 3) (Optional) Step penalty:
+        #    A gentle penalty to encourage speed. If you'd like it to simply stay put,
+        #    you might set this to zero or a small negative value.
+        step_penalty = -0.01
+        reward += step_penalty
+
+        return reward
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
