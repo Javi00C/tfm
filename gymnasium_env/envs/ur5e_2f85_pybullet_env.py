@@ -4,7 +4,7 @@ from gymnasium import spaces
 from typing import Optional
 import time
 
-from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
+from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim_simple import UR5Sim
 
 MAX_REWARD = 1000
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
