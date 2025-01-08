@@ -10,6 +10,7 @@ MAX_REWARD = 1000
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
+VELOCITY_SCALE = 1.0 #Originally at 0.3
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
@@ -33,7 +34,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(6,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
+        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
         self.current_step = 0
 
         self.done = False
@@ -52,7 +53,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         #gripper_action = action[6]
         gripper_action = 1.0
 
-        velocity_scale = 0.3 #Maximum velocity that is stable in the simulation
+        velocity_scale = VELOCITY_SCALE #Maximum velocity that is stable in the simulation
         end_effector_velocity = velocity_action * velocity_scale
 
         # Fix gripper open
@@ -67,7 +68,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         terminated = self.done
         truncated = self.current_step >= self.max_steps
 
-        #print(f"robot tcp pos: {self.sim.get_current_pose()}")
+        print(f"robot tcp pos: {self.sim.get_current_pose()}")
         return obs, reward, terminated, truncated, {}
 
     def _calculate_reward(self):

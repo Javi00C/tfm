@@ -5,7 +5,7 @@ import pybullet
 from ur5e_gripper_sim_simple import UR5Sim
 
 if __name__ == "__main__":
-    sim = UR5Sim(useIK=True, renders=True, maxSteps=500)
+    sim = UR5Sim(useIK=True, renders=True, maxSteps=500,goal_position=[0.5,0.5,0.5])
 
     # Move the arm a bit, keep the gripper open
     for i in range(1000000):

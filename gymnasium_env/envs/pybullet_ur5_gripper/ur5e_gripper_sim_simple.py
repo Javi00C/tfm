@@ -39,7 +39,8 @@ class UR5Sim:
                  useIK=True,
                  renders=True,
                  maxSteps=1000,
-                 cfg=None):
+                 cfg=None,
+                 goal_position=None):
 
         self.renders = renders
         self.useIK = useIK
@@ -150,6 +151,9 @@ class UR5Sim:
         self.digits = None
         self.digit_body = None
         self._initialize_tacto_sensor_in_urdf()
+
+        #Create visual goal in simulation
+        self.add_visual_goal(goal_position)
 
         # Reset Robot to Default Pose and Load Rope
         self.reset()
@@ -463,6 +467,29 @@ class UR5Sim:
             restPoses=rest_poses
         )
         return joint_angles
+
+    def add_visual_goal(self, position):
+        """
+        Adds a visual-only sphere to the simulation as a goal marker.
+
+        :param position: List or tuple with 3 elements [x, y, z]
+        :param radius: Radius of the sphere
+        :param color: RGBA color of the sphere [R, G, B, A]
+        """
+        radius=0.01
+        color=[0, 1, 0, 1]
+        visual_shape_id = pybullet.createVisualShape(
+            shapeType=pybullet.GEOM_SPHERE,
+            radius=radius,
+            rgbaColor=color
+        )
+        body_id = pybullet.createMultiBody(
+            baseMass=0,  # No mass, purely visual
+            baseCollisionShapeIndex=-1,  # No collision
+            baseVisualShapeIndex=visual_shape_id,
+            basePosition=position
+        )
+        return body_id
 
     def get_end_eff_pose(self): #whole pose including orientation (euler)
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
