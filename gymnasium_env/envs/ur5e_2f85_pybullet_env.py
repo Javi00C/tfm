@@ -67,7 +67,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         terminated = self.done
         truncated = self.current_step >= self.max_steps
 
-        #print(f"Last rope link position: {self.sim.get_last_rope_link_position()}")
+        #print(f"robot tcp pos: {self.sim.get_current_pose()}")
         return obs, reward, terminated, truncated, {}
 
     def _calculate_reward(self):
