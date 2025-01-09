@@ -26,7 +26,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         self.num_robot_joints = 6
         self.num_sensor_readings = 160*120
         self.rope_link_pose = 3
-        self.target_size = 3
+        self.target_size = 6
         obs_dim = 2*self.num_robot_joints + self.target_size
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
@@ -122,8 +122,8 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
-        ee_pos = self.sim.get_current_pose()
-        dist_to_target = np.linalg.norm(ee_pos - self.target)
+        ee_pose = self.sim.get_end_eff_pose()
+        dist_to_target = np.linalg.norm(ee_pose - self.target)
         if dist_to_target > MAX_DISTANCE:
             return True
         return False
