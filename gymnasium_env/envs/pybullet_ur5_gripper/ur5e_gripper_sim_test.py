@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # Move the arm a bit, keep the gripper open
     for i in range(1000000):
-        end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.05, 0.0, 0.0])
+        end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.05])
         gripper_cmd = 1.0  # open
         sim.step(end_effector_velocity, gripper_cmd)
         pose = sim.get_end_eff_pose()

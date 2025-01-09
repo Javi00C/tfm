@@ -502,13 +502,19 @@ class UR5Sim:
             ),axis=0)
         return ee_pose
     
-    def get_current_pose(self):
+    def get_end_eff_position(self):
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]
         return np.array(position)
     
     def get_end_eff_vel(self):
-        return self.end_effector_vel    
+        linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True, computeLinkVelocity=1)
+        cartesian_vel, angular_vel_euler = linkstate[6], linkstate[7] # no transformation from quaternion is needed as it already gives cartesian euler angles 
+        ee_vel = np.concatenate((
+            np.array(cartesian_vel),
+            np.array(angular_vel_euler),
+            ),axis=0)
+        return ee_vel
 
     def get_joint_angles(self):
         joint_states = pybullet.getJointStates(self.ur5, self.ur5_joint_ids)
@@ -521,7 +527,6 @@ class UR5Sim:
         return joint_velocities
     
     def get_last_rope_link_position(self):
-        
         # Get the ID of the last rope segment
         last_segment_id = self.rope_segments[-1]
         
@@ -590,7 +595,7 @@ class UR5Sim:
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
-        self.end_effector_vel = np.zeros(6)
+        #self.end_effector_vel = np.zeros(6)
         for i in range(100):
             pybullet.stepSimulation()
 
@@ -611,7 +616,7 @@ class UR5Sim:
             pybullet.stepSimulation()
 
     def step(self, end_effector_velocity, gripper_cmd):
-        self.end_effector_vel = end_effector_velocity
+        #self.end_effector_vel = end_effector_velocity
         active_joint_indices = []
         for i in range(self.num_joints):
             info = pybullet.getJointInfo(self.ur5, i)
