@@ -468,7 +468,7 @@ class UR5Sim:
         )
         return joint_angles
 
-    def add_visual_goal(self, position):
+    def add_visual_goal(self, pose):
         """
         Adds a visual-only sphere to the simulation as a goal marker.
 
@@ -476,6 +476,7 @@ class UR5Sim:
         :param radius: Radius of the sphere
         :param color: RGBA color of the sphere [R, G, B, A]
         """
+        position = pose[:3]
         radius=0.01
         color=[0, 1, 0, 1]
         visual_shape_id = pybullet.createVisualShape(

@@ -15,7 +15,7 @@ VELOCITY_SCALE = 1.0 #Originally at 0.3
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.5, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.5, 0.5, 0.02, -0.001,  0.68]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -98,24 +98,23 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     #     return total_reward
 
     def _calculate_reward(self):
-        ee_pos = self.sim.get_current_pose()
-        dist = np.linalg.norm(ee_pos - self.target)
+        #Position only
+        #ee_pos = self.sim.get_current_pose()
+        #dist = np.linalg.norm(ee_pos - self.target)
+        
+        #Position and orientation
+        ee_pose = self.sim.get_end_eff_pose()
+        dist = np.linalg.norm(ee_pose - self.target)
 
-        # 1) Basic shaping term (negative distance):
-        #    The agent gets less negative (i.e. higher) reward the closer it is.
-        #    You can scale this factor according to preference.
+        
         reward = -dist
 
-        # 2) Bonus for being "close enough":
-        #    If the end-effector is within some small threshold, award a constant bonus.
-        #    This encourages the robot to stay near the target region.
+        
         threshold = 0.05
         if dist < threshold:
             reward += 2.0  # Provide a small "hovering reward" each step
 
-        # 3) (Optional) Step penalty:
-        #    A gentle penalty to encourage speed. If you'd like it to simply stay put,
-        #    you might set this to zero or a small negative value.
+        
         step_penalty = -0.01
         reward += step_penalty
 
