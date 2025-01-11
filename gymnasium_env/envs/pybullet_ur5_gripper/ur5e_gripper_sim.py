@@ -1,3 +1,6 @@
+##################################
+#SENSOR IS NOT BEING LOADED AND URDF BODIES ARE NOT GIVEN TO THE SENSOR IN THE LOAD ROPE!!!
+##################################
 import random
 import time
 import numpy as np
@@ -39,7 +42,8 @@ class UR5Sim:
                  useIK=True,
                  renders=True,
                  maxSteps=1000,
-                 cfg=None):
+                 cfg=None,
+                 goal_position=None):
 
         self.renders = renders
         self.useIK = useIK
@@ -149,7 +153,10 @@ class UR5Sim:
         #Load DIGIT sensor
         self.digits = None
         self.digit_body = None
-        self._initialize_tacto_sensor_in_urdf()
+        #self._initialize_tacto_sensor_in_urdf()
+
+        #Create visual goal in simulation
+        self.add_visual_goal(goal_position)
 
         # Reset Robot to Default Pose and Load Rope
         self.reset()
@@ -319,7 +326,7 @@ class UR5Sim:
         self.segment_length = self.total_length / self.num_segments
         self.mass = 0.1
         self.friction = 0.5
-        self.start_position = [0.60, 0.135, 1]
+        self.start_position = [0.60, 0.135, 0.9]
         self.rope_segments = []
         self.constraints = []
 
@@ -344,12 +351,11 @@ class UR5Sim:
 
             pybullet.changeDynamics(body_id, -1, lateralFriction=self.friction)
             self.rope_segments.append(body_id)
-            #ADD TO TACTO SENSOR
-            #self.digits.add_body(body_id)
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            # Construct the absolute path to the URDF file
-            dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
-            self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
+
+            # Add link to DIGIT sensor 
+            # script_dir = os.path.dirname(os.path.abspath(__file__))
+            # dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
+            # self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
 
             if i > 0:
                 pybullet.setCollisionFilterPair(self.rope_segments[i - 1], self.rope_segments[i], -1, -1, enableCollision=0)
@@ -463,6 +469,30 @@ class UR5Sim:
             restPoses=rest_poses
         )
         return joint_angles
+
+    def add_visual_goal(self, pose):
+        """
+        Adds a visual-only sphere to the simulation as a goal marker.
+
+        :param position: List or tuple with 3 elements [x, y, z]
+        :param radius: Radius of the sphere
+        :param color: RGBA color of the sphere [R, G, B, A]
+        """
+        position = pose[:3]
+        radius=0.01
+        color=[0, 1, 0, 1]
+        visual_shape_id = pybullet.createVisualShape(
+            shapeType=pybullet.GEOM_SPHERE,
+            radius=radius,
+            rgbaColor=color
+        )
+        body_id = pybullet.createMultiBody(
+            baseMass=0,  # No mass, purely visual
+            baseCollisionShapeIndex=-1,  # No collision
+            baseVisualShapeIndex=visual_shape_id,
+            basePosition=position
+        )
+        return body_id
 
     def get_end_eff_pose(self): #whole pose including orientation (euler)
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
