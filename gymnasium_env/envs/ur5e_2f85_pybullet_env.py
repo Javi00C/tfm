@@ -11,7 +11,7 @@ MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
 VELOCITY_SCALE = 1.0 #Originally at 0.3
-CLOSE_REWARD_DIST = 0.15
+CLOSE_REWARD_DIST = 0.1
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
@@ -73,52 +73,56 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         return obs, reward, terminated, truncated, {}
 
     # def _calculate_reward(self):
-    #     # Compute reward: reward is high when close to the target, penalized with distance
+    #     #Position only
+    #     #ee_pos = self.sim.get_current_pose()
+    #     #dist = np.linalg.norm(ee_pos - self.target)
         
-    #     # Apply constant negative reward per step to encourage efficient behavior
-    #     step_penalty = -10
+    #     #Position and orientation
+    #     ee_pose = self.sim.get_end_eff_pose()
+    #     dist = np.linalg.norm(ee_pose - self.target)
 
-    #     # Determine the current tile and whether it's on the edge
+        
+    #     reward = -dist
 
-    #     max_rew = MAX_REWARD
-    #     max_dist = MAX_DIST_REW
-    #     a = -max_rew/max_dist
-    #     b = max_rew
+        
+    #     if dist < CLOSE_REWARD_DIST:
+    #         reward += 1.0/dist  # Provide a small "hovering reward" each step
 
-    #     if self.done:
-    #         terminated_penalty = -MAX_REWARD
-    #         reward = 0
-    #     else:
-    #         terminated_penalty = 0
-    #         ee_pos = self.sim.get_current_pose()
-    #         dist = np.linalg.norm(ee_pos - self.target)
-    #         #reward = MAX_REWARD / (0.001 + dist)  # Reward function
-    #         reward = a*dist+b
+        
+    #     step_penalty = -0.01
+    #     reward += step_penalty
 
-    #     total_reward = step_penalty + reward + terminated_penalty
-    #     return total_reward
+    #     return reward
 
     def _calculate_reward(self):
-        #Position only
-        #ee_pos = self.sim.get_current_pose()
-        #dist = np.linalg.norm(ee_pos - self.target)
-        
-        #Position and orientation
         ee_pose = self.sim.get_end_eff_pose()
-        dist = np.linalg.norm(ee_pose - self.target)
-
+        position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
+        orientation_error = np.linalg.norm(ee_pose[3:] - self.target[3:])
         
-        reward = -dist
-
+        reward = -position_error - 0.5*orientation_error  # Weighted penalty for position and orientation errors
         
-        if dist < CLOSE_REWARD_DIST:
-            reward += 1.0/dist  # Provide a small "hovering reward" each step
+        # Bonus for being close to the target
+        if position_error < CLOSE_REWARD_DIST:
+            #reward += 0.1 / (position_error + 1e-6)  # Avoid division by zero
+            reward += 1.0
 
+            # Add velocity penalty to discourage movement
+            ee_velocity = self.sim.get_end_effector_velocity()
+            reward -= np.linalg.norm(ee_velocity)
+
+            # Add time-based bonus for staying in the goal region
+            self.time_in_goal += 1
+            reward += 0.1 * self.time_in_goal  # Reward grows with time
+        else:
+            self.time_in_goal = 0
         
-        step_penalty = -0.01
-        reward += step_penalty
+        # Small penalty for every time step
+        reward -= 0.01  # Step penalty
+        
+        # # Penalty for unnecessary movement
 
         return reward
+
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""

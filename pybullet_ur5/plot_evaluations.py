@@ -16,7 +16,7 @@ import platform
 log_dir = "logs_pybullet"
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
 # Plot evaluation results
-data = np.load(os.path.join(log_dir, "evaluations_exp_1c.npz"))
+data = np.load(os.path.join(log_dir, "evaluations.npz"))
 timesteps = data['timesteps']
 results = data['results']
 
