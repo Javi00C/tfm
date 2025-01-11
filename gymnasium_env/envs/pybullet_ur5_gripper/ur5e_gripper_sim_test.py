@@ -9,12 +9,11 @@ if __name__ == "__main__":
 
     # Move the arm a bit, keep the gripper open
     for i in range(1000000):
-        end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.05])
+        end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         gripper_cmd = 1.0  # open
         sim.step(end_effector_velocity, gripper_cmd)
-        pose = sim.get_end_eff_pose()
-        print(f"Orientation: {pose[3:6]}")
-        #print(f"Pose: {sim.get_end_eff_pose()}")
+        #pose = sim.get_end_eff_pose()
+        #print(f"Orientation: {pose[3:6]}")
         #sim.get_sensor_reading()
     print("Simulation ended.")
     sim.close()
