@@ -18,7 +18,7 @@ CLOSE_REWARD_DIST = 0.1
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.3, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.4, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
