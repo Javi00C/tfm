@@ -6,13 +6,14 @@ import pybullet
 from ur5e_gripper_sim import UR5Sim
 
 if __name__ == "__main__":
-    sim = UR5Sim(useIK=True, renders=True, maxSteps=500,goal_position=[0.5,0.4,0.5])
-
+    sim = UR5Sim(useIK=True, renders=True, maxSteps=500,goal_position=[0.5,0.4,0.6])
+    goal = [0.5,0.4,0.6]
     # Move the arm a bit, keep the gripper open
     for i in range(1000000):
         end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         gripper_cmd = 0.6  # open
         sim.step(end_effector_velocity, gripper_cmd)
+        print(f"Distance link to goal: {np.linalg.norm(sim.get_last_rope_link_position()-goal)}")
         #pose = sim.get_end_eff_pose()
         #print(f"Orientation: {pose[3:6]}")
         #sim.get_sensor_reading()

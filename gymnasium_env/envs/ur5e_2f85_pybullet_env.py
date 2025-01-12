@@ -10,7 +10,7 @@ import time
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 MAX_REWARD = 1000
-MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
 CLOSE_REWARD_DIST = 0.1
@@ -18,7 +18,7 @@ CLOSE_REWARD_DIST = 0.1
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.4, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.4, 0.6]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -40,6 +40,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
         self.current_step = 0
+        self.time_near_target = 0
 
         self.done = False
 
@@ -47,6 +48,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         super().reset(seed=seed)
         self.sim.reset()
         self.current_step = 0
+        self.time_near_target = 0
         self.done = False
         obs = self._get_obs()
         return obs, {}
@@ -62,13 +64,14 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         # Fix gripper open
         self.sim.step(end_effector_velocity, gripper_action)
-
+        
         obs = self._get_obs()
 
+        self.done = self._check_done()
         reward = self._calculate_reward()
         
         self.current_step += 1
-        self.done = self._check_done()
+        
         terminated = self.done
         truncated = self.current_step >= self.max_steps
 
@@ -102,18 +105,26 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     #     return total_reward
 
     def _calculate_reward(self):
-        link_rope_pos = self.sim.get_last_rope_link_position()
-        dist = np.linalg.norm(link_rope_pos - self.target)
-        
-        
-        reward = -dist # Weighted penalty for position and orientation errors
-        
-        # Bonus for being close to the target
-        if dist < CLOSE_REWARD_DIST:
-            reward += 2.0
-        
-        # Small penalty for every time step
-        reward -= 0.01  # Step penalty
+
+        if self.done:
+            reward = -5
+        else:
+            link_rope_pos = self.sim.get_last_rope_link_position()
+            dist = np.linalg.norm(link_rope_pos - self.target)
+            
+            reward = -dist # Weighted penalty for position and orientation errors
+            
+            # Bonus for being close to the target
+            if dist < CLOSE_REWARD_DIST:
+                #Minimum reward = 2.0 (sum of both contributions)
+                reward += np.clip(0.1/dist,1,5)
+                reward += 1.0
+                self.time_near_target += 1
+                reward += 0.1 * self.time_near_target
+            else:
+                self.time_near_target = 0
+            # Small penalty for every time step
+            reward -= 0.01  # Step penalty
 
         return reward
 
