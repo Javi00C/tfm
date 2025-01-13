@@ -153,7 +153,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
             np.array(tcp_vel, dtype=np.float32),
             np.array(last_link_rope_pos, dtype=np.float32)
             #np.array(sensor_reading, dtype=np.float32)
-        ), axis=0)
+        ), axis=None)
 
         obs = obs.flatten()
         obs = np.squeeze(obs)

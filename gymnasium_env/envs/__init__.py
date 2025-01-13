@@ -4,3 +4,4 @@
 # from gymnasium_env.envs.ur5e_2f85_mujoco_env import ur5e_2f85Env
 from gymnasium_env.envs.ur5e_2f85_pybullet_env import ur5e_2f85_pybulletEnv
 from gymnasium_env.envs.ur5e_2f85_pybullet_env_simple import ur5e_2f85_pybulletEnv_Simple
+from gymnasium_env.envs.ur5e_2f85_pybullet_env_simple_3d import ur5e_2f85_pybulletEnv_Simple_3d
