@@ -24,7 +24,7 @@ class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
         self.render_mode = render_mode
 
         # Observation space
-        self.num_robot_joints = 6
+        self.num_robot_joints = 3
         self.num_sensor_readings = 160*120
         self.rope_link_pose = 3
         self.target_size = 3
@@ -37,6 +37,7 @@ class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
         self.current_step = 0
+        self.time_near_target = 0
 
         self.done = False
 
@@ -44,6 +45,7 @@ class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
         super().reset(seed=seed)
         self.sim.reset()
         self.current_step = 0
+        self.time_near_target = 0
         self.done = False
         obs = self._get_obs()
         return obs, {}
@@ -89,7 +91,10 @@ class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
             # Bonus for being close to the target
             if position_error < CLOSE_REWARD_DIST:
                 reward += 2.0
-            
+                self.time_near_target += 1
+                reward += 0.1 * self.time_near_target
+            else:
+                self.time_near_target = 0
             # Small penalty for every time step
             reward -= 0.01  # Step penalty
 
@@ -111,8 +116,8 @@ class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
 
         obs = np.concatenate((
             self.target,
-            np.array(tcp_pos, dtype=np.float32),
-            np.array(tcp_vel, dtype=np.float32)
+            np.array(tcp_pos[:3], dtype=np.float32),
+            np.array(tcp_vel[:3], dtype=np.float32)
         ), axis=None)
 
         obs = obs.flatten()

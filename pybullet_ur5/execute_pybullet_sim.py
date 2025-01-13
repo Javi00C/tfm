@@ -30,7 +30,7 @@ for _ in range(episode_length):
     #print(f"Shape of observation passed to model: {obs.shape}")
     action, _states = model.predict(obs)
     obs, reward, done, info = env.step(action)
-
+    
     # Render the environment
     env.envs[0].render()
         
