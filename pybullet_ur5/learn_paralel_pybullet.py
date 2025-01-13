@@ -29,7 +29,7 @@ print(f"Numpy Version: {np.__version__}")
 NUM_ENVS = 25  # Adjust based on system's capacity
 TIMESTEPS = 2000000
 DEVICE_USED = 'cpu'
-env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v1"
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
     return gymnasium.make(env_str, render_mode='training')
