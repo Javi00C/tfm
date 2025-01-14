@@ -27,7 +27,7 @@ class ur5e_2f85_pybulletEnv_Simple_6d(gym.Env):
         self.num_robot_joints = 6
         self.num_sensor_readings = 160*120
         self.rope_link_pose = 3
-        self.target_size = 3
+        self.target_size = 6
         obs_dim = 2*self.num_robot_joints + self.target_size
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
