@@ -30,6 +30,8 @@ NUM_ENVS = 25  # Adjust based on system's capacity
 TIMESTEPS = 2000000
 DEVICE_USED = 'cpu'
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v3"
+#env_str = "gymnasium_env/ur5e_pybulletEnv-v0"
+
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():
     return gymnasium.make(env_str, render_mode='training')
@@ -89,22 +91,3 @@ if __name__ == '__main__':
     mean_reward, std_reward = evaluate_policy(best_model, eval_env, n_eval_episodes=5)
     print(f"Best Model - Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
     eval_env.close()
-
-    # # Plot evaluation results
-    # data = np.load(os.path.join(log_dir, "evaluations.npz"))
-    # timesteps = data['timesteps']
-    # results = data['results']
-
-    # mean_results = np.mean(results, axis=1)
-    # std_results = np.std(results, axis=1)
-
-    # plt.figure()
-    # plt.plot(timesteps, mean_results)
-    # plt.fill_between(timesteps,
-    #                  mean_results - std_results,
-    #                  mean_results + std_results,
-    #                  alpha=0.3)
-    # plt.xlabel("Timesteps")
-    # plt.ylabel("Mean Reward")
-    # plt.title(f"PPO Performance on {env_str}")
-    # plt.show()
