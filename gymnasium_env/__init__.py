@@ -40,3 +40,10 @@ register(
     id="gymnasium_env/ur5e_2f85_pybulletEnv-v2",
     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple_3d",
 )
+
+#PyBullet robot simulation
+register(
+    id="gymnasium_env/ur5e_2f85_pybulletEnv-v3",
+    entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple_6d",
+)
+

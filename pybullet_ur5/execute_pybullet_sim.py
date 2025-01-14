@@ -8,7 +8,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 model = PPO.load("models_pybullet/best_model")
 #model = PPO.load("models_pybullet/best_model")
 
-env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v2"
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v3"
 
 # Create the environment with rendering enabled
 env = gym.make(env_str, render_mode='human')
