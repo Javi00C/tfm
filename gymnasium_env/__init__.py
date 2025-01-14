@@ -35,12 +35,6 @@ register(
     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple",
 )
 
-<<<<<<< HEAD
-#PyBullet UR5e robot simulation
-register(
-    id="gymnasium_env/ur5e_pybulletEnv-v0",
-    entry_point="gymnasium_env.envs:ur5e_pybulletEnv",
-=======
 #PyBullet robot simulation
 register(
     id="gymnasium_env/ur5e_2f85_pybulletEnv-v2",
@@ -51,6 +45,10 @@ register(
 register(
     id="gymnasium_env/ur5e_2f85_pybulletEnv-v3",
     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple_6d",
->>>>>>> f81c4e15a78aa7d23c7e8816cc7a41d0bdd4025b
 )
+
+#PyBullet UR5e robot simulation
+register(
+    id="gymnasium_env/ur5e_pybulletEnv-v0",
+    entry_point="gymnasium_env.envs:ur5e_pybulletEnv",
 
