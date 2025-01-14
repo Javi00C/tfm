@@ -5,12 +5,12 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 # Load the saved PPO model
-#model = PPO.load("models_pybullet/best_model")
+model = PPO.load("models_pybullet/best_model")
 #model = PPO.load("models_pybullet/ppo_robot_py_25_2048000")
 #model = PPO.load("models_pybullet/ppo_ur5_simple_demo_25_2048000")
 #model = PPO.load("models_pybullet/ppo_ur5_simple_demo_10_81920")
 #model = PPO.load("models_pybullet/ppo_ur5_simple_demo_25_81920")
-model = PPO.load("models_pybullet/ppo_ur5_simple_demo_12_3_25_1024000")
+#model = PPO.load("models_pybullet/ppo_ur5_simple_demo_12_3_25_1024000")
 
 env_str = "gymnasium_env/ur5e_pybulletEnv-v0"
 
