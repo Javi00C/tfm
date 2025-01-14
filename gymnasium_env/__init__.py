@@ -51,4 +51,5 @@ register(
 register(
     id="gymnasium_env/ur5e_pybulletEnv-v0",
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv",
+)
 
