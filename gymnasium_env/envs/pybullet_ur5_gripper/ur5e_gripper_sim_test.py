@@ -14,11 +14,11 @@ if __name__ == "__main__":
         gripper_cmd = 0.6  # open
         sim.step(end_effector_velocity, gripper_cmd)
         #print(f"Distance link to goal: {np.linalg.norm(sim.get_last_rope_link_position()-goal)}")
-        pose = sim.get_end_eff_pose()
-        print(f"Distance EE to goal: {np.linalg.norm(pose[:3]-goal)}")
-        
         #pose = sim.get_end_eff_pose()
-        #print(f"Orientation: {pose[3:6]}")
+        #print(f"Distance EE to goal: {np.linalg.norm(pose[:3]-goal)}")
+        
+        pose = sim.get_end_eff_pose()
+        print(f"Position: {pose[:3]}")
         #sim.get_sensor_reading()
     print("Simulation ended.")
     sim.close()
