@@ -1,0 +1,37 @@
+hydra:
+  run:
+    dir: ./
+
+tacto:
+  width: 120
+  height: 160
+
+digit:
+  urdf_path: "meshes/digit.urdf"
+  base_position: [0.6, 0.182, 0.373]
+
+  # quaternion from p.getQuaternionFromEuler([0, -pi/2, 0])
+  #base_orientation: [0.0, -0.707106, 0.0, 0.707106]
+  use_fixed_base: False
+
+object:
+  urdf_path: "objects/sphere_small.urdf"
+  base_position: [0.584, 0.147, 0.3]
+  global_scaling: 0.15
+
+object_control_panel:
+  slider_params:
+    position_low: [0, 0, 0]
+    position_high: [1, 1, 1]
+
+pybullet_camera:
+  cameraDistance: 0.12
+  cameraYaw: 90.
+  cameraPitch: -45.
+  cameraTargetPosition: [0, 0, 0]
+  
+rope:
+  urdf_path: "objects/rope.urdf"
+  base_position: [0.635, 0.135, 1]
+  global_scaling: 1
+
