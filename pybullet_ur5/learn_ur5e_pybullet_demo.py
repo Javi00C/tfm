@@ -68,7 +68,7 @@ if __name__ == '__main__':
     eval_callback = EvalCallback(eval_env,
                                  best_model_save_path=model_dir,
                                  log_path=log_dir,
-                                 eval_freq=10240,  # Adjust evaluation frequency
+                                 eval_freq=1024,  # Adjust evaluation frequency
                                  n_eval_episodes=5)
 
     # Create a PPO agent

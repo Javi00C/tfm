@@ -6,7 +6,7 @@ import time
 
 from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim import UR5Sim
 
-MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
 #VELOCITY_SCALE = 1.0 #Originally at 0.3
 VELOCITY_SCALE = 0.02 #Originally at 0.3
