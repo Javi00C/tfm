@@ -103,7 +103,7 @@ class ur5e_2f85_pybulletEnv_Simple_6d(gym.Env):
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
         ee_pose = self.sim.get_end_eff_pose()
-        dist_to_target = np.linalg.norm(ee_pose[:3] - self.target)
+        dist_to_target = np.linalg.norm(ee_pose - self.target)
         if dist_to_target > MAX_DISTANCE:
             return True
         return False
