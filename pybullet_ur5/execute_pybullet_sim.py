@@ -8,7 +8,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 model = PPO.load("models_pybullet/best_model")
 #model = PPO.load("models_pybullet/best_model")
 
-env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v3"
 
 # Create the environment with rendering enabled
 env = gym.make(env_str, render_mode='human')
@@ -30,7 +30,7 @@ for _ in range(episode_length):
     #print(f"Shape of observation passed to model: {obs.shape}")
     action, _states = model.predict(obs)
     obs, reward, done, info = env.step(action)
-
+    
     # Render the environment
     env.envs[0].render()
         

@@ -7,16 +7,16 @@ import time
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim_simple import UR5Sim
 
 MAX_REWARD = 1000
-MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
 VELOCITY_SCALE = 1.0 #Originally at 0.3
 CLOSE_REWARD_DIST = 0.1
 
-class ur5e_2f85_pybulletEnv_Simple(gym.Env):
+class ur5e_2f85_pybulletEnv_Simple_6d(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.5, 0.5, 0.02, -0.001,  0.68]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.5, 0.5, 0.5, 0.02, -0.001, 0.68]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -37,6 +37,7 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
         self.current_step = 0
+        self.time_near_target = 0
 
         self.done = False
 
@@ -44,13 +45,16 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         super().reset(seed=seed)
         self.sim.reset()
         self.current_step = 0
+        self.time_near_target = 0
         self.done = False
         obs = self._get_obs()
         return obs, {}
 
     def step(self, action):
         
-        velocity_action = action[:6]
+        
+        velocity_action = action
+
         #gripper_action = action[6]
         gripper_action = 1.0
 
@@ -62,64 +66,36 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
 
         obs = self._get_obs()
 
+        self.done = self._check_done()
         reward = self._calculate_reward()
         
         self.current_step += 1
-        self.done = self._check_done()
+
         terminated = self.done
         truncated = self.current_step >= self.max_steps
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
         #print(f"robot tcp pose: {self.sim.get_end_eff_pose()}")
         return obs, reward, terminated, truncated, {}
 
-    # def _calculate_reward(self):
-    #     #Position only
-    #     #ee_pos = self.sim.get_current_pose()
-    #     #dist = np.linalg.norm(ee_pos - self.target)
-        
-    #     #Position and orientation
-    #     ee_pose = self.sim.get_end_eff_pose()
-    #     dist = np.linalg.norm(ee_pose - self.target)
-
-        
-    #     reward = -dist
-
-        
-    #     if dist < CLOSE_REWARD_DIST:
-    #         reward += 1.0/dist  # Provide a small "hovering reward" each step
-
-        
-    #     step_penalty = -0.01
-    #     reward += step_penalty
-
-    #     return reward
-
     def _calculate_reward(self):
         ee_pose = self.sim.get_end_eff_pose()
-        position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
-        orientation_error = np.linalg.norm(ee_pose[3:] - self.target[3:])
+        position_error = np.linalg.norm(ee_pose - self.target)
         
-        reward = -position_error - 0.5*orientation_error  # Weighted penalty for position and orientation errors
-        
-        # Bonus for being close to the target
-        if position_error < CLOSE_REWARD_DIST:
-            #reward += 0.1 / (position_error + 1e-6)  # Avoid division by zero
-            reward += 1.0
-
-            # Add velocity penalty to discourage movement
-            ee_velocity = self.sim.get_end_effector_velocity()
-            reward -= np.linalg.norm(ee_velocity)
-
-            # Add time-based bonus for staying in the goal region
-            self.time_in_goal += 1
-            reward += 0.1 * self.time_in_goal  # Reward grows with time
+        if self.done:
+            reward = -2
         else:
-            self.time_in_goal = 0
         
-        # Small penalty for every time step
-        reward -= 0.01  # Step penalty
-        
-        # # Penalty for unnecessary movement
+            reward = -position_error  # Weighted penalty for position and orientation errors
+            
+            # Bonus for being close to the target
+            if position_error < CLOSE_REWARD_DIST:
+                reward += 2.0
+                self.time_near_target += 1
+                reward += 0.1 * self.time_near_target
+            else:
+                self.time_near_target = 0
+            # Small penalty for every time step
+            reward -= 0.01  # Step penalty
 
         return reward
 
