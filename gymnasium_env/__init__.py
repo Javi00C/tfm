@@ -59,4 +59,10 @@ register(
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv_random",
 )
 
+#PyBullet UR5e robot simulation RANDOM GOAL + RANDOM ORIENTATION
+register(
+    id="gymnasium_env/ur5e_pybulletEnv-v2",
+    entry_point="gymnasium_env.envs:ur5e_pybulletEnv_random_orient",
+)
+
 

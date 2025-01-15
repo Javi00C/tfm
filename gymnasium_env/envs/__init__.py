@@ -8,4 +8,5 @@ from gymnasium_env.envs.ur5e_2f85_pybullet_env_simple_3d import ur5e_2f85_pybull
 from gymnasium_env.envs.ur5e_2f85_pybullet_env_simple_6d import ur5e_2f85_pybulletEnv_Simple_6d
 from gymnasium_env.envs.ur5e_pybullet_env import ur5e_pybulletEnv
 from gymnasium_env.envs.ur5e_pybullet_random_env import ur5e_pybulletEnv_random
+from gymnasium_env.envs.ur5e_pybullet_random_orient_env import ur5e_pybulletEnv_random_orient
 

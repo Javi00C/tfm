@@ -12,8 +12,9 @@ from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 MAX_REWARD = 1000
 MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
-MAX_STEPS_SIM = 4000
+MAX_STEPS_SIM = 10000
 CLOSE_REWARD_DIST = 0.1
+VELOCITY_SCALE = 0.1 #Originally at 0.3
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
@@ -59,8 +60,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         #gripper_action = action[6]
         gripper_action = 1.0
 
-        velocity_scale = 1.0 #Maximum velocity that is stable in the simulation
-        end_effector_velocity = velocity_action * velocity_scale
+        end_effector_velocity = velocity_action * VELOCITY_SCALE
 
         # Fix gripper open
         self.sim.step(end_effector_velocity, gripper_action)
@@ -78,55 +78,44 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         #print(f"Last rope link position: {self.sim.get_last_rope_link_position()}")
         return obs, reward, terminated, truncated, {}
 
+
     # def _calculate_reward(self):
-    #     # Compute reward: reward is high when close to the target, penalized with distance
-        
-    #     # Apply constant negative reward per step to encourage efficient behavior
-    #     step_penalty = -10
-
-    #     # Determine the current tile and whether it's on the edge
-
-    #     max_rew = MAX_REWARD
-    #     max_dist = MAX_DIST_REW
-    #     a = -max_rew/max_dist
-    #     b = max_rew
 
     #     if self.done:
-    #         terminated_penalty = -MAX_REWARD
-    #         reward = 0
+    #         reward = -5
     #     else:
-    #         terminated_penalty = 0
     #         link_rope_pos = self.sim.get_last_rope_link_position()
     #         dist = np.linalg.norm(link_rope_pos - self.target)
-    #         #reward = MAX_REWARD / (0.001 + dist)  # Reward function
-    #         reward = a*dist+b
+            
+    #         reward = -dist # Weighted penalty for position and orientation errors
+            
+    #         # Bonus for being close to the target
+    #         if dist < CLOSE_REWARD_DIST:
+    #             #Minimum reward = 2.0 (sum of both contributions)
+    #             reward += np.clip(0.1/dist,1,5)
+    #             reward += 1.0
+    #             self.time_near_target += 1
+    #             reward += 0.1 * self.time_near_target
+    #         else:
+    #             self.time_near_target = 0
+    #         # Small penalty for every time step
+    #         reward -= 0.01  # Step penalty
 
-    #     total_reward = step_penalty + reward + terminated_penalty
-    #     return total_reward
+    #     return reward
 
     def _calculate_reward(self):
-
-        if self.done:
-            reward = -5
+        ll_pos = self.sim.get_last_rope_link_position()
+        position_error = np.linalg.norm(ll_pos - self.target)
+                
+        if self.current_step == 0:
+            self.distance = position_error
+            self.reward = 0
         else:
-            link_rope_pos = self.sim.get_last_rope_link_position()
-            dist = np.linalg.norm(link_rope_pos - self.target)
-            
-            reward = -dist # Weighted penalty for position and orientation errors
-            
-            # Bonus for being close to the target
-            if dist < CLOSE_REWARD_DIST:
-                #Minimum reward = 2.0 (sum of both contributions)
-                reward += np.clip(0.1/dist,1,5)
-                reward += 1.0
-                self.time_near_target += 1
-                reward += 0.1 * self.time_near_target
-            else:
-                self.time_near_target = 0
-            # Small penalty for every time step
-            reward -= 0.01  # Step penalty
+            self.reward = (self.distance - position_error)*10
+            self.distance = position_error
 
-        return reward
+        #print(f"Reward: {self.reward}")
+        return self.reward
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
@@ -149,9 +138,9 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         obs = np.concatenate((
             self.target,
+            np.array(last_link_rope_pos, dtype=np.float32)
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32),
-            np.array(last_link_rope_pos, dtype=np.float32)
             #np.array(sensor_reading, dtype=np.float32)
         ), axis=None)
 
