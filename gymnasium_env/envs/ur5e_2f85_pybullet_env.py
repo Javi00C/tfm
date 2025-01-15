@@ -138,9 +138,9 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         obs = np.concatenate((
             self.target,
-            np.array(last_link_rope_pos, dtype=np.float32)
+            np.array(last_link_rope_pos, dtype=np.float32),
             np.array(tcp_pos, dtype=np.float32),
-            np.array(tcp_vel, dtype=np.float32),
+            np.array(tcp_vel, dtype=np.float32)
             #np.array(sensor_reading, dtype=np.float32)
         ), axis=None)
 
