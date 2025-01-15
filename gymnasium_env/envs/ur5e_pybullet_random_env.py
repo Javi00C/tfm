@@ -10,8 +10,7 @@ from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim import UR5Sim
 
 MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
-#VELOCITY_SCALE = 1.0 #Originally at 0.3
-VELOCITY_SCALE = 0.02 #Originally at 0.3
+VELOCITY_SCALE = 0.02 
 CLOSE_REWARD_DIST = 0.1
 
 
@@ -38,7 +37,7 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(3,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
+        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
         self.current_step = 0
         self.reward = 0
         self.distance = 0
@@ -77,6 +76,8 @@ class ur5e_pybulletEnv_random(gym.Env):
 
         self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
         self.sim.reset()
+        self.sim.add_visual_goal(self.target)
+
         self.current_step = 0
         self.done = False
         obs = self._get_obs()

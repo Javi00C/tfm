@@ -39,8 +39,7 @@ class UR5Sim:
                  useIK=True,
                  renders=True,
                  maxSteps=1000,
-                 cfg=None,
-                 goal_position=None):
+                 cfg=None):
 
         self.renders = renders
         self.useIK = useIK
@@ -148,8 +147,6 @@ class UR5Sim:
         self.stepCounter = 0
         self.ur5_joint_ids = [1,2,3,4,5,6]
         
-        #Create visual goal in simulation
-        self.add_visual_goal(goal_position)
 
         # Reset Robot to Default Pose and Load Rope
         self.reset()
@@ -400,7 +397,7 @@ class UR5Sim:
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
         self.set_joint_angles(joint_angles)
-        #self.end_effector_vel = np.zeros(6)
+
         for i in range(100):
             pybullet.stepSimulation()
 
