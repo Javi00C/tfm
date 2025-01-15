@@ -26,10 +26,7 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.max_steps = max_steps
         self.render_mode = render_mode
 
-        #Create random goal
-        self.radius = 0.5
-        self.center = [0.49, 0.13, 0.69]
-        self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
+
         # Observation space
         self.num_robot_joints = 6
         self.ee_position_size = 3
@@ -46,6 +43,11 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.reward = 0
         self.distance = 0
         self.time_in_goal = 0
+
+        #Create random goal
+        self.radius = 0.2
+        self.center = self.sim.get_end_eff_position()#[0.49, 0.13, 0.69]
+        self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
 
         self.done = False
 
