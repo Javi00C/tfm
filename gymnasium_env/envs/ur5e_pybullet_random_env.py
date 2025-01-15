@@ -8,11 +8,13 @@ import math
 
 from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim import UR5Sim
 
-MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
-VELOCITY_SCALE = 0.02 
-CLOSE_REWARD_DIST = 0.1
+#VELOCITY_SCALE = 0.02 
+VELOCITY_SCALE = 0.06 
+CLOSE_REWARD_DIST = 0.01
 
+GOAL_SPAWN_RADIUS = 0.3
 
 
 class ur5e_pybulletEnv_random(gym.Env):
@@ -41,14 +43,14 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.current_step = 0
         self.reward = 0
         self.distance = 0
-        self.time_in_goal = 0
 
         #Create random goal
-        self.radius = 0.2
+        self.radius = GOAL_SPAWN_RADIUS
         self.center = self.sim.get_end_eff_position()#[0.49, 0.13, 0.69]
         self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
 
         self.done = False
+        self.goal = False
 
     def random_point_in_sphere(self,radius, center):
         """
@@ -80,6 +82,7 @@ class ur5e_pybulletEnv_random(gym.Env):
 
         self.current_step = 0
         self.done = False
+        self.goal = False
         obs = self._get_obs()
 
 
@@ -97,8 +100,9 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.current_step += 1
         #check if no more steps are needed
         self.done = self._check_done()
+        self.goal = self._check_goal()
         #terminated flag True -> if _check_done() True
-        terminated = self.done
+        terminated = self.done or self.goal
         #truncated flag True -> if maximum steps exectuted
         truncated = self.current_step >= self.max_steps
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
@@ -111,16 +115,24 @@ class ur5e_pybulletEnv_random(gym.Env):
         position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
        
         #sfoix reward
-        self.time_in_goal += 1
-        if self.time_in_goal == 0:
+        if self.current_step == 0:
            self.distance = position_error
            self.reward = 0
         else:
            self.reward = (self.distance - position_error)*10
            self.distance = position_error
-
+           
+        if self.goal:
+            reward += 10 
         #print(f"Reward: {self.reward}")
         return self.reward
+
+    def _check_goal(self):
+        ee_position = self.sim.get_end_eff_position()
+        dist_to_target = np.linalg.norm(ee_position - self.target)
+        if dist_to_target < CLOSE_REWARD_DIST :
+            return True
+        return False
 
 
     def _check_done(self):

@@ -33,7 +33,7 @@ class ur5e_pybulletEnv(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(3,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
+        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
         self.current_step = 0
         self.reward = 0
         self.distance = 0
@@ -44,6 +44,8 @@ class ur5e_pybulletEnv(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         self.sim.reset()
+        self.sim.add_visual_goal(self.target)
+        
         self.current_step = 0
         self.done = False
         obs = self._get_obs()
