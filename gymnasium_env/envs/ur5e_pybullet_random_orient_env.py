@@ -64,7 +64,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
             pose_rchd = self.sim.get_end_eff_pose()
             dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
-
+        print("Goal found")
         self.sim.add_visual_goal_orient(self.goal)
         
 
