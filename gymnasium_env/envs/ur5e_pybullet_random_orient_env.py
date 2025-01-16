@@ -53,7 +53,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def create_goal(self):
         dist_pose_rchd = 1
-        while dist_pose_rchd > 0.02:
+        while dist_pose_rchd > 0.05:
             self.orientation_goal = self.random_orient_in_sphere()
             self.position_goal = self.random_point_in_sphere(self.radius,self.center)
             self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
