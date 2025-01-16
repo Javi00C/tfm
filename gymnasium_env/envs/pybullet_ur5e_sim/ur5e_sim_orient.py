@@ -483,24 +483,35 @@ class UR5Sim:
             if x**2 + y**2 + z**2 <= radius**2:
                 return (center[0] + x, center[1] + y, center[2] + z)
 
+    def goal_step_sim(self):
+        for i in range(200):
+                pybullet.stepSimulation()
+
     def reset(self):
+
         self.stepCounter = 0
         joint_angles = (0, -math.pi/2, math.pi/2, math.pi, -math.pi/2, 0)#(0, -math.pi/2, math.pi/2, -math.pi/2, -math.pi/2, 0)
-        roll = random.uniform(-math.pi, math.pi)
-        pitch = random.uniform(-math.pi, math.pi)
-        yaw = random.uniform(-math.pi, math.pi)
-        radius = 0.1
-        center = [0.4,0,0.4]
-        rand_or = (roll,pitch,yaw)
-        rand_pos = self.random_point_in_sphere(radius,center)
-        target = np.array(rand_pos + rand_or,dtype=np.float32)
-        self.add_visual_goal_orient(target)
-        joint_angles = self.calculate_ik(rand_pos,rand_or)
+        # dist_pose_rchd = 1
+        # while dist_pose_rchd > 0.02:
+        #     roll = random.uniform(-math.pi, math.pi)
+        #     pitch = random.uniform(-math.pi, math.pi)
+        #     yaw = random.uniform(-math.pi, math.pi)
+        #     radius = 0.1
+        #     center = [0.4,0,0.4]
+        #     rand_or = (roll,pitch,yaw)
+        #     rand_pos = self.random_point_in_sphere(radius,center)
+        #     target = np.array(rand_pos + rand_or,dtype=np.float32)
+        #     joint_angles = self.calculate_ik(rand_pos,rand_or)
+        #     self.set_joint_angles(joint_angles)
+            
+        #     for i in range(200):
+        #         pybullet.stepSimulation()
+
+        #     pose_rchd = self.get_end_eff_pose()
+        #     dist_pose_rchd = np.linalg.norm(pose_rchd - target)
         self.set_joint_angles(joint_angles)
-
-        for i in range(100):
+        for i in range(200):
             pybullet.stepSimulation()
-
         # Reset rope: remove old segments and constraints
         # if hasattr(self, 'rope_segments'):
         #     for seg_id in self.rope_segments:
@@ -515,8 +526,71 @@ class UR5Sim:
         for i in range(100):
             pybullet.stepSimulation()
 
+
+    def visualize_tcp(self, tcp_pose):
+        """
+        Visualize the TCP position and orientation in the simulation.
+
+        Args:
+            tcp_pose (list): A list containing position [x, y, z] and orientation [roll, pitch, yaw].
+        """
+        # Remove previous visualization if it exists
+        if hasattr(self, 'tcp_visuals'):
+            for visual_id in self.tcp_visuals:
+                pybullet.removeUserDebugItem(visual_id)
+        self.tcp_visuals = []
+
+        position = tcp_pose[:3]
+        orientation_euler = tcp_pose[3:]
+        orientation_quat = pybullet.getQuaternionFromEuler(orientation_euler)
+
+        # Add a sphere for the TCP position
+        tcp_sphere_id = pybullet.addUserDebugText(
+            text="TCP",
+            textPosition=position,
+            textColorRGB=[1, 0, 0],  # Red text for position label
+            textSize=1.5
+        )
+        self.tcp_visuals.append(tcp_sphere_id)
+
+        # Orientation visualization (arrows for axes)
+        arrow_length = 0.1  # Length of the arrows
+        arrow_colors = {
+            "x": [1, 0, 0],  # Red for X-axis
+            "y": [0, 1, 0],  # Green for Y-axis
+            "z": [0, 0, 1]   # Blue for Z-axis
+        }
+        rotation_matrix = pybullet.getMatrixFromQuaternion(orientation_quat)
+
+        # Extract the direction vectors for the axes
+        x_axis = [rotation_matrix[0], rotation_matrix[1], rotation_matrix[2]]
+        y_axis = [rotation_matrix[3], rotation_matrix[4], rotation_matrix[5]]
+        z_axis = [rotation_matrix[6], rotation_matrix[7], rotation_matrix[8]]
+
+        # Add arrows for orientation
+        for axis, direction in zip(["x", "y", "z"], [x_axis, y_axis, z_axis]):
+            arrow_id = pybullet.addUserDebugLine(
+                position,
+                [position[0] + arrow_length * direction[0],
+                 position[1] + arrow_length * direction[1],
+                 position[2] + arrow_length * direction[2]],
+                lineColorRGB=arrow_colors[axis],
+                lineWidth=2
+            )
+            self.tcp_visuals.append(arrow_id)
+
+    def update_tcp_visualization(self):
+        """
+        Updates the TCP visualization in the simulation.
+        Call this method at each iteration to refresh the TCP visualization.
+        """
+        tcp_pose = self.get_end_eff_pose()
+        self.visualize_tcp(tcp_pose)
+
+
     def step(self, end_effector_velocity):
         #self.end_effector_vel = end_effector_velocity
+        #self.update_tcp_visualization()
         active_joint_indices = []
         for i in range(self.num_joints):
             info = pybullet.getJointInfo(self.ur5, i)

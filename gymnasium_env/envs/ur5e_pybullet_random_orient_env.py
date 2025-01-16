@@ -14,7 +14,7 @@ MAX_STEPS_SIM = 10000
 VELOCITY_SCALE = 0.06 
 CLOSE_REWARD_DIST = 0.01
 
-GOAL_SPAWN_RADIUS = 0.3
+GOAL_SPAWN_RADIUS = 0.2
 
 
 class ur5e_pybulletEnv_random_orient(gym.Env):
@@ -44,15 +44,29 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.distance = 0
 
         #Create random goal
-        self.radius = GOAL_SPAWN_RADIUS
         self.center = self.sim.get_end_eff_position()
-        self.position_target = self.random_point_in_sphere(self.radius, self.center)
-        self.orientation_target = self.random_orient_in_sphere()
-        self.target = self.position_target + self.orientation_target # (way to concatenate tuples using "+")
-        self.target = np.array(self.target,dtype=np.float32)
+        self.radius = GOAL_SPAWN_RADIUS
+        self.create_goal()
 
         self.done = False
-        self.goal = False
+        self.goal_reached = False
+
+    def create_goal(self):
+        dist_pose_rchd = 1
+        while dist_pose_rchd > 0.02:
+            self.orientation_goal = self.random_orient_in_sphere()
+            self.position_goal = self.random_point_in_sphere(self.radius,self.center)
+            self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
+            joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
+            self.sim.set_joint_angles(joint_angles)
+            
+            self.sim.goal_step_sim() # steps the simulation so that it gets to tries to get to goal point
+
+            pose_rchd = self.sim.get_end_eff_pose()
+            dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
+
+        self.sim.add_visual_goal_orient(self.goal)
+        
 
     def random_orient_in_sphere(self): # returns tuple
         roll = random.uniform(-math.pi, math.pi)
@@ -61,16 +75,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         return (roll,pitch,yaw)
 
     def random_point_in_sphere(self,radius, center):
-        """
-        Generates a random 3D point inside a sphere of a given radius centered at a given point.
-
-        Args:
-            radius (float): Radius of the sphere.
-            center (tuple): Coordinates of the sphere's center (x, y, z).
-
-        Returns:
-            tuple: Random point (x, y, z) inside the sphere.
-        """
         while True:
             # Generate a random point in the cube that bounds the sphere
             x = random.uniform(-radius, radius)
@@ -84,15 +88,12 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.position_target = self.random_point_in_sphere(self.radius, self.center)
-        self.orientation_target = self.random_orient_in_sphere()
-        self.target = np.array(self.position_target + self.orientation_target,dtype=np.float32) # (way to concatenate tuples using "+")        
         self.sim.reset()
-        self.sim.add_visual_goal_orient(self.target)
+        self.create_goal()
 
         self.current_step = 0
         self.done = False
-        self.goal = False
+        self.goal_reached = False
         obs = self._get_obs()
 
 
@@ -111,9 +112,9 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.current_step += 1
         #check if no more steps are needed
         self.done = self._check_done()
-        self.goal = self._check_goal()
+        self.goal_reached = self._check_goal()
         #terminated flag True -> if _check_done() True
-        terminated = self.done or self.goal
+        terminated = self.done or self.goal_reached
         #truncated flag True -> if maximum steps exectuted
         truncated = self.current_step >= self.max_steps
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
@@ -133,7 +134,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
            self.reward = (self.distance - position_error)*10
            self.distance = position_error
            
-        if self.goal:
+        if self.goal_reached:
             reward += 10 
         #print(f"Reward: {self.reward}")
         return self.reward
