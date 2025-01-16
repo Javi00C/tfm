@@ -12,7 +12,8 @@ from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 MAX_DISTANCE = 10  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
 #VELOCITY_SCALE = 0.02 
-VELOCITY_SCALE = 0.1 
+CARTESIAN_VEL_SCALE = 0.1 
+ANGULAR_VEL_SCALE = 0.5
 CLOSE_REWARD_DIST = 0.01
 
 GOAL_SPAWN_RADIUS = 0.1
@@ -47,7 +48,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         #Create random goal
         self.center = self.sim.get_end_eff_position()
         self.radius = GOAL_SPAWN_RADIUS
-        self.create_goal()
 
         self.done = False
         self.goal_reached = False
@@ -123,8 +123,11 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def step(self, action):
         #execute a step given the action
-        velocity_action = action[:6]
-        end_effector_velocity = velocity_action * VELOCITY_SCALE        
+        #velocity_action = action[:6]
+        cartesian_action = action[:3] * CARTESIAN_VEL_SCALE
+        angular_action = action[3:] * ANGULAR_VEL_SCALE
+        end_effector_velocity = cartesian_action + angular_action
+ 
         self.sim.step(end_effector_velocity)
         #update the observation
         obs = self._get_obs()
