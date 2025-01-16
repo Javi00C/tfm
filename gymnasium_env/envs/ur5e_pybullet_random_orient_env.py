@@ -9,10 +9,10 @@ import csv
 
 from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 
-MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 10  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
 #VELOCITY_SCALE = 0.02 
-VELOCITY_SCALE = 0.06 
+VELOCITY_SCALE = 0.1 
 CLOSE_REWARD_DIST = 0.01
 
 GOAL_SPAWN_RADIUS = 0.1
@@ -109,7 +109,9 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         
         self.create_goal()
         self.sim.reset()
-        
+        print("Env reset")
+        print(self.goal)
+        print(np.linalg.norm(self.goal))
 
         self.current_step = 0
         self.done = False

@@ -38,9 +38,9 @@ for _ in range(episode_length):
     #action = np.array([np.concatenate((action[0,:3], np.array([0.0, 0.0, 0.0])))])
     #action = np.array([[0.0, 0.0, 0.01, 0.0, 0.0, 0.0]])
     obs, reward, done, info = env.step(action)
-    print(f"action: {action}")
-    print(f"obs: {obs}")
-    print(f"Reward: {reward}")
+    #print(f"action: {action}")
+    #print(f"obs: {obs}")
+    #print(f"Reward: {reward}")
     # Render the environment
     env.envs[0].render()
         
