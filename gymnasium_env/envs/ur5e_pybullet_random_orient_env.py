@@ -53,17 +53,17 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def create_goal(self):
         dist_pose_rchd = 1
-        while dist_pose_rchd > 0.05:
-            self.orientation_goal = self.random_orient_in_sphere()
-            self.position_goal = self.random_point_in_sphere(self.radius,self.center)
-            self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
-            joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
-            self.sim.set_joint_angles(joint_angles)
-            
-            self.sim.goal_step_sim() # steps the simulation so that it tries to get to goal point
+        #while dist_pose_rchd > 0.05:
+        self.orientation_goal = self.random_orient_in_sphere()
+        self.position_goal = self.random_point_in_sphere(self.radius,self.center)
+        self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
+        joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
+        self.sim.set_joint_angles(joint_angles)
+        
+        self.sim.goal_step_sim() # steps the simulation so that it tries to get to goal point
 
-            pose_rchd = self.sim.get_end_eff_pose()
-            dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
+        pose_rchd = self.sim.get_end_eff_pose()
+        dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
 
         self.sim.add_visual_goal_orient(self.goal)
         
