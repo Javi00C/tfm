@@ -12,8 +12,8 @@ from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 MAX_DISTANCE = 10  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
 #VELOCITY_SCALE = 0.02 
-CARTESIAN_VEL_SCALE = 0.5 
-ANGULAR_VEL_SCALE = 0.5
+CARTESIAN_VEL_SCALE = 0.1 
+ANGULAR_VEL_SCALE = 0.7
 CLOSE_REWARD_DIST = 0.01
 
 GOAL_SPAWN_RADIUS = 0.1
