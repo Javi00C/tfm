@@ -5,6 +5,7 @@ from typing import Optional
 import time
 import random
 import math
+import csv
 
 from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 
@@ -14,7 +15,7 @@ MAX_STEPS_SIM = 10000
 VELOCITY_SCALE = 0.06 
 CLOSE_REWARD_DIST = 0.01
 
-GOAL_SPAWN_RADIUS = 0.2
+GOAL_SPAWN_RADIUS = 0.1
 
 
 class ur5e_pybulletEnv_random_orient(gym.Env):
@@ -51,22 +52,40 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.done = False
         self.goal_reached = False
 
-    def create_goal(self):
-        dist_pose_rchd = 1
-        while dist_pose_rchd > 0.1:
-            self.orientation_goal = self.random_orient_in_sphere()
-            self.position_goal = self.random_point_in_sphere(self.radius,self.center)
-            self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
-            joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
-            self.sim.set_joint_angles(joint_angles)
+    # def create_goal(self):
+    #     dist_pose_rchd = 1
+    #     while dist_pose_rchd > 0.1:
+    #         self.orientation_goal = self.random_orient_in_sphere()
+    #         self.position_goal = self.random_point_in_sphere(self.radius,self.center)
+    #         self.goal = np.array(self.orientation_goal + self.position_goal,dtype=np.float32)
+    #         joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
+    #         self.sim.set_joint_angles(joint_angles)
             
-            self.sim.goal_step_sim() # steps the simulation so that it tries to get to goal point
+    #         self.sim.goal_step_sim() # steps the simulation so that it tries to get to goal point
 
-            pose_rchd = self.sim.get_end_eff_pose()
-            dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
-        print("Goal found")
+    #         pose_rchd = self.sim.get_end_eff_pose()
+    #         dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
+    #     print("Goal found")
+    #     self.sim.add_visual_goal_orient(self.goal)
+
+    def create_goal(self):
+        reachable_goals_file = "reachable_goals.csv"
+
+        # Read all reachable goals from the file
+        with open(reachable_goals_file, mode='r') as file:
+            reader = csv.reader(file)
+            goals = [list(map(float, row)) for row in reader]
+
+        if not goals:
+            raise ValueError("No goals found in the reachable goals file.")
+
+        # Select a random goal from the list
+        random_goal = random.choice(goals)
+        self.goal = np.array(random_goal, dtype=np.float32)
+
         self.sim.add_visual_goal_orient(self.goal)
-        
+
+        return self.goal
 
     def random_orient_in_sphere(self): # returns tuple
         roll = random.uniform(-math.pi, math.pi)

@@ -4,7 +4,7 @@ import pybullet
 
 #from ur5e_gripper_sim_simple import UR5Sim
 #from ur5e_gripper_sim import UR5Sim
-from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
+from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient_generator import UR5Sim
 goal = [0.5,0.4,0.6]
 
 if __name__ == "__main__":
@@ -20,7 +20,8 @@ if __name__ == "__main__":
         #print(f"Distance EE to goal: {np.linalg.norm(pose[:3]-goal)}")
         
         pose = sim.get_end_eff_pose()
-        print(f"Orient: {pose[3:6]}")
+        #print(f"Orient: {pose[3:6]}")
+        print(f"Position: {pose[:3]}")
         #sim.get_sensor_reading()
     print("Simulation ended.")
     sim.close()
