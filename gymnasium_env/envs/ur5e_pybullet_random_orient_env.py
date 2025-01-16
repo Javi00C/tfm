@@ -23,15 +23,15 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
     def __init__(self, target=np.array([0.2, 0.2, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
-        #self.target = np.array(target, dtype=np.float32)
+        #self.goal = np.array(target, dtype=np.float32)
         self.max_steps = max_steps
         self.render_mode = render_mode
 
         # Observation space
         self.tcp_coordinates = 6
         self.ee_pose_size = 6
-        self.target_size = 6
-        obs_dim = self.tcp_coordinates + self.target_size + self.ee_pose_size
+        self.goal_size = 6
+        obs_dim = self.tcp_coordinates + self.goal_size + self.ee_pose_size
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Action: 3D end-effector velocity in world coordinates
@@ -60,7 +60,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
             joint_angles = self.sim.calculate_ik(self.position_goal,self.orientation_goal)
             self.sim.set_joint_angles(joint_angles)
             
-            self.sim.goal_step_sim() # steps the simulation so that it gets to tries to get to goal point
+            self.sim.goal_step_sim() # steps the simulation so that it tries to get to goal point
 
             pose_rchd = self.sim.get_end_eff_pose()
             dist_pose_rchd = np.linalg.norm(pose_rchd - self.goal)
@@ -87,9 +87,10 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-
-        self.sim.reset()
+        
         self.create_goal()
+        self.sim.reset()
+        
 
         self.current_step = 0
         self.done = False
@@ -119,12 +120,12 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         truncated = self.current_step >= self.max_steps
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
         #print(f"robot tcp pose: {self.sim.get_end_eff_pose()}")
-        #print(f"Distance ee to goal: {np.linalg.norm(self.sim.get_end_eff_position()-self.target[:3])}")
+        #print(f"Distance ee to goal: {np.linalg.norm(self.sim.get_end_eff_position()-self.goal[:3])}")
         return obs, reward, terminated, truncated, {}
 
     def _calculate_reward(self):
         ee_pose = self.sim.get_end_eff_pose()
-        position_error = np.linalg.norm(ee_pose - self.target)
+        position_error = np.linalg.norm(ee_pose - self.goal)
        
         #sfoix reward
         if self.current_step == 0:
@@ -141,7 +142,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def _check_goal(self):
         ee_pose = self.sim.get_end_eff_pose()
-        dist_to_target = np.linalg.norm(ee_pose - self.target)
+        dist_to_target = np.linalg.norm(ee_pose - self.goal)
         if dist_to_target < CLOSE_REWARD_DIST :
             return True
         return False
@@ -150,9 +151,9 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
         #ee_pose = self.sim.get_end_eff_pose()
-        #dist_to_target = np.linalg.norm(ee_pose - self.target)
+        #dist_to_target = np.linalg.norm(ee_pose - self.goal)
         ee_pose = self.sim.get_end_eff_pose()
-        dist_to_target = np.linalg.norm(ee_pose - self.target)
+        dist_to_target = np.linalg.norm(ee_pose - self.goal)
         if dist_to_target > MAX_DISTANCE:
             return True
         return False
@@ -163,7 +164,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         tcp_vel = self.sim.get_end_eff_vel()
 
         obs = np.concatenate((
-            self.target,
+            self.goal,
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32)
         ), axis=0)
