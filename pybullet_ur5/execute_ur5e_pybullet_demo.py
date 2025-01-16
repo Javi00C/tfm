@@ -13,8 +13,9 @@ model = PPO.load("models_pybullet/best_model")
 #model = PPO.load("models_pybullet/ppo_ur5_simple_demo_12_3_25_1024000")
 
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v1"
-#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
-env_str = "gymnasium_env/ur5e_pybulletEnv-v2"
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
+
+#env_str = "gymnasium_env/ur5e_pybulletEnv-v2"
 # Create the environment with rendering enabled
 env = gym.make(env_str, render_mode='human')
 

@@ -9,12 +9,9 @@ import time
 
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
-MAX_REWARD = 1000
-MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
-MAX_DIST_REW = 2.0
+MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
-CLOSE_REWARD_DIST = 0.1
-VELOCITY_SCALE = 1.0 #First training was using 0.1
+VELOCITY_SCALE = 0.8 #First training was using 0.1
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}

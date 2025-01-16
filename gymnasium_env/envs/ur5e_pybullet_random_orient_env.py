@@ -16,7 +16,7 @@ CARTESIAN_VEL_SCALE = 0.1
 ANGULAR_VEL_SCALE = 0.7
 CLOSE_REWARD_DIST = 0.01
 
-GOAL_SPAWN_RADIUS = 0.1
+GOAL_SPAWN_RADIUS = 0.05
 
 
 class ur5e_pybulletEnv_random_orient(gym.Env):
