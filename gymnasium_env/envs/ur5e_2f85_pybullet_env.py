@@ -14,7 +14,7 @@ MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 10000
 CLOSE_REWARD_DIST = 0.1
-VELOCITY_SCALE = 0.1 #Originally at 0.3
+VELOCITY_SCALE = 1.0 #First training was using 0.1
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}

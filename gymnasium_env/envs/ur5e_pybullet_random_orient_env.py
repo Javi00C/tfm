@@ -6,7 +6,7 @@ import time
 import random
 import math
 
-from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim import UR5Sim
+from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 
 MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
@@ -27,7 +27,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.max_steps = max_steps
         self.render_mode = render_mode
 
-
         # Observation space
         self.tcp_coordinates = 6
         self.ee_pose_size = 6
@@ -46,11 +45,20 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
         #Create random goal
         self.radius = GOAL_SPAWN_RADIUS
-        self.center = self.sim.get_end_eff_position()#[0.49, 0.13, 0.69]########################################################################################
-        self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
+        self.center = self.sim.get_end_eff_position()
+        self.position_target = self.random_point_in_sphere(self.radius, self.center)
+        self.orientation_target = self.random_orient_in_sphere()
+        self.target = self.position_target + self.orientation_target # (way to concatenate tuples using "+")
+        self.target = np.array(self.target,dtype=np.float32)
 
         self.done = False
         self.goal = False
+
+    def random_orient_in_sphere(self): # returns tuple
+        roll = random.uniform(-math.pi, math.pi)
+        pitch = random.uniform(-math.pi, math.pi)
+        yaw = random.uniform(-math.pi, math.pi)
+        return (roll,pitch,yaw)
 
     def random_point_in_sphere(self,radius, center):
         """
@@ -76,9 +84,11 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
+        self.position_target = self.random_point_in_sphere(self.radius, self.center)
+        self.orientation_target = self.random_orient_in_sphere()
+        self.target = np.array(self.position_target + self.orientation_target,dtype=np.float32) # (way to concatenate tuples using "+")        
         self.sim.reset()
-        self.sim.add_visual_goal(self.target)
+        self.sim.add_visual_goal_orient(self.target)
 
         self.current_step = 0
         self.done = False
@@ -90,7 +100,8 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def step(self, action):
         #execute a step given the action
-        end_effector_velocity = np.concatenate((action, np.array([0.0, 0.0, 0.0]))) * VELOCITY_SCALE
+        velocity_action = action[:6]
+        end_effector_velocity = velocity_action * VELOCITY_SCALE        
         self.sim.step(end_effector_velocity)
         #update the observation
         obs = self._get_obs()

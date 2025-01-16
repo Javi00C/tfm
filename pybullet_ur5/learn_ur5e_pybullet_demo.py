@@ -30,7 +30,7 @@ print(f"Numpy Version: {np.__version__}")
 NUM_ENVS = 25  # Adjust based on system's capacity
 #NUM_ENVS = 10  # Adjust based on system's capacity
 #TIMESTEPS = 2048000
-TIMESTEPS = 2048000
+TIMESTEPS = 1024000
 #TIMESTEPS = 81920
 DEVICE_USED = 'cpu'
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v1"
