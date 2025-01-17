@@ -149,7 +149,7 @@ class ur5e_pybulletEnv_orient(gym.Env):
         cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
         orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
        
-        max_dist_orient = np.pi()
+        max_dist_orient = math.pi
         max_dist_cart = np.linalg.norm(self.tcp_ini[:3] - self.goal[:3])
 
         cart_rew_scaling = max_dist_orient/max_dist_cart
