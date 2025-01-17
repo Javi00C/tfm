@@ -338,88 +338,25 @@ class UR5Sim:
         :param color: RGBA color of the sphere [R, G, B, A]
         """
         position = pose[:3]
-        radius=0.01
+        orientation_euler = pose[3:]
+        orientation_quat = pybullet.getQuaternionFromEuler(orientation_euler)
+        print(f"Orientation_quat= {orientation_quat}")
+
         color=[0, 1, 0, 1]
         visual_shape_id = pybullet.createVisualShape(
-            shapeType=pybullet.GEOM_SPHERE,
-            radius=radius,
+            shapeType=pybullet.GEOM_BOX,
+            halfExtents=[0.01, 0.01, 0.01],
             rgbaColor=color
         )
         body_id = pybullet.createMultiBody(
             baseMass=0,  # No mass, purely visual
             baseCollisionShapeIndex=-1,  # No collision
             baseVisualShapeIndex=visual_shape_id,
-            basePosition=position
+            basePosition=position,
+            baseOrientation=orientation_quat
         )
         return body_id
     
-    def add_visual_goal_orient(self, pose):
-        """
-        Adds a visual representation of the goal pose to the simulation.
-        This includes a sphere for the position and lines/arrows for the orientation.
-
-        Args:
-            pose (list): A list or tuple containing position [x, y, z] and orientation [roll, pitch, yaw].
-        """
-        position = pose[:3]
-        orientation_euler = pose[3:]
-        orientation_quat = pybullet.getQuaternionFromEuler(orientation_euler)
-
-        # Sphere to mark the position
-        radius = 0.01
-        color = [0, 1, 0, 1]
-        visual_shape_id = pybullet.createVisualShape(
-            shapeType=pybullet.GEOM_SPHERE,
-            radius=radius,
-            rgbaColor=color
-        )
-        pybullet.createMultiBody(
-            baseMass=0,  # No mass, purely visual
-            baseCollisionShapeIndex=-1,  # No collision
-            baseVisualShapeIndex=visual_shape_id,
-            basePosition=position
-        )
-
-        # Orientation visualization (arrows for axes)
-        arrow_length = 0.1  # Length of the arrows
-        arrow_colors = {
-            "x": [1, 0, 0],  # Red for X-axis
-            "y": [0, 1, 0],  # Green for Y-axis
-            "z": [0, 0, 1]   # Blue for Z-axis
-        }
-        rotation_matrix = pybullet.getMatrixFromQuaternion(orientation_quat)
-        # Extract the direction vectors for the axes
-        x_axis = [rotation_matrix[0], rotation_matrix[1], rotation_matrix[2]]
-        y_axis = [rotation_matrix[3], rotation_matrix[4], rotation_matrix[5]]
-        z_axis = [rotation_matrix[6], rotation_matrix[7], rotation_matrix[8]]
-
-        # Draw arrows
-        pybullet.addUserDebugLine(
-            position, 
-            [position[0] + arrow_length * x_axis[0], 
-            position[1] + arrow_length * x_axis[1], 
-            position[2] + arrow_length * x_axis[2]],
-            lineColorRGB=arrow_colors["x"],
-            lineWidth=2
-        )
-        pybullet.addUserDebugLine(
-            position, 
-            [position[0] + arrow_length * y_axis[0], 
-            position[1] + arrow_length * y_axis[1], 
-            position[2] + arrow_length * y_axis[2]],
-            lineColorRGB=arrow_colors["y"],
-            lineWidth=2
-        )
-        pybullet.addUserDebugLine(
-            position, 
-            [position[0] + arrow_length * z_axis[0], 
-            position[1] + arrow_length * z_axis[1], 
-            position[2] + arrow_length * z_axis[2]],
-            lineColorRGB=arrow_colors["z"],
-            lineWidth=2
-        )
-
-
     def get_end_eff_pose(self): #whole pose including orientation (euler)
         linkstate = pybullet.getLinkState(self.ur5, self.end_effector_index, computeForwardKinematics=True)
         position, orientation = linkstate[0], linkstate[1]

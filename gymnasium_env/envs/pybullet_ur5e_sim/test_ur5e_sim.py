@@ -6,7 +6,7 @@ from ur5e_sim import UR5Sim
 
 if __name__ == "__main__":
     goal = [0.2,0.2,0.5]
-    sim = UR5Sim(useIK=True, renders=True, maxSteps=500,goal_position=goal)
+    sim = UR5Sim(useIK=True, renders=True, maxSteps=500)
     # Move the arm a bit, keep the gripper open
     for i in range(800):
         end_effector_velocity = np.array([0.0, 0.1, 0.0, 0.0, 0.0, 0.0])
