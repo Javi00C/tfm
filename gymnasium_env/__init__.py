@@ -47,21 +47,27 @@ register(
     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple_6d",
 )
 
-#PyBullet UR5e robot simulation
+#PyBullet UR5e robot simulation GOAL: cartesian
 register(
     id="gymnasium_env/ur5e_pybulletEnv-v0",
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv",
 )
 
-#PyBullet UR5e robot simulation RANDOM GOAL
+#PyBullet UR5e robot simulation GOAL: random cartesian
 register(
     id="gymnasium_env/ur5e_pybulletEnv-v1",
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv_random",
 )
 
-#PyBullet UR5e robot simulation RANDOM GOAL + RANDOM ORIENTATION
+#PyBullet UR5e robot simulation GOAL: cartesian and orientation
 register(
     id="gymnasium_env/ur5e_pybulletEnv-v2",
+    entry_point="gymnasium_env.envs:ur5e_pybulletEnv_orient",
+)
+
+#PyBullet UR5e robot simulation GOAL: random cartesian and random orientation
+register(
+    id="gymnasium_env/ur5e_pybulletEnv-v3",
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv_random_orient",
 )
 
