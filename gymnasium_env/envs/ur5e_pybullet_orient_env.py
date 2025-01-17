@@ -152,7 +152,7 @@ class ur5e_pybulletEnv_orient(gym.Env):
         max_dist_orient = math.pi
         max_dist_cart = np.linalg.norm(self.tcp_ini[:3] - self.goal[:3])
 
-        cart_rew_scaling = max_dist_orient/max_dist_cart
+        cart_rew_scaling = 0.5*max_dist_orient/max_dist_cart
 
         if self.current_step == 0:
            self.distance_cart = cart_error
