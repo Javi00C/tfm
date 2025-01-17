@@ -12,8 +12,8 @@ from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 10000
 #VELOCITY_SCALE = 0.02 
-CARTESIAN_VEL_SCALE = 0.2 #0.3 before
-ANGULAR_VEL_SCALE = 0.3 #0.8 before
+CARTESIAN_VEL_SCALE = 0.1 #0.3 before
+ANGULAR_VEL_SCALE = 0.2 #0.8 before
 CLOSE_REWARD_DIST = 0.01
 
 GOAL_SPAWN_RADIUS = 0.05
@@ -41,12 +41,15 @@ class ur5e_pybulletEnv_orient(gym.Env):
 
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
+        
+        self.tcp_ini = self.sim.get_end_eff_position()
+        
         self.current_step = 0
         self.reward = 0
         self.distance_cart = 0
         self.distance_orient = 0
 
-        #self.sim.add_visual_goal(self.goal)
+        self.sim.add_visual_goal(self.goal)
 
         self.done = False
         self.goal_reached = False
@@ -146,13 +149,17 @@ class ur5e_pybulletEnv_orient(gym.Env):
         cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
         orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
        
-        #sfoix reward
+        max_dist_orient = np.pi()
+        max_dist_cart = np.linalg.norm(self.tcp_ini - self.goal[:3])
+        
+        cart_rew_scaling = max_dist_orient/max_dist_cart
+
         if self.current_step == 0:
            self.distance_cart = cart_error
            self.distance_orient = orient_error
            self.reward = 0
         else:
-           self.reward = (self.distance_cart - cart_error)*10 + (self.distance_orient - orient_error)*7
+           self.reward = (self.distance_cart - cart_error)*cart_rew_scaling + (self.distance_orient - orient_error)
            self.distance_cart = cart_error
            self.distance_orient = orient_error
            
