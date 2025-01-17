@@ -22,7 +22,7 @@ GOAL_SPAWN_RADIUS = 0.05
 class ur5e_pybulletEnv_orient(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.2, 0.2, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.4,0.15,0.4,0,1.57,0]), max_steps=MAX_STEPS_SIM, render_mode=None):
         super().__init__()
 
         self.goal = np.array(target, dtype=np.float32)
