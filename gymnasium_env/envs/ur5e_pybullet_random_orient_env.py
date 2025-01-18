@@ -49,6 +49,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
 
         #Create random goal
+        self.create_goal()
         self.center = self.sim.get_end_eff_position()
         self.radius = GOAL_SPAWN_RADIUS
 
