@@ -129,7 +129,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.goal_reached = False
         obs = self._get_obs()
 
-
         return obs, {}
 
     def step(self, action):
@@ -137,8 +136,8 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         #velocity_action = action[:6]
         cartesian_action = action[:3] * CARTESIAN_VEL_SCALE
         angular_action = action[3:] * ANGULAR_VEL_SCALE
-        end_effector_velocity = np.concatenate(np.array(cartesian_action,dtype=np.float32),
-                                                 np.array(angular_action,dtype=np.float32))
+        end_effector_velocity = np.concatenate((np.array(cartesian_action,dtype=np.float32),
+                                                 np.array(angular_action,dtype=np.float32)),axis=None)
 
         self.sim.step(end_effector_velocity)
         #update the observation
@@ -227,7 +226,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
             self.goal,
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32)
-        ), axis=0)
+        ), axis=None)
 
         obs = obs.flatten()
         obs = np.squeeze(obs)
