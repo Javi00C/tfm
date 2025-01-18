@@ -47,7 +47,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.distance_cart = 0
         self.distance_orient = 0
 
-        self.sim.add_visual_goal(self.goal)
 
         #Create random goal
         self.center = self.sim.get_end_eff_position()
@@ -99,6 +98,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
             [0.39, 0.44, 0.49, 0.92, 0.042, 1.98]
         ]
         self.goal = random.choice(poses)
+        self.sim.add_visual_goal(self.goal)
 
     def random_orient_in_sphere(self): # returns tuple
         roll = random.uniform(-math.pi, math.pi)
