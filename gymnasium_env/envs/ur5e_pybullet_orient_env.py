@@ -125,7 +125,8 @@ class ur5e_pybulletEnv_orient(gym.Env):
         #velocity_action = action[:6]
         cartesian_action = action[:3] * CARTESIAN_VEL_SCALE
         angular_action = action[3:] * ANGULAR_VEL_SCALE
-        end_effector_velocity = np.concatenate((cartesian_action, angular_action))
+        end_effector_velocity = np.concatenate(np.array(cartesian_action,dtype=np.float32),
+                                                 np.array(angular_action,dtype=np.float32))
  
         self.sim.step(end_effector_velocity)
         #update the observation
