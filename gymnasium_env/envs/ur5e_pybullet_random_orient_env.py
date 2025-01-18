@@ -9,11 +9,11 @@ import csv
 
 from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 
-MAX_DISTANCE = 10  # Maximum allowable distance from target before termination
-MAX_STEPS_SIM = 10000
+MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
+MAX_STEPS_SIM = 15000
 #VELOCITY_SCALE = 0.02 
 CARTESIAN_VEL_SCALE = 0.1 
-ANGULAR_VEL_SCALE = 0.7
+ANGULAR_VEL_SCALE = 0.4
 CLOSE_REWARD_DIST = 0.01
 
 GOAL_SPAWN_RADIUS = 0.05
@@ -43,7 +43,11 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
         self.current_step = 0
         self.reward = 0
-        self.distance = 0
+        #self.distance = 0
+        self.distance_cart = 0
+        self.distance_orient = 0
+
+        self.sim.add_visual_goal(self.goal)
 
         #Create random goal
         self.center = self.sim.get_end_eff_position()
@@ -68,24 +72,33 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
     #     print("Goal found")
     #     self.sim.add_visual_goal_orient(self.goal)
 
+    # def create_goal(self):
+    #     reachable_goals_file = "reachable_goals.csv"
+
+    #     # Read all reachable goals from the file
+    #     with open(reachable_goals_file, mode='r') as file:
+    #         reader = csv.reader(file)
+    #         goals = [list(map(float, row)) for row in reader]
+
+    #     if not goals:
+    #         raise ValueError("No goals found in the reachable goals file.")
+
+    #     # Select a random goal from the list
+    #     random_goal = random.choice(goals)
+    #     self.goal = np.array(random_goal, dtype=np.float32)
+
+    #     self.sim.add_visual_goal_orient(self.goal)
+
+    #     return self.goal
+
     def create_goal(self):
-        reachable_goals_file = "reachable_goals.csv"
-
-        # Read all reachable goals from the file
-        with open(reachable_goals_file, mode='r') as file:
-            reader = csv.reader(file)
-            goals = [list(map(float, row)) for row in reader]
-
-        if not goals:
-            raise ValueError("No goals found in the reachable goals file.")
-
-        # Select a random goal from the list
-        random_goal = random.choice(goals)
-        self.goal = np.array(random_goal, dtype=np.float32)
-
-        self.sim.add_visual_goal_orient(self.goal)
-
-        return self.goal
+        poses = [
+            [0.4, 0.15, 0.4, 0, 1.57, 0],
+            [0.38, 0.28, 0.69, 0, 0, 1.57],
+            [0.25, -0.06, 0.81, 0.29, -1.5, -1.1],
+            [0.39, 0.44, 0.49, 0.92, 0.042, 1.98]
+        ]
+        self.goal = random.choice(poses)
 
     def random_orient_in_sphere(self): # returns tuple
         roll = random.uniform(-math.pi, math.pi)
@@ -109,9 +122,6 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         
         self.create_goal()
         self.sim.reset()
-        print("Env reset")
-        print(self.goal)
-        print(np.linalg.norm(self.goal))
 
         self.current_step = 0
         self.done = False
@@ -147,17 +157,41 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         #print(f"Distance ee to goal: {np.linalg.norm(self.sim.get_end_eff_position()-self.goal[:3])}")
         return obs, reward, terminated, truncated, {}
 
+    # def _calculate_reward(self):
+    #     ee_pose = self.sim.get_end_eff_pose()
+    #     position_error = np.linalg.norm(ee_pose - self.goal)
+       
+    #     #sfoix reward
+    #     if self.current_step == 0:
+    #        self.distance = position_error
+    #        self.reward = 0
+    #     else:
+    #        self.reward = (self.distance - position_error)*10
+    #        self.distance = position_error
+           
+    #     if self.goal_reached:
+    #         reward += 10 
+    #     #print(f"Reward: {self.reward}")
+    #     return self.reward
+
     def _calculate_reward(self):
         ee_pose = self.sim.get_end_eff_pose()
-        position_error = np.linalg.norm(ee_pose - self.goal)
+        cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+        orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
        
-        #sfoix reward
+        max_dist_orient = math.pi
+        max_dist_cart = np.linalg.norm(self.tcp_ini[:3] - self.goal[:3])
+
+        cart_rew_scaling = 1.1*max_dist_orient/max_dist_cart #before 1.2*...
+
         if self.current_step == 0:
-           self.distance = position_error
+           self.distance_cart = cart_error
+           self.distance_orient = orient_error
            self.reward = 0
         else:
-           self.reward = (self.distance - position_error)*10
-           self.distance = position_error
+           self.reward = (self.distance_cart - cart_error)*cart_rew_scaling + (self.distance_orient - orient_error)
+           self.distance_cart = cart_error
+           self.distance_orient = orient_error
            
         if self.goal_reached:
             reward += 10 
@@ -166,19 +200,19 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
 
     def _check_goal(self):
         ee_pose = self.sim.get_end_eff_pose()
-        dist_to_target = np.linalg.norm(ee_pose - self.goal)
-        if dist_to_target < CLOSE_REWARD_DIST :
+
+        cart_dist_to_target = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+        orient_dist_to_target = np.linalg.norm(ee_pose[3:] - self.goal[3:])
+
+        if cart_dist_to_target < CLOSE_REWARD_DIST and orient_dist_to_target < CLOSE_REWARD_DIST:
             return True
         return False
 
 
     def _check_done(self):
-        """Terminate the episode if the end-effector is too far from the target."""
-        #ee_pose = self.sim.get_end_eff_pose()
-        #dist_to_target = np.linalg.norm(ee_pose - self.goal)
         ee_pose = self.sim.get_end_eff_pose()
-        dist_to_target = np.linalg.norm(ee_pose - self.goal)
-        if dist_to_target > MAX_DISTANCE:
+        cart_dist_to_target = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+        if cart_dist_to_target > MAX_DISTANCE:
             return True
         return False
 

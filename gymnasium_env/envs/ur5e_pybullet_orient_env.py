@@ -70,6 +70,7 @@ class ur5e_pybulletEnv_orient(gym.Env):
     #     print("Goal found")
     #     self.sim.add_visual_goal_orient(self.goal)
 
+
     def create_goal(self):
         reachable_goals_file = "reachable_goals.csv"
 
@@ -88,6 +89,7 @@ class ur5e_pybulletEnv_orient(gym.Env):
         self.sim.add_visual_goal_orient(self.goal)
 
         return self.goal
+
 
     def random_orient_in_sphere(self): # returns tuple
         roll = random.uniform(-math.pi, math.pi)
