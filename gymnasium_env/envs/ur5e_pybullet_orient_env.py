@@ -195,7 +195,7 @@ class ur5e_pybulletEnv_orient(gym.Env):
         tcp_vel = self.sim.get_end_eff_vel()
 
         obs = np.concatenate((
-            self.goal,
+            np.array(self.goal, dtype=np.float32),
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32)
         ), axis=None)
