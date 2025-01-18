@@ -46,7 +46,7 @@ class ur5e_pybulletEnv_random_orient(gym.Env):
         #self.distance = 0
         self.distance_cart = 0
         self.distance_orient = 0
-
+        self.tcp_ini = self.sim.get_end_eff_position()
 
         #Create random goal
         self.create_goal()
