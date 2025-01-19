@@ -19,7 +19,7 @@ ANGULAR_VEL_SCALE = 0.4
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5, 0.4, 0.6]), max_steps=MAX_STEPS_SIM, render_mode=None):
+    def __init__(self, target=np.array([0.5,0.3,0.4]), max_steps=MAX_STEPS_SIM, render_mode=None): #[0.5,0.4,0.6]
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -106,6 +106,20 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     #     return reward
 
+    # def _calculate_reward(self):
+    #     ll_pos = self.sim.get_last_rope_link_position()
+    #     position_error = np.linalg.norm(ll_pos - self.target)
+                
+    #     if self.current_step == 0:
+    #         self.distance = position_error
+    #         self.reward = 0
+    #     else:
+    #         self.reward = (self.distance - position_error)*10
+    #         self.distance = position_error
+
+    #     #print(f"Reward: {self.reward}")
+    #     return self.reward
+    
     def _calculate_reward(self):
         ll_pos = self.sim.get_last_rope_link_position()
         position_error = np.linalg.norm(ll_pos - self.target)
