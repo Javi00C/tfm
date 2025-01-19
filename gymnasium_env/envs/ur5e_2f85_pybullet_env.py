@@ -10,8 +10,11 @@ import time
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
 MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
-MAX_STEPS_SIM = 10000
-VELOCITY_SCALE = 0.8 #First training was using 0.1
+MAX_STEPS_SIM = 20000
+#VELOCITY_SCALE = 0.8 #First training was using 0.1
+
+CARTESIAN_VEL_SCALE = 0.1 
+ANGULAR_VEL_SCALE = 0.4
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
@@ -53,11 +56,14 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
     def step(self, action):
         
-        velocity_action = action[:6]
+        #velocity_action = action[:6]
         #gripper_action = action[6]
         gripper_action = 1.0
 
-        end_effector_velocity = velocity_action * VELOCITY_SCALE
+        cartesian_action = action[:3] * CARTESIAN_VEL_SCALE
+        angular_action = action[3:] * ANGULAR_VEL_SCALE
+        end_effector_velocity = np.concatenate((np.array(cartesian_action,dtype=np.float32),
+                                                 np.array(angular_action,dtype=np.float32)),axis=None)
 
         # Fix gripper open
         self.sim.step(end_effector_velocity, gripper_action)
@@ -134,7 +140,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         last_link_rope_pos = self.sim.get_last_rope_link_position()
 
         obs = np.concatenate((
-            self.target,
+            np.array(self.target, dtype=np.float32),
             np.array(last_link_rope_pos, dtype=np.float32),
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32)
