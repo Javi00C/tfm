@@ -16,6 +16,8 @@ MAX_STEPS_SIM = 20000
 CARTESIAN_VEL_SCALE = 0.1 
 ANGULAR_VEL_SCALE = 0.4
 
+DIST_TCP_LL_THRESH = 0.02 # length of a segment is 0.06 in this case
+
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
@@ -41,7 +43,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         # Initialize simulation
         self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
         self.current_step = 0
-        self.time_near_target = 0
+        self.goal_flag1 = False
 
         self.done = False
 
@@ -49,7 +51,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         super().reset(seed=seed)
         self.sim.reset()
         self.current_step = 0
-        self.time_near_target = 0
+        self.goal_flag1 = False
         self.done = False
         obs = self._get_obs()
         return obs, {}
@@ -120,16 +122,32 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     #     #print(f"Reward: {self.reward}")
     #     return self.reward
     
+
     def _calculate_reward(self):
         ll_pos = self.sim.get_last_rope_link_position()
-        position_error = np.linalg.norm(ll_pos - self.target)
+        tcp_pose = self.sim.get_end_eff_pose()
+        dist_tcp_ll = np.linalg.norm(ll_pos - tcp_pose[:3])
+
+        if dist_tcp_ll >= DIST_TCP_LL_THRESH and self.goal_flag1 == False:            
                 
-        if self.current_step == 0:
-            self.distance = position_error
-            self.reward = 0
+            if self.current_step == 0:
+                self.last_dist_tcp_ll = dist_tcp_ll
+                self.reward = 0
+            else:
+                self.reward = (self.last_dist_tcp_ll - dist_tcp_ll)*10
+                self.last_dist_tcp_ll = dist_tcp_ll
         else:
-            self.reward = (self.distance - position_error)*10
-            self.distance = position_error
+            
+            dist_ll_goal = np.linalg.norm(ll_pos - self.target)
+                
+            if self.self.goal_flag1 == False:
+                self.goal_flag1 = True
+                self.last_dist_ll_goal = dist_ll_goal
+                self.reward = 0
+            else:
+                self.reward = (self.last_dist_ll_goal - dist_ll_goal)*10
+                self.last_dist_ll_goal = dist_ll_goal
+
 
         #print(f"Reward: {self.reward}")
         return self.reward

@@ -33,7 +33,8 @@ obs = env.reset()
 
 # Execute the policy for a longer duration
 episode_length = 100000  # Adjust as needed
-for _ in range(episode_length):
+for i in range(episode_length):
+    print(i)
     #print(f"Shape of observation passed to model: {obs.shape}")
     action, _states = model.predict(obs)
     # getting rid of orientation actions
