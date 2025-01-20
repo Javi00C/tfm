@@ -154,6 +154,9 @@ class UR5Sim:
         self.digit_body = None
         self._initialize_tacto_sensor_in_urdf()
 
+        if self.digits is not None:
+            self.color, self.depth = self.digits.render()
+            self.digits.updateGUI(self.color, self.depth)
         #Create visual goal in simulation
         #self.add_visual_goal(goal_position)
 
@@ -177,7 +180,7 @@ class UR5Sim:
         # Construct the absolute path to the URDF file
         conf_dir = os.path.join(script_dir, "conf", "bg_digit_240_320.jpg")
         bg = cv2.imread(conf_dir)  # If you have a background image
-        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg, visualize_gui=True)
+        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg, visualize_gui=False)
 
         # 2) Identify the link index in your newly updated robot URDF
         #    Suppose you named the sensor link "digit_link" in your URDF <link name="digit_link">
