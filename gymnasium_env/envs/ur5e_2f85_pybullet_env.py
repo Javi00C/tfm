@@ -9,19 +9,23 @@ import time
 
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
-MAX_DISTANCE = 2.0  # Maximum allowable distance from target before termination
+MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 20000
 #VELOCITY_SCALE = 0.8 #First training was using 0.1
 
-CARTESIAN_VEL_SCALE = 0.1 
-ANGULAR_VEL_SCALE = 0.4
+# CARTESIAN_VEL_SCALE = 0.1 
+# ANGULAR_VEL_SCALE = 0.4
+CARTESIAN_VEL_SCALE = 1.0 
+ANGULAR_VEL_SCALE = 1.0
 
 DIST_TCP_LL_THRESH = 0.02 # length of a segment is 0.06 in this case
+
+CLOSE_REWARD_DIST = 0.01
 
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5,0.3,0.4]), max_steps=MAX_STEPS_SIM, render_mode=None): #[0.5,0.4,0.6]
+    def __init__(self, target=np.array([0.5,0.4,0.6]), max_steps=MAX_STEPS_SIM, render_mode=None): #[0.5,0.4,0.6]
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -60,7 +64,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         
         #velocity_action = action[:6]
         #gripper_action = action[6]
-        gripper_action = 1.0
+        gripper_action = 0.6
 
         cartesian_action = action[:3] * CARTESIAN_VEL_SCALE
         angular_action = action[3:] * ANGULAR_VEL_SCALE
@@ -81,32 +85,37 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         truncated = self.current_step >= self.max_steps
 
         #print(f"Last rope link position: {self.sim.get_last_rope_link_position()}")
-        return obs, reward, terminated, truncated, {}
+        distance_dict = {}  # Create a dictionary if it doesn't exist yet
+        # Compute the distance
+        dist_ll_goal = np.linalg.norm(self.sim.get_last_rope_link_position() - self.target)
+        # Add the distance to the dictionary with an appropriate key
+        distance_dict["distance_to_goal"] = dist_ll_goal
+        return obs, reward, terminated, truncated, distance_dict
 
 
-    # def _calculate_reward(self):
+    def _calculate_reward(self):
 
-    #     if self.done:
-    #         reward = -5
-    #     else:
-    #         link_rope_pos = self.sim.get_last_rope_link_position()
-    #         dist = np.linalg.norm(link_rope_pos - self.target)
+        if self.done:
+            reward = -5
+        else:
+            link_rope_pos = self.sim.get_last_rope_link_position()
+            dist = np.linalg.norm(link_rope_pos - self.target)
             
-    #         reward = -dist # Weighted penalty for position and orientation errors
+            reward = -dist # Weighted penalty for position and orientation errors
             
-    #         # Bonus for being close to the target
-    #         if dist < CLOSE_REWARD_DIST:
-    #             #Minimum reward = 2.0 (sum of both contributions)
-    #             reward += np.clip(0.1/dist,1,5)
-    #             reward += 1.0
-    #             self.time_near_target += 1
-    #             reward += 0.1 * self.time_near_target
-    #         else:
-    #             self.time_near_target = 0
-    #         # Small penalty for every time step
-    #         reward -= 0.01  # Step penalty
+            # Bonus for being close to the target
+            if dist < CLOSE_REWARD_DIST:
+                #Minimum reward = 2.0 (sum of both contributions)
+                reward += np.clip(0.1/dist,1,5)
+                reward += 1.0
+                self.time_near_target += 1
+                reward += 0.1 * self.time_near_target
+            else:
+                self.time_near_target = 0
+            # Small penalty for every time step
+            reward -= 0.01  # Step penalty
 
-    #     return reward
+        return reward
 
     # def _calculate_reward(self):
     #     ll_pos = self.sim.get_last_rope_link_position()
@@ -123,34 +132,34 @@ class ur5e_2f85_pybulletEnv(gym.Env):
     #     return self.reward
     
 
-    def _calculate_reward(self):
-        ll_pos = self.sim.get_last_rope_link_position()
-        tcp_pose = self.sim.get_end_eff_pose()
-        dist_tcp_ll = np.linalg.norm(ll_pos - tcp_pose[:3])
+    # def _calculate_reward(self):
+    #     ll_pos = self.sim.get_last_rope_link_position()
+    #     tcp_pose = self.sim.get_end_eff_pose()
+    #     dist_tcp_ll = np.linalg.norm(ll_pos - tcp_pose[:3])
 
-        if dist_tcp_ll >= DIST_TCP_LL_THRESH and self.goal_flag1 == False:            
+    #     if dist_tcp_ll >= DIST_TCP_LL_THRESH and self.goal_flag1 == False:            
                 
-            if self.current_step == 0:
-                self.last_dist_tcp_ll = dist_tcp_ll
-                self.reward = 0
-            else:
-                self.reward = (self.last_dist_tcp_ll - dist_tcp_ll)*10
-                self.last_dist_tcp_ll = dist_tcp_ll
-        else:
+    #         if self.current_step == 0:
+    #             self.last_dist_tcp_ll = dist_tcp_ll
+    #             self.reward = 0
+    #         else:
+    #             self.reward = (self.last_dist_tcp_ll - dist_tcp_ll)*10
+    #             self.last_dist_tcp_ll = dist_tcp_ll
+    #     else:
             
-            dist_ll_goal = np.linalg.norm(ll_pos - self.target)
+    #         dist_ll_goal = np.linalg.norm(ll_pos - self.target)
                 
-            if self.self.goal_flag1 == False:
-                self.goal_flag1 = True
-                self.last_dist_ll_goal = dist_ll_goal
-                self.reward = 0
-            else:
-                self.reward = (self.last_dist_ll_goal - dist_ll_goal)*10
-                self.last_dist_ll_goal = dist_ll_goal
+    #         if self.self.goal_flag1 == False:
+    #             self.goal_flag1 = True
+    #             self.last_dist_ll_goal = dist_ll_goal
+    #             self.reward = 0
+    #         else:
+    #             self.reward = (self.last_dist_ll_goal - dist_ll_goal)*10
+    #             self.last_dist_ll_goal = dist_ll_goal
 
 
-        #print(f"Reward: {self.reward}")
-        return self.reward
+    #     #print(f"Reward: {self.reward}")
+    #     return self.reward
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
