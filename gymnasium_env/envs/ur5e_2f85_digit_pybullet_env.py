@@ -46,7 +46,7 @@ class ur5e_2f85_pybulletEnv_digit(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(6,), dtype=np.float32)
 
         # Initialize simulation
-        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps, goal_position=self.target)
+        self.sim = UR5Sim(useIK=True, renders=(self.render_mode == "human"), maxSteps=self.max_steps)
         self.current_step = 0
         self.goal_flag1 = False
 

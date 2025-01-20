@@ -42,8 +42,7 @@ class UR5Sim:
                  useIK=True,
                  renders=True,
                  maxSteps=1000,
-                 cfg=None,
-                 goal_position=None):
+                 cfg=None):
 
         self.renders = renders
         self.useIK = useIK
