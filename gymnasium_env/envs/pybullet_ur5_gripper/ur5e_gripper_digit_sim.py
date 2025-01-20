@@ -694,8 +694,8 @@ class UR5Sim:
             #print("Digit sensor object:")
             #print(DigitSensor)
             is_touching, certainty = pt.TouchDetect(color_img_pil)
-            print(f"Sensor Touching:{is_touching}")
-            print(f"Sensor Certainty:{certainty}")
+            #print(f"Sensor Touching:{is_touching}")
+            #print(f"Sensor Certainty:{certainty}")
             return is_touching,certainty
 
     def reset(self):

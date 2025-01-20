@@ -129,8 +129,8 @@ class ur5e_2f85_pybulletEnv_digit(gym.Env):
     #     return reward
 
     def _calculate_reward(self):
-        tcp_pos = self.sim.get_end_eff_position()
-        position_error = np.linalg.norm(tcp_pos - self.target)
+        tcp_pose = self.sim.get_end_eff_pose()
+        position_error = np.linalg.norm(tcp_pose[:3] - self.target)
                 
         if self.current_step == 0:
             self.distance = position_error
