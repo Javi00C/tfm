@@ -1,5 +1,5 @@
 ##############################################
-#ENVIRONMENT WITH FIXED CLOSED GRIPPER AND ROPE
+#ENVIRONMENT WITH FIXED CLOSED GRIPPER AND ROPE 
 ##############################################
 import numpy as np
 import gymnasium as gym
@@ -22,6 +22,10 @@ DIST_TCP_LL_THRESH = 0.02 # length of a segment is 0.06 in this case
 
 CLOSE_REWARD_DIST = 0.01
 
+##################################
+# IMPORTANT THE GOAL IS THE INITAL POSITION OF THE LAST LINK OF THE ROPE BUT IT DOES NOT UPDATE DURING THE SIM
+# THE ROPE ACTUALLY MOVES ALTHOUGH THE JOINTS ARE FIXED
+# ################################ 
 class ur5e_2f85_pybulletEnv_digit(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 

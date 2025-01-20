@@ -398,7 +398,7 @@ class UR5Sim:
         self.segment_length = self.total_length / self.num_segments
         
         # Zero mass ensures no movement due to physics
-        self.mass = 0.1
+        self.mass = 0.0
         self.friction = 0.5
         self.start_position = [0.60, 0.135, 0.9]
         self.rope_segments = []

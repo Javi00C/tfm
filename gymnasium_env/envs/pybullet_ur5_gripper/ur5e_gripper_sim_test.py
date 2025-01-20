@@ -11,7 +11,7 @@ from ur5e_gripper_digit_sim import UR5Sim
 
 goal = [0.5,0.3,0.4]
 if __name__ == "__main__":
-    sim = UR5Sim(useIK=True, renders=True, maxSteps=500, goal_position=goal)
+    sim = UR5Sim(useIK=True, renders=True, maxSteps=500)
     # Move the arm a bit, keep the gripper open
     sim.add_visual_goal(goal)
     # necessary_angles = sim.calculate_ik(goal[:3],goal[3:])
