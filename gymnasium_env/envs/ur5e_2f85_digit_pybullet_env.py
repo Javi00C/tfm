@@ -191,9 +191,11 @@ class ur5e_2f85_pybulletEnv_digit(gym.Env):
         
         
         #last_link_rope_pos = self.sim.get_last_rope_link_position()
-
-        self.sensor_touch, self.sensor_certainty = self.sim.get_sensor_reading()
-
+        if self.current_step == 0:
+            self.sensor_touch, self.sensor_certainty = self.sim.get_sensor_reading()
+        elif self.current_step % 100 == 0:
+            self.sensor_touch, self.sensor_certainty = self.sim.get_sensor_reading()
+            
         obs = np.concatenate((
             np.array(self.sensor_touch, dtype=np.float32),
             np.array(self.sensor_certainty, dtype=np.float32),
