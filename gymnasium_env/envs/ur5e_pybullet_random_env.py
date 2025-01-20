@@ -108,7 +108,11 @@ class ur5e_pybulletEnv_random(gym.Env):
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
         #print(f"robot tcp pose: {self.sim.get_end_eff_pose()}")
         #print(f"Distance ee to goal: {np.linalg.norm(self.sim.get_end_eff_position()-self.target[:3])}")
-        return obs, reward, terminated, truncated, {}
+        distance_dict = {}  # Create a dictionary if it doesn't exist yet
+        cart_dist_to_goal = np.linalg.norm(self.sim.get_end_eff_pose()[:3] - self.target[:3])  
+        # Add the distance to the dictionary with an appropriate key
+        distance_dict["distance_to_goal"] = cart_dist_to_goal
+        return obs, reward, terminated, truncated, distance_dict
 
     def _calculate_reward(self):
         ee_pose = self.sim.get_end_eff_pose()

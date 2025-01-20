@@ -145,8 +145,33 @@ class ur5e_pybulletEnv_orient(gym.Env):
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
         #print(f"robot tcp pose: {self.sim.get_end_eff_pose()}")
         #print(f"Distance ee to goal: {np.linalg.norm(self.sim.get_end_eff_position()-self.goal[:3])}")
-        return obs, reward, terminated, truncated, {}
+        distance_dict = {}  # Create a dictionary if it doesn't exist yet
+        cart_dist_to_goal = np.linalg.norm(self.sim.get_end_eff_pose()[:3] - self.goal[:3])  
+        orient_dist_to_goal = np.linalg.norm(self.sim.get_end_eff_pose()[3:] - self.goal[3:])  
+        # Add the distance to the dictionary with an appropriate key
+        distance_dict["cart_dist_to_goal"] = cart_dist_to_goal
+        distance_dict["orient_dist_to_goal"] = orient_dist_to_goal
+        return obs, reward, terminated, truncated, distance_dict
 
+    # def _calculate_reward(self):
+    #         ee_pose = self.sim.get_end_eff_pose()
+    #         cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+    #         orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
+
+            
+    #         if self.current_step == 0:
+    #             self.distance_cart = cart_error
+    #             self.distance_orient = orient_error
+    #             self.reward = 0
+    #         else:
+    #             self.reward = (self.distance_cart - cart_error)*10 + (self.distance_orient - orient_error)*7
+    #             self.distance_cart = cart_error
+    #             self.distance_orient = orient_error
+    #         if self.goal_reached:
+    #             reward += 10 
+    #         #print(f"Reward: {self.reward}")
+    #         return self.reward
+    
     def _calculate_reward(self):
         ee_pose = self.sim.get_end_eff_pose()
         cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])

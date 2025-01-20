@@ -47,6 +47,12 @@ register(
     entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_Simple_6d",
 )
 
+#PyBullet simulation with DIGIT sensor (Rigid rope)
+register(
+    id="gymnasium_env/ur5e_2f85_pybulletEnv-v4",
+    entry_point="gymnasium_env.envs:ur5e_2f85_pybulletEnv_digit",
+)
+
 #PyBullet UR5e robot simulation GOAL: cartesian
 register(
     id="gymnasium_env/ur5e_pybulletEnv-v0",

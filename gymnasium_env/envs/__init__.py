@@ -10,4 +10,4 @@ from gymnasium_env.envs.ur5e_pybullet_env import ur5e_pybulletEnv
 from gymnasium_env.envs.ur5e_pybullet_random_env import ur5e_pybulletEnv_random
 from gymnasium_env.envs.ur5e_pybullet_orient_env import ur5e_pybulletEnv_orient
 from gymnasium_env.envs.ur5e_pybullet_random_orient_env import ur5e_pybulletEnv_random_orient
-
+from gymnasium_env.envs.ur5e_2f85_digit_pybullet_env import ur5e_2f85_pybulletEnv_digit
