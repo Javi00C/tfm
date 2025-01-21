@@ -26,7 +26,7 @@ class ur5e_pybulletEnv_lowfreq(gym.Env):
         self.num_robot_joints = 6
         self.ee_position_size = 3
         self.target_size = 3
-        obs_dim = self.num_robot_joints + self.target_size #+ self.ee_position_size
+        obs_dim = self.num_robot_joints + self.target_size + self.ee_position_size
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Action: 3D end-effector velocity in world coordinates
