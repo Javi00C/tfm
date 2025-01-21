@@ -76,41 +76,41 @@ class ur5e_pybulletEnv_lowfreq(gym.Env):
         distance_dict["distance_to_goal"] = cart_dist_to_goal
         return obs, reward, terminated, truncated, distance_dict
 
-    # def _calculate_reward(self):
-    #     ee_pose = self.sim.get_end_eff_pose()
-    #     position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
-       
-    #     #sfoix reward
-    #     self.time_in_goal += 1
-    #     if self.time_in_goal == 0:
-    #        self.distance = position_error
-    #        self.reward = 0
-    #     else:
-    #        self.reward = (self.distance - position_error)*10
-    #        self.distance = position_error
-
-    #     #print(f"Reward: {self.reward}")
-    #     return self.reward
-
     def _calculate_reward(self):
-
-        if self.done:
-            reward = -2
+        ee_pose = self.sim.get_end_eff_pose()
+        position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
+       
+        #sfoix reward
+        self.time_in_goal += 1
+        if self.time_in_goal == 0:
+           self.distance = position_error
+           self.reward = 0
         else:
-            link_rope_pos = self.sim.get_last_rope_link_position()
-            dist = np.linalg.norm(link_rope_pos - self.target)
-            
-            reward = -dist # Weighted penalty for position and orientation errors
-            
-            # Bonus for being close to the target
-            if dist < CLOSE_REWARD_DIST:
-                #Minimum reward = 2.0 (sum of both contributions)
-                reward += 2.0
-                
-            # Small penalty for every time step
-            reward -= 0.01  # Step penalty
+           self.reward = (self.distance - position_error)*10
+           self.distance = position_error
 
-        return reward
+        #print(f"Reward: {self.reward}")
+        return self.reward
+
+    # def _calculate_reward(self):
+
+    #     if self.done:
+    #         reward = -2
+    #     else:
+    #         link_rope_pos = self.sim.get_last_rope_link_position()
+    #         dist = np.linalg.norm(link_rope_pos - self.target)
+            
+    #         reward = -dist # Weighted penalty for position and orientation errors
+            
+    #         # Bonus for being close to the target
+    #         if dist < CLOSE_REWARD_DIST:
+    #             #Minimum reward = 2.0 (sum of both contributions)
+    #             reward += 2.0
+                
+    #         # Small penalty for every time step
+    #         reward -= 0.01  # Step penalty
+
+    #     return reward
 
     def _check_done(self):
         """Terminate the episode if the end-effector is too far from the target."""
