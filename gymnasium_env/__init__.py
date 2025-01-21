@@ -77,4 +77,8 @@ register(
     entry_point="gymnasium_env.envs:ur5e_pybulletEnv_random_orient",
 )
 
-
+#PyBullet simulation with lower frequency in simulation
+register(
+    id="gymnasium_env/ur5e_pybulletEnv-v4",
+    entry_point="gymnasium_env.envs:ur5e_pybulletEnv_lowfreq",
+)

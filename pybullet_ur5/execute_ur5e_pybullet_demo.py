@@ -16,7 +16,9 @@ model = PPO.load("models_pybullet/best_model")
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v1" # Random cartesian goal
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v2" # Specific cartesian and orientation goal
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v3" # Random cartesian and orientation goal
-env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v4"
+#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v4"
+
+env_str = "gymnasium_env/ur5e_pybulletEnv-v4"
 # Create the environment with rendering enabled
 env = gym.make(env_str, render_mode='human')
 
