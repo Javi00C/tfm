@@ -14,7 +14,7 @@ MAX_STEPS_SIM = 10000
 VELOCITY_SCALE = 0.06 
 CLOSE_REWARD_DIST = 0.01
 
-GOAL_SPAWN_RADIUS = 0.3
+GOAL_SPAWN_RADIUS = 0.2
 
 
 class ur5e_pybulletEnv_random(gym.Env):
@@ -51,6 +51,7 @@ class ur5e_pybulletEnv_random(gym.Env):
 
         self.done = False
         self.goal = False
+        self.flag = False
 
     def random_point_in_sphere(self,radius, center):
         """
@@ -72,12 +73,15 @@ class ur5e_pybulletEnv_random(gym.Env):
             # Check if the point is inside the sphere
             if x**2 + y**2 + z**2 <= radius**2:
                 return (center[0] + x, center[1] + y, center[2] + z)
-
+    
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
         self.target = np.array(self.random_point_in_sphere(self.radius, self.center),dtype=np.float32)
-        self.sim.reset()
+        if self.flag == False:
+            self.flag = True
+            self.sim.reset()
+
         self.sim.add_visual_goal(self.target)
 
         self.current_step = 0

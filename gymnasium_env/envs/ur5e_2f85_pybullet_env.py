@@ -6,6 +6,8 @@ import gymnasium as gym
 from gymnasium import spaces
 from typing import Optional
 import time
+import math
+import random
 
 from gymnasium_env.envs.pybullet_ur5_gripper.ur5e_gripper_sim import UR5Sim
 
@@ -13,10 +15,10 @@ MAX_DISTANCE = 1.0  # Maximum allowable distance from target before termination
 MAX_STEPS_SIM = 20000
 #VELOCITY_SCALE = 0.8 #First training was using 0.1
 
-# CARTESIAN_VEL_SCALE = 0.1 
-# ANGULAR_VEL_SCALE = 0.4
-CARTESIAN_VEL_SCALE = 1.0 
-ANGULAR_VEL_SCALE = 1.0
+CARTESIAN_VEL_SCALE = 0.1 
+ANGULAR_VEL_SCALE = 0.4
+# CARTESIAN_VEL_SCALE = 1.0 
+# ANGULAR_VEL_SCALE = 1.0
 
 DIST_TCP_LL_THRESH = 0.02 # length of a segment is 0.06 in this case
 
@@ -25,7 +27,7 @@ CLOSE_REWARD_DIST = 0.01
 class ur5e_2f85_pybulletEnv(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
-    def __init__(self, target=np.array([0.5,0.4,0.6]), max_steps=MAX_STEPS_SIM, render_mode=None): #[0.5,0.4,0.6]
+    def __init__(self, target=np.array([0.5,0.3,0.4]), max_steps=MAX_STEPS_SIM, render_mode=None): #[0.5,0.4,0.6]
         super().__init__()
 
         self.target = np.array(target, dtype=np.float32)
@@ -51,9 +53,29 @@ class ur5e_2f85_pybulletEnv(gym.Env):
 
         self.done = False
 
+    def create_random_goal(self):
+        # Extract x, y, z coordinates
+        x1, y1, z1 = [0.5, 0.3, 0.4]
+        x2, y2, z2 = [0.5, 0.13, 0.7]
+
+        # Calculate radius (x-y distance between P1 and P2)
+        radius = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+        # Generate a random angle and a distance
+        angle = random.uniform(0, 2 * math.pi)
+        distance = random.uniform(0, radius)
+
+        # Calculate random point in the circle
+        random_x = x2 + distance * math.cos(angle)
+        random_y = y2 + distance * math.sin(angle)
+        random_z = 0.4  # Fixed z-coordinate
+        self.target = [random_x, random_y, random_z]
+        
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         self.sim.reset()
+        self.create_random_goal()
         self.current_step = 0
         self.goal_flag1 = False
         self.done = False

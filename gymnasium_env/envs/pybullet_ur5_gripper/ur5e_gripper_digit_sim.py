@@ -36,6 +36,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the absolute path to the URDF file
 ROBOT_URDF_PATH = os.path.join(script_dir, "robots", "urdf", "ur5e_with_gripper_digit.urdf")
 
+TIME_DENOM = 240
 
 class UR5Sim:
     def __init__(self,
@@ -55,7 +56,7 @@ class UR5Sim:
             pybullet.connect(pybullet.GUI)
         else:
             pybullet.connect(pybullet.DIRECT)
-        pybullet.setTimeStep(1./240.)
+        pybullet.setTimeStep(1/TIME_DENOM)
         pybullet.setGravity(0,0,-9.81)
         pybullet.setRealTimeSimulation(False)
         pybullet.resetDebugVisualizerCamera(cameraDistance=1.5,
@@ -180,7 +181,7 @@ class UR5Sim:
         # Construct the absolute path to the URDF file
         conf_dir = os.path.join(script_dir, "conf", "bg_digit_240_320.jpg")
         bg = cv2.imread(conf_dir)  # If you have a background image
-        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg, visualize_gui=False)
+        self.digits = tacto.Sensor(**self.cfg.tacto, background=bg, visualize_gui=True)
 
         # 2) Identify the link index in your newly updated robot URDF
         #    Suppose you named the sensor link "digit_link" in your URDF <link name="digit_link">
@@ -318,6 +319,228 @@ class UR5Sim:
             )
 
 
+    def _load_rope(self):
+        # Parameters
+        self.num_segments = 10
+        self.total_length = 0.6
+        self.segment_radius = 0.02
+        self.segment_length = self.total_length / self.num_segments
+        
+        # Rope segment properties
+        self.mass = 0.1
+        self.friction = 0.5
+        self.start_position = [0.60, 0.135, 0.9]
+        self.rope_segments = []
+        self.constraints = []
+
+        # Create rope segments
+        for i in range(self.num_segments):
+            segment_position = [
+                self.start_position[0],
+                self.start_position[1],
+                self.start_position[2] - i * self.segment_length
+            ]
+
+            segment_id = pybullet.createCollisionShape(pybullet.GEOM_CAPSULE,
+                                                    radius=self.segment_radius,
+                                                    height=self.segment_length)
+            visual_id = pybullet.createVisualShape(pybullet.GEOM_CAPSULE,
+                                                radius=self.segment_radius,
+                                                length=self.segment_length,
+                                                rgbaColor=[0,1,0,1])
+
+            # Create body with desired mass and position
+            body_id = pybullet.createMultiBody(
+                baseMass=self.mass,
+                baseCollisionShapeIndex=segment_id,
+                baseVisualShapeIndex=visual_id,
+                basePosition=segment_position
+            )
+
+            # Assign friction and keep track of segments
+            pybullet.changeDynamics(body_id, -1, lateralFriction=self.friction)
+            self.rope_segments.append(body_id)
+
+            # Add link to DIGIT sensor
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
+            self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)
+
+            # Connect this segment to the previous one
+            if i > 0:
+                pybullet.setCollisionFilterPair(self.rope_segments[i-1],
+                                                self.rope_segments[i],
+                                                -1, -1,
+                                                enableCollision=0)
+
+                c = pybullet.createConstraint(
+                    parentBodyUniqueId=self.rope_segments[i-1],
+                    parentLinkIndex=-1,
+                    childBodyUniqueId=self.rope_segments[i],
+                    childLinkIndex=-1,
+                    jointType=pybullet.JOINT_FIXED,  # "Weld" the segments together
+                    jointAxis=[0,0,0],
+                    parentFramePosition=[0,0,-self.segment_length/2],
+                    childFramePosition=[0,0,self.segment_length/2]
+                )
+                self.constraints.append(c)
+
+        #-------------------------------------------------------------------------
+        # Anchor at FIRST rope segment
+        #-------------------------------------------------------------------------
+        anchor_shape_start = pybullet.createCollisionShape(pybullet.GEOM_SPHERE, radius=0.001)
+        anchor_body_start = pybullet.createMultiBody(
+            baseMass=0,
+            baseCollisionShapeIndex=anchor_shape_start,
+            basePosition=self.start_position
+        )
+        pybullet.setCollisionFilterPair(anchor_body_start,
+                                        self.rope_segments[0],
+                                        -1, -1,
+                                        enableCollision=0)
+
+        pybullet.createConstraint(
+            parentBodyUniqueId=anchor_body_start,
+            parentLinkIndex=-1,
+            childBodyUniqueId=self.rope_segments[0],
+            childLinkIndex=-1,
+            jointType=pybullet.JOINT_FIXED,
+            jointAxis=[0,0,0],
+            parentFramePosition=[0,0,0],
+            childFramePosition=[0,0,0]
+        )
+
+        #-------------------------------------------------------------------------
+        # Anchor at LAST rope segment
+        #-------------------------------------------------------------------------
+        # Compute the final segment position (same logic used in the rope loop)
+        end_position = [
+            self.start_position[0],
+            self.start_position[1],
+            self.start_position[2] - (self.num_segments - 1) * self.segment_length
+        ]
+
+        anchor_shape_end = pybullet.createCollisionShape(pybullet.GEOM_SPHERE, radius=0.001)
+        anchor_body_end = pybullet.createMultiBody(
+            baseMass=0,
+            baseCollisionShapeIndex=anchor_shape_end,
+            basePosition=end_position
+        )
+        # Set collision filters with the last segment
+        pybullet.setCollisionFilterPair(anchor_body_end,
+                                        self.rope_segments[-1],
+                                        -1, -1,
+                                        enableCollision=0)
+
+        pybullet.createConstraint(
+            parentBodyUniqueId=anchor_body_end,
+            parentLinkIndex=-1,
+            childBodyUniqueId=self.rope_segments[-1],
+            childLinkIndex=-1,
+            jointType=pybullet.JOINT_FIXED,
+            jointAxis=[0,0,0],
+            parentFramePosition=[0,0,0],
+            childFramePosition=[0,0,0]
+        )   
+
+
+    # def _load_rope(self):
+    #     # --- Parameters ---
+    #     self.num_segments = 10
+    #     self.total_length = 0.6
+    #     self.segment_radius = 0.02
+    #     self.segment_length = self.total_length / self.num_segments
+        
+    #     # Rope segment properties
+    #     self.mass = 0.1
+    #     self.friction = 0.5
+    #     self.start_position = [0.60, 0.135, 0.9]
+    #     self.rope_segments = []
+    #     self.constraints = []
+
+    #     # --- Create rope segments ---
+    #     for i in range(self.num_segments):
+    #         segment_position = [
+    #             self.start_position[0],
+    #             self.start_position[1],
+    #             self.start_position[2] - i * self.segment_length
+    #         ]
+
+    #         segment_id = pybullet.createCollisionShape(pybullet.GEOM_CAPSULE,
+    #                                                 radius=self.segment_radius,
+    #                                                 height=self.segment_length)
+    #         visual_id = pybullet.createVisualShape(pybullet.GEOM_CAPSULE,
+    #                                             radius=self.segment_radius,
+    #                                             length=self.segment_length,
+    #                                             rgbaColor=[0,1,0,1])
+
+    #         body_id = pybullet.createMultiBody(
+    #             baseMass=self.mass,
+    #             baseCollisionShapeIndex=segment_id,
+    #             baseVisualShapeIndex=visual_id,
+    #             basePosition=segment_position
+    #         )
+    #         pybullet.changeDynamics(body_id, -1, lateralFriction=self.friction)
+
+    #         self.rope_segments.append(body_id)
+
+    #         # Add link to DIGIT sensor (if relevant to your system)
+    #         script_dir = os.path.dirname(os.path.abspath(__file__))
+    #         dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
+    #         self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)
+
+    #         # "Weld" this segment to the previous one
+    #         if i > 0:
+    #             pybullet.setCollisionFilterPair(self.rope_segments[i - 1],
+    #                                             self.rope_segments[i],
+    #                                             -1, -1, enableCollision=0)
+    #             constraint_id = pybullet.createConstraint(
+    #                 parentBodyUniqueId=self.rope_segments[i - 1],
+    #                 parentLinkIndex=-1,
+    #                 childBodyUniqueId=self.rope_segments[i],
+    #                 childLinkIndex=-1,
+    #                 jointType=pybullet.JOINT_FIXED,
+    #                 jointAxis=[0,0,0],
+    #                 parentFramePosition=[0,0,-self.segment_length/2],
+    #                 childFramePosition=[0,0,self.segment_length/2]
+    #             )
+    #             self.constraints.append(constraint_id)
+
+    #     # --- Anchor every segment ---
+    #     for i, seg_id in enumerate(self.rope_segments):
+    #         # Compute the position of this segment
+    #         seg_position = [
+    #             self.start_position[0],
+    #             self.start_position[1],
+    #             self.start_position[2] - i * self.segment_length
+    #         ]
+            
+    #         # Create a tiny anchor body at the segment position
+    #         anchor_shape = pybullet.createCollisionShape(pybullet.GEOM_SPHERE, radius=0.0001)
+    #         anchor_body = pybullet.createMultiBody(
+    #             baseMass=0,
+    #             baseCollisionShapeIndex=anchor_shape,
+    #             basePosition=seg_position
+    #         )
+    #         # Optionally disable collision between anchor and segment
+    #         pybullet.setCollisionFilterPair(anchor_body,
+    #                                         seg_id,
+    #                                         -1, -1,
+    #                                         enableCollision=0)
+            
+    #         # Fix the rope segment to its anchor
+    #         pybullet.createConstraint(
+    #             parentBodyUniqueId=anchor_body,
+    #             parentLinkIndex=-1,
+    #             childBodyUniqueId=seg_id,
+    #             childLinkIndex=-1,
+    #             jointType=pybullet.JOINT_FIXED,
+    #             jointAxis=[0,0,0],
+    #             parentFramePosition=[0,0,0],
+    #             childFramePosition=[0,0,0]
+    #         )
+
+
     # def _load_rope(self):
     #     # Parameters MUST BE CHANGED IN THE DUMMY URDF FOR TACTO
     #     self.num_segments = 10
@@ -355,9 +578,9 @@ class UR5Sim:
     #         self.rope_segments.append(body_id)
 
     #         # Add link to DIGIT sensor 
-    #         script_dir = os.path.dirname(os.path.abspath(__file__))
-    #         dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
-    #         self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
+    #         # script_dir = os.path.dirname(os.path.abspath(__file__))
+    #         # dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
+    #         # self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
 
     #         if i > 0:
     #             pybullet.setCollisionFilterPair(self.rope_segments[i - 1], self.rope_segments[i], -1, -1, enableCollision=0)
@@ -389,88 +612,6 @@ class UR5Sim:
     #         parentFramePosition=[0,0,0],
     #         childFramePosition=[0,0,0]
     #     )
-
-    def _load_rope(self):
-        # Parameters
-        self.num_segments = 10
-        self.total_length = 0.6
-        self.segment_radius = 0.02
-        self.segment_length = self.total_length / self.num_segments
-        
-        # Zero mass ensures no movement due to physics
-        self.mass = 0.0
-        self.friction = 0.5
-        self.start_position = [0.60, 0.135, 0.9]
-        self.rope_segments = []
-        self.constraints = []
-
-        for i in range(self.num_segments):
-            segment_position = [
-                self.start_position[0],
-                self.start_position[1],
-                self.start_position[2] - i * self.segment_length
-            ]
-
-            segment_id = pybullet.createCollisionShape(pybullet.GEOM_CAPSULE, 
-                                                    radius=self.segment_radius, 
-                                                    height=self.segment_length)
-            visual_id = pybullet.createVisualShape(pybullet.GEOM_CAPSULE, 
-                                                radius=self.segment_radius, 
-                                                length=self.segment_length,
-                                                rgbaColor=[0,1,0,1])
-            # All segments have zero mass
-            body_id = pybullet.createMultiBody(baseMass=self.mass, 
-                                            baseCollisionShapeIndex=segment_id,
-                                            baseVisualShapeIndex=visual_id, 
-                                            basePosition=segment_position)
-
-            pybullet.changeDynamics(body_id, -1, lateralFriction=self.friction)
-            self.rope_segments.append(body_id)
-
-            # Add link to DIGIT sensor
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            dummy_dir = os.path.join(script_dir, "objects", "rope_dummy.urdf")
-            self.digits.add_object(dummy_dir, body_id, globalScaling=1.0)    
-
-            if i > 0:
-                # Disable collisions between adjacent segments if desired
-                pybullet.setCollisionFilterPair(self.rope_segments[i - 1],
-                                                self.rope_segments[i],
-                                                -1, -1,
-                                                enableCollision=0)
-
-                # Use a fixed joint instead of a point-to-point joint
-                c = pybullet.createConstraint(
-                    parentBodyUniqueId=self.rope_segments[i - 1],
-                    parentLinkIndex=-1,
-                    childBodyUniqueId=self.rope_segments[i],
-                    childLinkIndex=-1,
-                    jointType=pybullet.JOINT_FIXED,  # Fixes them relative to each other
-                    jointAxis=[0,0,0],
-                    parentFramePosition=[0,0,-self.segment_length/2],
-                    childFramePosition=[0,0,self.segment_length/2],
-                )
-                self.constraints.append(c)
-
-        # Create anchor with zero mass
-        anchor_shape = pybullet.createCollisionShape(pybullet.GEOM_SPHERE, radius=0.001)
-        anchor_body = pybullet.createMultiBody(baseMass=0, 
-                                            baseCollisionShapeIndex=anchor_shape, 
-                                            basePosition=self.start_position)
-        pybullet.setCollisionFilterPair(anchor_body, self.rope_segments[0], -1, -1, enableCollision=0)
-        
-        # Attach the first segment to the anchor with a fixed joint
-        pybullet.createConstraint(
-            parentBodyUniqueId=anchor_body,
-            parentLinkIndex=-1,
-            childBodyUniqueId=self.rope_segments[0],
-            childLinkIndex=-1,
-            jointType=pybullet.JOINT_FIXED,
-            jointAxis=[0,0,0],
-            parentFramePosition=[0,0,0],
-            childFramePosition=[0,0,0]
-        )
-
 
     def _load_sphere(self):
         self.sphere = px.Body(**self.cfg.object)
@@ -723,7 +864,7 @@ class UR5Sim:
             pybullet.stepSimulation()
 
     def step(self, end_effector_velocity, gripper_cmd):
-        self.end_effector_vel = end_effector_velocity
+        self.end_effector_vel = end_effector_velocity   
         active_joint_indices = []
         for i in range(self.num_joints):
             info = pybullet.getJointInfo(self.ur5, i)
@@ -770,7 +911,7 @@ class UR5Sim:
 
         pybullet.stepSimulation()
         self.stepCounter += 1
-        time.sleep(1./240.)
+        time.sleep(1/TIME_DENOM)
 
         if self.digits is not None:
             self.color, self.depth = self.digits.render()

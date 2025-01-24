@@ -27,7 +27,7 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         self.num_robot_joints = 6
         self.num_sensor_readings = 160*120
         self.rope_link_pose = 3
-        self.target_size = 6
+        self.target_size = 3
         obs_dim = 2*self.num_robot_joints + self.target_size
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
@@ -53,9 +53,11 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         velocity_action = action[:6]
         #gripper_action = action[6]
         gripper_action = 1.0
-
+        
         velocity_scale = VELOCITY_SCALE #Maximum velocity that is stable in the simulation
         end_effector_velocity = velocity_action * velocity_scale
+
+        end_effector_velocity = np.concatenate((action, np.array([0.0, 0.0, 0.0]))) * VELOCITY_SCALE
 
         # Fix gripper open
         self.sim.step(end_effector_velocity, gripper_action)
@@ -70,7 +72,11 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         truncated = self.current_step >= self.max_steps
         #print(f"tcp angles: {self.sim.get_ee_angles()}")
         #print(f"robot tcp pose: {self.sim.get_end_eff_pose()}")
-        return obs, reward, terminated, truncated, {}
+        distance_dict = {}  # Create a dictionary if it doesn't exist yet
+        cart_dist_to_goal = np.linalg.norm(self.sim.get_end_eff_pose()[:3] - self.target[:3])  
+        # Add the distance to the dictionary with an appropriate key
+        distance_dict["distance_to_goal"] = cart_dist_to_goal
+        return obs, reward, terminated, truncated, distance_dict
 
     # def _calculate_reward(self):
     #     #Position only
@@ -138,7 +144,7 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
         tcp_vel = self.sim.get_end_eff_vel()
 
         obs = np.concatenate((
-            self.target,
+            self.target[:3],
             np.array(tcp_pos, dtype=np.float32),
             np.array(tcp_vel, dtype=np.float32)
         ), axis=None)

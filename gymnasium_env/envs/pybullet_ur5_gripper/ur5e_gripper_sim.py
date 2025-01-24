@@ -156,7 +156,8 @@ class UR5Sim:
         #self._initialize_tacto_sensor_in_urdf()
 
         #Create visual goal in simulation
-        self.add_visual_goal(goal_position)
+        if goal_position is not None:
+            self.add_visual_goal(goal_position)
 
         # Reset Robot to Default Pose and Load Rope
         self.reset()

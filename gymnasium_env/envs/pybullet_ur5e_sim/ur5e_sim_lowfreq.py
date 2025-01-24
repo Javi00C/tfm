@@ -460,7 +460,7 @@ class UR5Sim:
 
         pybullet.stepSimulation()
         self.stepCounter += 1
-        time.sleep(1/TIME_DENOM)
+        #time.sleep(1/TIME_DENOM)
 
     def close(self):
         pybullet.disconnect()

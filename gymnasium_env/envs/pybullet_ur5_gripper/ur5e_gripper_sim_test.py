@@ -3,15 +3,15 @@ import numpy as np
 import pybullet
 
 #from ur5e_gripper_sim_simple import UR5Sim
-#from ur5e_gripper_sim import UR5Sim
+from ur5e_gripper_sim import UR5Sim
 #from ur5e_gripper_digit_sim import UR5Sim
 
-from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_lowfreq import UR5Sim
+#from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim import UR5Sim
+#from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_lowfreq import UR5Sim
 #from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient import UR5Sim
 #from gymnasium_env.envs.pybullet_ur5e_sim.ur5e_sim_orient_generator import UR5Sim
 #goal = [0.4,0.15,0.4,0,1.57,0]
-
-goal = [0.5,0.3,0.4]
+goal = [0.5,0.4,0.6]
 if __name__ == "__main__":
     sim = UR5Sim(useIK=True, renders=True, maxSteps=500)
     # Move the arm a bit, keep the gripper open
@@ -24,9 +24,9 @@ if __name__ == "__main__":
     for i in range(1000000):
         print(i)
         #end_effector_velocity = np.array([0.025, 0.0, 0.0, 0.0, 0.0, 0.0])
-        end_effector_velocity = np.array([0.1, 0.0, 0.0, 0.0, 0.0, 0.0])
+        end_effector_velocity = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         gripper_cmd = 0.6  # open
-        sim.step(end_effector_velocity)
+        sim.step(end_effector_velocity,gripper_cmd)
         #if i%100 == 0:
             #reading = sim.get_sensor_reading()
         #sim.step(end_effector_velocity)

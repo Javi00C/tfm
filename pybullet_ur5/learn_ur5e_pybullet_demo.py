@@ -34,11 +34,11 @@ TIMESTEPS = 2048000
 #TIMESTEPS = 81920
 DEVICE_USED = 'cpu'
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v1"
-#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0"
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v2"
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v3"
 #env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v4"
-env_str = "gymnasium_env/ur5e_pybulletEnv-v4"
+#env_str = "gymnasium_env/ur5e_pybulletEnv-v4"
 
 # Function to create environments (needed for SubprocVecEnv)
 def make_env():

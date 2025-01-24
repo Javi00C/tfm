@@ -8,17 +8,22 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Load the saved PPO model
-model = PPO.load("models_pybullet/best_model")
+model = PPO.load("models_pybullet/best_model_exp_1A_2")
 
 
-#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0" # Rope no gripper control
+env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0" # Rope no gripper control
+
+#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v1" # env simple
+#env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v2" # env simple 3d
+
+
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v0" # Specific cartesian goal
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v1" # Random cartesian goal
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v2" # Specific cartesian and orientation goal
 #env_str = "gymnasium_env/ur5e_pybulletEnv-v3" # Random cartesian and orientation goal
 #env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v4"
 
-env_str = "gymnasium_env/ur5e_pybulletEnv-v4"
+#env_str = "gymnasium_env/ur5e_pybulletEnv-v4"
 # Create the environment with rendering enabled
 env = gym.make(env_str, render_mode='human')
 
