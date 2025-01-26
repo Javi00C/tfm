@@ -16,7 +16,7 @@ cd
 git clone git@github.com:Javi00C/tfm.git
 cd tfm
 pip install -e .
-# Important for headless server (and make use of egl in the learning script)
+# Important only for training (headless server must be used)
 pip install PyOpenGL PyOpenGL-accelerate pyrender trimesh
 ```
 
