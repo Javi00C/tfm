@@ -5,13 +5,28 @@ conda create -n pybullet_env python=3.9.21
 ```bash
 conda activate pybullet_env
 ```
+```bash
 pip install --upgrade pip
+```
+```bash
 pip3 install pybullet --upgrade --user
+```
+```bash
 pip install numpy==1.23.0
+```
+```bash
 pip install attrdict
+```
+```bash
 pip install tacto
+```
+```bash
 pip install torch
+```
+```bash
 pip install stable-baselines3[extra]
+```
+```bash
 pip install pybulletx
 pip install pytouch
 pip install networkx==3.2.1
@@ -21,7 +36,7 @@ cd tfm
 pip install -e .
 # Important for headless server (and make use of egl in the learning script)
 pip install PyOpenGL PyOpenGL-accelerate pyrender trimesh
-
+```
 
 This guide explains how to install PyBullet from a `.tar.gz` source file and resolve any dependency issues encountered during the installation process.
 
