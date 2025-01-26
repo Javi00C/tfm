@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Load the saved PPO model
-model = PPO.load("models_pybullet/best_model_exp_1A_2")
+model = PPO.load("models_pybullet/best_model")
 
 
 env_str = "gymnasium_env/ur5e_2f85_pybulletEnv-v0" # Rope no gripper control

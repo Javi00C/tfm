@@ -76,6 +76,7 @@ class ur5e_2f85_pybulletEnv(gym.Env):
         super().reset(seed=seed)
         self.sim.reset()
         self.create_random_goal()
+        self.sim.add_visual_goal(self.target)
         self.current_step = 0
         self.goal_flag1 = False
         self.done = False
