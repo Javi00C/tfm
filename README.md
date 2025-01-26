@@ -1,7 +1,10 @@
 # 1.PYBULLET Env Installation
-
+```bash
 conda create -n pybullet_env python=3.9.21
+```
+```bash
 conda activate pybullet_env
+```
 pip install --upgrade pip
 pip3 install pybullet --upgrade --user
 pip install numpy==1.23.0
