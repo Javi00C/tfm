@@ -1,32 +1,14 @@
 # 1.PYBULLET Env Installation
 ```bash
 conda create -n pybullet_env python=3.9.21
-```
-```bash
 conda activate pybullet_env
-```
-```bash
 pip install --upgrade pip
-```
-```bash
 pip3 install pybullet --upgrade --user
-```
-```bash
 pip install numpy==1.23.0
-```
-```bash
 pip install attrdict
-```
-```bash
 pip install tacto
-```
-```bash
 pip install torch
-```
-```bash
 pip install stable-baselines3[extra]
-```
-```bash
 pip install pybulletx
 pip install pytouch
 pip install networkx==3.2.1
