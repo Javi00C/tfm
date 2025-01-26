@@ -1,4 +1,5 @@
 # 1.PYBULLET Env Installation
+## Only pybullet env installation is necessary
 ```bash
 conda create -n pybullet_env python=3.9.21
 conda activate pybullet_env
