@@ -18,9 +18,12 @@ pip install torch
 pip install stable-baselines3[extra]
 pip install pybulletx
 pip install pytouch
+```
+(Please ignore the urdfpy and networkx dependency conflict)
+```bash
 pip install networkx==3.2.1
 cd 
-git clone git@github.com:Javi00C/tfm.git
+git clone https://github.com/Javi00C/tfm.git
 cd tfm
 pip install -e .
 # Important only for training (headless server must be used)
