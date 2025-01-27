@@ -1,5 +1,5 @@
 # 1.PYBULLET Environments Installation
-To execute the experiments shown in the documentation only the following pybullet installation is necessary.
+To execute the experiments shown in the documentation (chapter 5) only the following pybullet installation is necessary:
 ```bash
 conda create -n pybullet_env python=3.9.21
 conda activate pybullet_env
@@ -21,11 +21,11 @@ pip install -e .
 pip install PyOpenGL PyOpenGL-accelerate pyrender trimesh
 ```
 ## Model setup
-The repository does not include the PPO models to execute the simulations as a way to keep it light. To install the models:
+The repository does not include the PPO models to execute the experiments as a way to keep it light. To install the models:
 ```bash
 cd tfm/pybullet_ur5_simulations/models_pybullet
 ```
-Download and copy the models from the google drive folder into the directory models_pybullet:
+Download and copy the models from the google drive folder into the directory models_pybullet (the models zip files should be in tfm/pybullet_ur5_simulations/models_pybullet):
 https://drive.google.com/drive/folders/1ZrjiKEHYnqX1RiqKRd_8P1UFyQRoK_KA?usp=sharing
 
 ## Model execution
@@ -33,7 +33,14 @@ When executing the model the desired environment and model must be selected (1A-
 ```bash
 conda activate pybullet_env
 cd tfm/pybullet_ur5_simulations
+```
+Use the following command to execute (1A-1, 1A-2, 1A-3, 1A-4, 1A-5, 2A, 2B, 2C, 2D)
+```bash
 python3 execute_ur5e_pybullet.py
+```
+Use the following command to execute (1B-1, 1B-2)
+```bash
+python3 execute_ur5e_pybullet_orient.py
 ```
 # 2.MUJOCO Env Installation
 
