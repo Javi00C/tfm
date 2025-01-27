@@ -109,9 +109,6 @@ class SimpleRobotEnvSine(gym.Env):
         car_x, _ = self.robot_pos
         return abs(car_x-WINDOW_SIZE//2)  # The distance is simply the x-coordinate difference from the edge at x=0
 
-    #Average distance reward -> poor performance
-    #def _calculate_average_dist(self):
-    #    self.avgd = ((self.index - 1) * self.avgd + self._calculate_distance_to_edge()) / self.index
     
     def _calculate_reward(self):
         # Apply constant negative reward per step to encourage efficient behavior

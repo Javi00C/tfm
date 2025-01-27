@@ -39,8 +39,8 @@ os.makedirs(log_dir, exist_ok=True)
 TIMESTEPS = 200000
 DEVICE_USED = 'cpu'
 #env_str = "CarRacing-v2"
-#env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
-env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
+env_str = "gymnasium_env/SimpleRobotEnv-v0" #Straight line edge
+#env_str = "gymnasium_env/SimpleRobotEnv-v1" #Sine wave edge
 
 
 backend = torch.backends.quantized.engine
@@ -53,21 +53,20 @@ env.close()
 
 
 
-# Create Training CarRacing environment
+# Create Training environment
 env = make_vec_env(env_str, n_envs=1, env_kwargs={"render_mode": "human"})
-# Parameterize n_stack to allow flexible configuration
-n_stack = 4  # Set default value for n_stack, can be adjusted for experimentation
+
+n_stack = 4
 env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 
 
-# Create Evaluation CarRacing environment
+# Create Evaluation environment
 env_val = make_vec_env(env_str, n_envs=1, env_kwargs={"render_mode": "human"})
 env_val = VecFrameStack(env_val, n_stack=n_stack)
 env_val = VecTransposeImage(env_val)
 
 # Create Evaluation Callback
-# eval_freq - increased to reduce potential learning instability due to frequent evaluations
 eval_callback = EvalCallback(env_val,
                              best_model_save_path=model_dir,
                              log_path=log_dir,
@@ -76,7 +75,6 @@ eval_callback = EvalCallback(env_val,
                              n_eval_episodes=20)
 
 # Initialize PPO
-# buffer_size is not required for PPO as it is an on-policy method
 model = PPO('CnnPolicy', env, verbose=1, ent_coef=0.01, device=DEVICE_USED)
 
 
@@ -103,43 +101,3 @@ best_model = PPO.load(best_model_path, env=env)
 
 mean_reward, std_reward = evaluate_policy(best_model, env, n_eval_episodes=20)
 print(f"Best Model - Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
-
-# Record video of the best model playing CarRacing
-env = VecVideoRecorder(env, "videos/",
-                       video_length=5000,  # Reduced video length to prevent large file sizes
-                       record_video_trigger=lambda x: x == 0,
-                       name_prefix="best_model_car_racing_ppo")
-
-obs = env.reset()
-for _ in range(5000):  # Adjusted to match video length
-    action, _states = best_model.predict(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-    if dones:
-        break
-
-env.close()
-
-# Load the evaluations.npz file
-data = numpy.load(os.path.join(log_dir, "evaluations.npz"))
-
-# Extract the relevant data
-timesteps = data['timesteps']
-results = data['results']
-
-# Calculate the mean and standard deviation of the results
-mean_results = numpy.mean(results, axis=1)
-std_results = numpy.std(results, axis=1)
-
-# Plot the results
-matplotlib.pyplot.figure()
-matplotlib.pyplot.plot(timesteps, mean_results)
-matplotlib.pyplot.fill_between(timesteps,
-                               mean_results - std_results,
-                               mean_results + std_results,
-                               alpha=0.3)
-
-matplotlib.pyplot.xlabel("Timesteps")
-matplotlib.pyplot.ylabel("Mean Reward")
-matplotlib.pyplot.title(f"PPO Performance on {env_str}")
-matplotlib.pyplot.show()

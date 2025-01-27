@@ -5,14 +5,37 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
+env_mapping = {
+    "1B-1": "gymnasium_env/ur5e_pybulletEnv-v2",
+    "1B-2": "gymnasium_env/ur5e_pybulletEnv-v3",
+}
+model_mapping = {
+    "1B-1": "models_pybullet/model_1B_1",
+    "1B-2": "models_pybullet/model_1B_2",
+}
 
-# Load the saved PPO model
-model = PPO.load("models_pybullet/best_model_single_orientation1")
 
-# Define the environment
-env_str = "gymnasium_env/ur5e_pybulletEnv-v2"
+# ----------------------------------------------------
+# 2) Prompt user for environment and model selections
+# ----------------------------------------------------
+print("Available experiment IDs:", ", ".join(env_mapping.keys()))
+env_key = input("Please select the experiment ID ('1B-1', '1B-2'): ").strip()
+
+model_key = env_key
+# Validate user input and fetch the environment/model
+if env_key not in env_mapping:
+    raise ValueError(f"Invalid experiment key: {env_key}")
+if model_key not in model_mapping:
+    raise ValueError(f"Invalid model key: {model_key}")
+
+env_str = env_mapping[env_key]
+model_path = model_mapping[model_key]
+
 env = gym.make(env_str, render_mode='human')
 env = DummyVecEnv([lambda: env])
+
+# Load the saved PPO model
+model = PPO.load(model_path)
 
 # Reset the environment
 obs = env.reset()

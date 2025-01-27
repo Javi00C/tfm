@@ -19,7 +19,7 @@ CLOSE_REWARD_DIST = 0.01
 GOAL_SPAWN_RADIUS = 0.05
 
 
-class ur5e_pybulletEnv_orient(gym.Env):
+class ur5e_pybulletEnv_1b1(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
     def __init__(self, target=np.array([0.4,0.15,0.4,0,1.57,0]), max_steps=MAX_STEPS_SIM, render_mode=None):
@@ -153,48 +153,48 @@ class ur5e_pybulletEnv_orient(gym.Env):
         distance_dict["orient_dist_to_goal"] = orient_dist_to_goal
         return obs, reward, terminated, truncated, distance_dict
 
-    # def _calculate_reward(self):
-    #         ee_pose = self.sim.get_end_eff_pose()
-    #         cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
-    #         orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
+    def _calculate_reward(self):
+            ee_pose = self.sim.get_end_eff_pose()
+            cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+            orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
 
             
-    #         if self.current_step == 0:
-    #             self.distance_cart = cart_error
-    #             self.distance_orient = orient_error
-    #             self.reward = 0
-    #         else:
-    #             self.reward = (self.distance_cart - cart_error)*10 + (self.distance_orient - orient_error)*7
-    #             self.distance_cart = cart_error
-    #             self.distance_orient = orient_error
-    #         if self.goal_reached:
-    #             reward += 10 
-    #         #print(f"Reward: {self.reward}")
-    #         return self.reward
+            if self.current_step == 0:
+                self.distance_cart = cart_error
+                self.distance_orient = orient_error
+                self.reward = 0
+            else:
+                self.reward = (self.distance_cart - cart_error)*10 + (self.distance_orient - orient_error)*7
+                self.distance_cart = cart_error
+                self.distance_orient = orient_error
+            if self.goal_reached:
+                reward += 10 
+            #print(f"Reward: {self.reward}")
+            return self.reward
     
-    def _calculate_reward(self):
-        ee_pose = self.sim.get_end_eff_pose()
-        cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
-        orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
+    # def _calculate_reward(self):
+    #     ee_pose = self.sim.get_end_eff_pose()
+    #     cart_error = np.linalg.norm(ee_pose[:3] - self.goal[:3])
+    #     orient_error = np.linalg.norm(ee_pose[3:] - self.goal[3:])
        
-        max_dist_orient = math.pi
-        max_dist_cart = np.linalg.norm(self.tcp_ini[:3] - self.goal[:3])
+    #     max_dist_orient = math.pi
+    #     max_dist_cart = np.linalg.norm(self.tcp_ini[:3] - self.goal[:3])
 
-        cart_rew_scaling = 1.1*max_dist_orient/max_dist_cart #before 1.2*...
+    #     cart_rew_scaling = 1.1*max_dist_orient/max_dist_cart #before 1.2*...
 
-        if self.current_step == 0:
-           self.distance_cart = cart_error
-           self.distance_orient = orient_error
-           self.reward = 0
-        else:
-           self.reward = (self.distance_cart - cart_error)*cart_rew_scaling + (self.distance_orient - orient_error)
-           self.distance_cart = cart_error
-           self.distance_orient = orient_error
+    #     if self.current_step == 0:
+    #        self.distance_cart = cart_error
+    #        self.distance_orient = orient_error
+    #        self.reward = 0
+    #     else:
+    #        self.reward = (self.distance_cart - cart_error)*cart_rew_scaling + (self.distance_orient - orient_error)
+    #        self.distance_cart = cart_error
+    #        self.distance_orient = orient_error
            
-        if self.goal_reached:
-            reward += 10 
-        #print(f"Reward: {self.reward}")
-        return self.reward
+    #     if self.goal_reached:
+    #         reward += 10 
+    #     #print(f"Reward: {self.reward}")
+    #     return self.reward
 
     def _check_goal(self):
         ee_pose = self.sim.get_end_eff_pose()

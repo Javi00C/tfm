@@ -17,7 +17,7 @@ CLOSE_REWARD_DIST = 0.01
 GOAL_SPAWN_RADIUS = 0.2
 
 
-class ur5e_pybulletEnv_random(gym.Env):
+class ur5e_pybulletEnv_1a5(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
     def __init__(self, target=np.array([0.2, 0.2, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
@@ -54,16 +54,7 @@ class ur5e_pybulletEnv_random(gym.Env):
         self.flag = False
 
     def random_point_in_sphere(self,radius, center):
-        """
-        Generates a random 3D point inside a sphere of a given radius centered at a given point.
 
-        Args:
-            radius (float): Radius of the sphere.
-            center (tuple): Coordinates of the sphere's center (x, y, z).
-
-        Returns:
-            tuple: Random point (x, y, z) inside the sphere.
-        """
         while True:
             # Generate a random point in the cube that bounds the sphere
             x = random.uniform(-radius, radius)
@@ -122,7 +113,6 @@ class ur5e_pybulletEnv_random(gym.Env):
         ee_pose = self.sim.get_end_eff_pose()
         position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
        
-        #sfoix reward
         if self.current_step == 0:
            self.distance = position_error
            self.reward = 0
@@ -144,7 +134,6 @@ class ur5e_pybulletEnv_random(gym.Env):
 
 
     def _check_done(self):
-        """Terminate the episode if the end-effector is too far from the target."""
         #ee_pose = self.sim.get_end_eff_pose()
         #dist_to_target = np.linalg.norm(ee_pose - self.target)
         ee_position = self.sim.get_end_eff_position()

@@ -10,10 +10,10 @@ MAX_REWARD = 1000
 MAX_DISTANCE = 10.0  # Maximum allowable distance from target before termination
 MAX_DIST_REW = 2.0
 MAX_STEPS_SIM = 4000
-VELOCITY_SCALE = 1.0 #Originally at 0.3
+VELOCITY_SCALE = 0.3
 CLOSE_REWARD_DIST = 0.1
 
-class ur5e_2f85_pybulletEnv_Simple(gym.Env):
+class ur5e_2f85_pybulletEnv_Simple_1a1(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
     def __init__(self, target=np.array([0.5, 0.5, 0.5, 0.02, -0.001,  0.68]), max_steps=MAX_STEPS_SIM, render_mode=None):
@@ -51,13 +51,13 @@ class ur5e_2f85_pybulletEnv_Simple(gym.Env):
     def step(self, action):
         
         velocity_action = action[:6]
-        #gripper_action = action[6]
+
         gripper_action = 1.0
         
         velocity_scale = VELOCITY_SCALE #Maximum velocity that is stable in the simulation
         end_effector_velocity = velocity_action * velocity_scale
 
-        end_effector_velocity = np.concatenate((action, np.array([0.0, 0.0, 0.0]))) * VELOCITY_SCALE
+        #end_effector_velocity = np.concatenate((action, np.array([0.0, 0.0, 0.0]))) * VELOCITY_SCALE
 
         # Fix gripper open
         self.sim.step(end_effector_velocity, gripper_action)

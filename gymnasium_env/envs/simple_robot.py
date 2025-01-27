@@ -45,7 +45,7 @@ class SimpleRobotEnv(gym.Env):
         # Reset visited tiles for new episode
         self.visited_tiles = set()
 
-        # Set the seed if provided (to maintain reproducibility)
+        # Set the seed
         if seed is not None:
             np.random.seed(seed)
 
@@ -161,16 +161,3 @@ class SimpleRobotEnv(gym.Env):
         distance_to_edge = self._calculate_distance_to_edge()
         return self.current_step >= self.max_steps or distance_to_edge > MAX_DIST
 
-'''
-# Example usage:
-if __name__ == '__main__':
-    env = SimpleRobotEnv()
-    obs, _ = env.reset()
-    for _ in range(10000):
-        action = env.action_space.sample()  # Take random action
-        obs, reward, done, _, _ = env.step(action)
-        env.render()
-        if done:
-            break
-    env.close()))))
-'''

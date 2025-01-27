@@ -31,7 +31,7 @@ class ur5e_2f85Env(MujocoEnv, utils.EzPickle):
         self.num_robot_joints = 6
         self.num_sensor_readings = 3
         self.rope_link_pose = 3
-        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose# multiplication by 2 because of qvel of robot
+        obs_dim = 2*self.num_robot_joints + self.num_sensor_readings + self.rope_link_pose # multiplication by 2 because of qvel of robot
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         # Load your MJCF model with env and choose frames count between actions

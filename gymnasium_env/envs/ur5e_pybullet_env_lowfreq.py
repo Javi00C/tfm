@@ -80,7 +80,6 @@ class ur5e_pybulletEnv_lowfreq(gym.Env):
         ee_pose = self.sim.get_end_eff_pose()
         position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
        
-        #sfoix reward
         self.time_in_goal += 1
         if self.time_in_goal == 0:
            self.distance = position_error

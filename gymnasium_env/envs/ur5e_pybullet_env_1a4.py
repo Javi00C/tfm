@@ -12,7 +12,7 @@ MAX_STEPS_SIM = 10000
 VELOCITY_SCALE = 0.02 #Originally at 0.3
 CLOSE_REWARD_DIST = 0.1
 
-class ur5e_pybulletEnv(gym.Env):
+class ur5e_pybulletEnv_1a4(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
     def __init__(self, target=np.array([0.2, 0.2, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):
@@ -80,7 +80,6 @@ class ur5e_pybulletEnv(gym.Env):
         ee_pose = self.sim.get_end_eff_pose()
         position_error = np.linalg.norm(ee_pose[:3] - self.target[:3])
        
-        #sfoix reward
         self.time_in_goal += 1
         if self.time_in_goal == 0:
            self.distance = position_error

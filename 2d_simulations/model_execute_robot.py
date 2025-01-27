@@ -23,17 +23,16 @@ env = VecFrameStack(env, n_stack=n_stack)
 obs = env.reset()
 
 # Execute the policy for a longer duration
-episode_length = 5000  # Adjusted episode length for better visualization
+episode_length = 5000
 r = 0
 for _ in range(episode_length):
     action, _states = model.predict(obs)
     obs, step_reward, done, info = env.step(action)
-    #r += step_reward
 
     # Render the environment after each action
-    env.envs[0].render()  # Use the underlying environment to render, bypassing DummyVecEnv
+    env.envs[0].render()
 
-    if done[0]:  # Adjusted to work with DummyVecEnv which returns list-like `done`
+    if done[0]: 
         obs = env.reset()
 
 env.close()

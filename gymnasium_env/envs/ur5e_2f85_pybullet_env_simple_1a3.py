@@ -13,7 +13,7 @@ MAX_STEPS_SIM = 4000
 VELOCITY_SCALE = 1.0 #Originally at 0.3
 CLOSE_REWARD_DIST = 0.1
 
-class ur5e_2f85_pybulletEnv_Simple_3d(gym.Env):
+class ur5e_2f85_pybulletEnv_Simple_1a3(gym.Env):
     metadata = {"render_modes": ["human","training"], "render_fps": 100}
 
     def __init__(self, target=np.array([0.5, 0.5, 0.5]), max_steps=MAX_STEPS_SIM, render_mode=None):

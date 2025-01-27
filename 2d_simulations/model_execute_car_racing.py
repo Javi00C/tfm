@@ -13,7 +13,7 @@ env = gym.make(env_str, render_mode='human')
 
 # Wrap the environment to ensure consistency with training
 env = DummyVecEnv([lambda: env])  # DummyVecEnv to make the environment compatible with Stable Baselines3
-n_stack = 4  # Set n_stack to match the one used in training
+n_stack = 4 
 env = VecFrameStack(env, n_stack=n_stack)
 env = VecTransposeImage(env)
 
@@ -21,7 +21,7 @@ env = VecTransposeImage(env)
 obs = env.reset()
 
 # Execute the policy for a longer duration
-episode_length = 5000  # Reduced episode length to prevent memory issues
+episode_length = 5000 
 
 for _ in range(episode_length):
     action, _states = model.predict(obs)
