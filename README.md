@@ -51,6 +51,7 @@ Use the following command to execute experiments: (1B-1, 1B-2)
 ```bash
 python3 execute_ur5e_pybullet_orient.py
 ```
+<!--
 # 2.MUJOCO Env Installation
 
 ## Miniconda
@@ -124,3 +125,4 @@ The lowest version of dm-control  0.0.28658793 is compatible with pyopengl 3.1.0
 seems like if version of dm-control 0.0.28658793 is used then it looks for document names of a lower version of mujoco (2.0.0)
 which is not available for download (https://github.com/google-deepmind/mujoco/releases)
 ```
+-->
