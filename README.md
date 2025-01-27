@@ -7,14 +7,6 @@ Please refer to [Miniconda installation](https://docs.anaconda.com/miniconda/ "M
 
 ## Create Conda Environment with dependencies
 ```bash
-conda create -n mujoco_env python=3.10.12 swig gymnasium=1.0.0 pytz scipy sympy gymnasium[mujoco]
-
-conda activate mujoco_env
-
-pip install stable-baselines3[extra]==2.4.0
-```
-## Dependencies
-```bash
 conda create -n pybullet_env python=3.9.21
 conda activate pybullet_env
 pip install --upgrade pip
