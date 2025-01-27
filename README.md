@@ -34,11 +34,11 @@ When executing the model the desired environment and model must be selected (1A-
 conda activate pybullet_env
 cd tfm/pybullet_ur5_simulations
 ```
-Use the following command to execute (1A-1, 1A-2, 1A-3, 1A-4, 1A-5, 2A, 2B, 2C, 2D)
+Use the following command to execute experiments: (1A-1, 1A-2, 1A-3, 1A-4, 1A-5, 2A, 2B, 2C, 2D)
 ```bash
 python3 execute_ur5e_pybullet.py
 ```
-Use the following command to execute (1B-1, 1B-2)
+Use the following command to execute experiments: (1B-1, 1B-2)
 ```bash
 python3 execute_ur5e_pybullet_orient.py
 ```
